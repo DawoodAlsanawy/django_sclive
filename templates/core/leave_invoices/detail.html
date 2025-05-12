@@ -149,7 +149,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-4">
         <div class="card mb-4">
             <div class="card-header">
@@ -198,7 +198,125 @@
                 </div>
             </div>
         </div>
-        
+
+        {% if leave_info %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات الإجازة المرتبطة</h5>
+            </div>
+            <div class="card-body">
+                {% if leave_invoice.leave_type == 'sick_leave' %}
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>رقم الإجازة:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.leave_id }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>المريض:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.patient.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الطبيب:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.doctor.name }}
+                    </div>
+                </div>
+                {% elif leave_invoice.leave_type == 'companion_leave' %}
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>رقم الإجازة:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.leave_id }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>المريض:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.patient.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>المرافق:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.companion.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الطبيب:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.doctor.name }}
+                    </div>
+                </div>
+                {% endif %}
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>تاريخ البداية:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.start_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>تاريخ النهاية:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.end_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>المدة (أيام):</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_info.duration_days }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الحالة:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {% if leave_info.status == 'active' %}
+                        <span class="badge bg-success">نشطة</span>
+                        {% elif leave_info.status == 'cancelled' %}
+                        <span class="badge bg-danger">ملغية</span>
+                        {% elif leave_info.status == 'expired' %}
+                        <span class="badge bg-secondary">منتهية</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-center">
+                    {% if leave_invoice.leave_type == 'sick_leave' %}
+                    <a href="{% url 'core:sick_leave_detail' leave_info.id %}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i> عرض تفاصيل الإجازة المرضية
+                    </a>
+                    {% elif leave_invoice.leave_type == 'companion_leave' %}
+                    <a href="{% url 'core:companion_leave_detail' leave_info.id %}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i> عرض تفاصيل إجازة المرافق
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">المدفوعات المرتبطة</h5>

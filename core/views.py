@@ -1435,8 +1435,122 @@ def companion_leave_search_api(request):
 @login_required
 def leave_invoice_list(request):
     """قائمة فواتير الإجازات"""
+    # تطبيق الفلاتر
     leave_invoices = LeaveInvoice.objects.all()
-    return render(request, 'core/leave_invoices/list.html', {'leave_invoices': leave_invoices})
+
+    # فلتر رقم الفاتورة
+    invoice_number = request.GET.get('invoice_number')
+    if invoice_number:
+        leave_invoices = leave_invoices.filter(invoice_number__icontains=invoice_number)
+
+    # فلتر العميل
+    client = request.GET.get('client')
+    if client:
+        leave_invoices = leave_invoices.filter(client__name__icontains=client)
+
+    # فلتر نوع الإجازة
+    leave_type = request.GET.get('leave_type')
+    if leave_type:
+        leave_invoices = leave_invoices.filter(leave_type=leave_type)
+
+    # فلتر رقم الإجازة
+    leave_id = request.GET.get('leave_id')
+    if leave_id:
+        leave_invoices = leave_invoices.filter(leave_id__icontains=leave_id)
+
+    # فلتر الحالة
+    status = request.GET.get('status')
+    if status:
+        leave_invoices = leave_invoices.filter(status=status)
+
+    # فلتر تاريخ الإصدار (من)
+    issue_date_from = request.GET.get('issue_date_from')
+    if issue_date_from:
+        leave_invoices = leave_invoices.filter(issue_date__gte=issue_date_from)
+
+    # فلتر تاريخ الإصدار (إلى)
+    issue_date_to = request.GET.get('issue_date_to')
+    if issue_date_to:
+        leave_invoices = leave_invoices.filter(issue_date__lte=issue_date_to)
+
+    # فلتر تاريخ الاستحقاق (من)
+    due_date_from = request.GET.get('due_date_from')
+    if due_date_from:
+        leave_invoices = leave_invoices.filter(due_date__gte=due_date_from)
+
+    # فلتر تاريخ الاستحقاق (إلى)
+    due_date_to = request.GET.get('due_date_to')
+    if due_date_to:
+        leave_invoices = leave_invoices.filter(due_date__lte=due_date_to)
+
+    # فلتر المبلغ (من)
+    amount_min = request.GET.get('amount_min')
+    if amount_min:
+        leave_invoices = leave_invoices.filter(amount__gte=amount_min)
+
+    # فلتر المبلغ (إلى)
+    amount_max = request.GET.get('amount_max')
+    if amount_max:
+        leave_invoices = leave_invoices.filter(amount__lte=amount_max)
+
+    # الترتيب
+    sort_by = request.GET.get('sort', '-created_at')
+    if sort_by not in ['invoice_number', '-invoice_number', 'client__name', '-client__name',
+                      'leave_type', '-leave_type', 'leave_id', '-leave_id', 'amount', '-amount',
+                      'status', '-status', 'issue_date', '-issue_date', 'due_date', '-due_date',
+                      'created_at', '-created_at']:
+        sort_by = '-created_at'
+
+    leave_invoices = leave_invoices.order_by(sort_by)
+
+    # الترقيم الصفحي
+    paginator = Paginator(leave_invoices, 10)  # 10 فواتير في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # إحصائيات سريعة
+    total_invoices = leave_invoices.count()
+    total_amount = leave_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب إجمالي المدفوعات
+    from django.db.models import DecimalField, ExpressionWrapper, F, Sum
+    from django.db.models.functions import Coalesce
+
+    # الحصول على إجمالي المدفوعات لكل فاتورة
+    payment_details = PaymentDetail.objects.filter(invoice__in=leave_invoices).values('invoice').annotate(
+        total_paid=Sum('amount')
+    )
+
+    # إنشاء قاموس للمدفوعات
+    payments_dict = {item['invoice']: item['total_paid'] for item in payment_details}
+
+    # حساب إجمالي المدفوعات
+    total_paid = sum(payments_dict.values()) if payments_dict else 0
+
+    # حساب المبلغ المتبقي
+    total_remaining = total_amount - total_paid
+
+    context = {
+        'leave_invoices': page_obj,
+        'invoice_number': invoice_number,
+        'client': client,
+        'leave_type': leave_type,
+        'leave_id': leave_id,
+        'status': status,
+        'issue_date_from': issue_date_from,
+        'issue_date_to': issue_date_to,
+        'due_date_from': due_date_from,
+        'due_date_to': due_date_to,
+        'amount_min': amount_min,
+        'amount_max': amount_max,
+        'sort': sort_by,
+        'total_invoices': total_invoices,
+        'total_amount': total_amount,
+        'total_paid': total_paid,
+        'total_remaining': total_remaining
+    }
+
+    return render(request, 'core/leave_invoices/list.html', context)
 
 
 @login_required
@@ -1446,11 +1560,35 @@ def leave_invoice_create(request):
         form = LeaveInvoiceForm(request.POST)
         if form.is_valid():
             invoice = form.save()
-            messages.success(request, f'تم إنشاء الفاتورة رقم {invoice.invoice_number} بنجاح')
+
+            # تحديث حالة الفاتورة بناءً على المدفوعات
+            invoice.update_status()
+            invoice.save()
+
+            messages.success(request, f'تم إنشاء الفاتورة رقم {invoice.invoice_number} بنجاح للعميل {invoice.client.name} بمبلغ {invoice.amount} ريال')
             return redirect('core:leave_invoice_detail', leave_invoice_id=invoice.id)
     else:
+        # توليد رقم فاتورة تلقائي
+        import datetime
+        import random
+        today = datetime.date.today()
+        date_string = today.strftime('%Y%m%d')
+        random_num = str(random.randint(100, 999))
+        invoice_number = f'INV-{date_string}-{random_num}'
+
+        # التحقق من عدم وجود رقم فاتورة مطابق
+        while LeaveInvoice.objects.filter(invoice_number=invoice_number).exists():
+            random_num = str(random.randint(100, 999))
+            invoice_number = f'INV-{date_string}-{random_num}'
+
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        initial_data = {
+            'invoice_number': invoice_number,
+            'issue_date': today,
+            'due_date': today + datetime.timedelta(days=30)  # تاريخ الاستحقاق بعد 30 يومًا
+        }
+
         # تعبئة البيانات من معلمات URL إذا كانت موجودة
-        initial_data = {}
         leave_type = request.GET.get('leave_type')
         leave_id = request.GET.get('leave_id')
 
@@ -1458,12 +1596,16 @@ def leave_invoice_create(request):
             initial_data['leave_type'] = leave_type
             initial_data['leave_id'] = leave_id
 
-            # البحث عن الإجازة وتعبئة بيانات العميل
+            # البحث عن الإجازة وتعبئة بيانات العميل والمبلغ
             if leave_type == 'sick_leave':
                 try:
                     sick_leave = SickLeave.objects.get(leave_id=leave_id)
                     if sick_leave.patient.employer:
                         initial_data['client'] = sick_leave.patient.employer.id
+
+                    # تعيين المبلغ بناءً على سعر الإجازة
+                    leave_price = LeavePrice.get_price('sick_leave', sick_leave.duration_days)
+                    initial_data['amount'] = leave_price
                 except SickLeave.DoesNotExist:
                     pass
             elif leave_type == 'companion_leave':
@@ -1471,6 +1613,10 @@ def leave_invoice_create(request):
                     companion_leave = CompanionLeave.objects.get(leave_id=leave_id)
                     if companion_leave.companion.employer:
                         initial_data['client'] = companion_leave.companion.employer.id
+
+                    # تعيين المبلغ بناءً على سعر الإجازة
+                    leave_price = LeavePrice.get_price('companion_leave', companion_leave.duration_days)
+                    initial_data['amount'] = leave_price
                 except CompanionLeave.DoesNotExist:
                     pass
 
@@ -1487,10 +1633,43 @@ def leave_invoice_detail(request, leave_invoice_id):
     # الحصول على تفاصيل المدفوعات المرتبطة بالفاتورة
     payment_details = PaymentDetail.objects.filter(invoice=leave_invoice).select_related('payment')
 
-    return render(request, 'core/leave_invoices/detail.html', {
+    # حساب إجمالي المدفوعات
+    total_paid = leave_invoice.get_total_paid()
+
+    # حساب المبلغ المتبقي
+    remaining_amount = leave_invoice.get_remaining()
+
+    # الحصول على معلومات الإجازة المرتبطة
+    leave_info = None
+    if leave_invoice.leave_type == 'sick_leave':
+        try:
+            leave_info = SickLeave.objects.get(leave_id=leave_invoice.leave_id)
+        except SickLeave.DoesNotExist:
+            pass
+    elif leave_invoice.leave_type == 'companion_leave':
+        try:
+            leave_info = CompanionLeave.objects.get(leave_id=leave_invoice.leave_id)
+        except CompanionLeave.DoesNotExist:
+            pass
+
+    # تحديث حالة الفاتورة
+    current_status = leave_invoice.status
+    updated_status = leave_invoice.update_status()
+
+    # حفظ الفاتورة إذا تغيرت الحالة
+    if current_status != updated_status:
+        leave_invoice.status = updated_status
+        leave_invoice.save()
+
+    context = {
         'leave_invoice': leave_invoice,
-        'payment_details': payment_details
-    })
+        'payment_details': payment_details,
+        'total_paid': total_paid,
+        'remaining_amount': remaining_amount,
+        'leave_info': leave_info
+    }
+
+    return render(request, 'core/leave_invoices/detail.html', context)
 
 
 @login_required
@@ -1498,18 +1677,55 @@ def leave_invoice_edit(request, leave_invoice_id):
     """تعديل فاتورة إجازة"""
     leave_invoice = get_object_or_404(LeaveInvoice, id=leave_invoice_id)
 
+    # الحصول على قيم قبل التعديل للمقارنة
+    old_amount = leave_invoice.amount
+    old_client_name = leave_invoice.client.name
+
     if request.method == 'POST':
         form = LeaveInvoiceForm(request.POST, instance=leave_invoice)
         if form.is_valid():
-            form.save()
-            messages.success(request, f'تم تعديل الفاتورة رقم {leave_invoice.invoice_number} بنجاح')
-            return redirect('core:leave_invoice_detail', leave_invoice_id=leave_invoice.id)
+            invoice = form.save(commit=False)
+
+            # تحديث حالة الفاتورة بناءً على المدفوعات
+            invoice.update_status()
+            invoice.save()
+
+            # إعداد رسالة النجاح مع تفاصيل التغييرات
+            success_message = f'تم تعديل الفاتورة رقم {invoice.invoice_number} بنجاح'
+
+            # إضافة تفاصيل التغييرات إذا تغيرت
+            changes = []
+            if old_amount != invoice.amount:
+                changes.append(f'تغيير المبلغ من {old_amount} إلى {invoice.amount} ريال')
+
+            if old_client_name != invoice.client.name:
+                changes.append(f'تغيير العميل من {old_client_name} إلى {invoice.client.name}')
+
+            if changes:
+                success_message += f' ({", ".join(changes)})'
+
+            messages.success(request, success_message)
+            return redirect('core:leave_invoice_detail', leave_invoice_id=invoice.id)
     else:
         form = LeaveInvoiceForm(instance=leave_invoice)
 
+    # الحصول على معلومات الإجازة المرتبطة
+    leave_info = None
+    if leave_invoice.leave_type == 'sick_leave':
+        try:
+            leave_info = SickLeave.objects.get(leave_id=leave_invoice.leave_id)
+        except SickLeave.DoesNotExist:
+            pass
+    elif leave_invoice.leave_type == 'companion_leave':
+        try:
+            leave_info = CompanionLeave.objects.get(leave_id=leave_invoice.leave_id)
+        except CompanionLeave.DoesNotExist:
+            pass
+
     return render(request, 'core/leave_invoices/edit.html', {
         'form': form,
-        'leave_invoice': leave_invoice
+        'leave_invoice': leave_invoice,
+        'leave_info': leave_info
     })
 
 
@@ -1522,12 +1738,27 @@ def leave_invoice_delete(request, leave_invoice_id):
     payment_details = PaymentDetail.objects.filter(invoice=leave_invoice).select_related('payment')
 
     if request.method == 'POST':
+        # حفظ معلومات الفاتورة قبل الحذف
+        invoice_number = leave_invoice.invoice_number
+        client_name = leave_invoice.client.name
+        leave_type_display = 'إجازة مرضية' if leave_invoice.leave_type == 'sick_leave' else 'إجازة مرافق'
+        leave_id = leave_invoice.leave_id
+        amount = leave_invoice.amount
+
         # حذف تفاصيل المدفوعات المرتبطة بالفاتورة أولاً
+        payment_details_count = payment_details.count()
         payment_details.delete()
 
         # ثم حذف الفاتورة
         leave_invoice.delete()
-        messages.success(request, 'تم حذف فاتورة الإجازة بنجاح')
+
+        # إعداد رسالة النجاح مع تفاصيل الفاتورة المحذوفة
+        success_message = f'تم حذف الفاتورة رقم {invoice_number} للعميل {client_name} ({leave_type_display} رقم {leave_id}) بمبلغ {amount} ريال بنجاح'
+
+        if payment_details_count > 0:
+            success_message += f' مع {payment_details_count} دفعة مرتبطة'
+
+        messages.success(request, success_message)
         return redirect('core:leave_invoice_list')
 
     return render(request, 'core/leave_invoices/delete.html', {

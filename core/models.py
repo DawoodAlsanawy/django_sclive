@@ -361,14 +361,23 @@ class LeaveInvoice(models.Model):
 
     def update_status(self):
         """تحديث حالة الفاتورة بناءً على المدفوعات"""
+        # لا نقوم بتحديث الحالة إذا كانت الفاتورة ملغية
+        if self.status == 'cancelled':
+            return self.status
+
         total_paid = self.get_total_paid()
+        old_status = self.status
 
         if total_paid <= 0:
-            self.status = 'unpaid'
+            new_status = 'unpaid'
         elif total_paid < self.amount:
-            self.status = 'partially_paid'
+            new_status = 'partially_paid'
         else:
-            self.status = 'paid'
+            new_status = 'paid'
+
+        # تحديث الحالة فقط إذا تغيرت
+        if old_status != new_status:
+            self.status = new_status
 
         return self.status
 
