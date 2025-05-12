@@ -1772,7 +1772,7 @@ def leave_invoice_delete(request, leave_invoice_id):
 def payment_list(request):
     """قائمة المدفوعات"""
     # تطبيق الفلاتر
-    payments = Payment.objects.all().order_by('-payment_date')
+    payments = Payment.objects.all()
 
     # فلتر رقم الدفعة
     payment_number = request.GET.get('payment_number')
@@ -1814,7 +1814,64 @@ def payment_list(request):
     if amount_max:
         payments = payments.filter(amount__lte=amount_max)
 
-    return render(request, 'core/payments/list.html', {'payments': payments})
+    # الترتيب
+    sort_by = request.GET.get('sort', '-payment_date')
+    if sort_by not in ['payment_number', '-payment_number', 'client__name', '-client__name',
+                      'amount', '-amount', 'payment_method', '-payment_method',
+                      'payment_date', '-payment_date', 'reference_number', '-reference_number',
+                      'created_at', '-created_at']:
+        sort_by = '-payment_date'
+
+    payments = payments.order_by(sort_by)
+
+    # الترقيم الصفحي
+    paginator = Paginator(payments, 10)  # 10 دفعات في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # إحصائيات سريعة
+    total_payments = payments.count()
+    total_amount = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # إحصائيات حسب طريقة الدفع
+    payment_methods_stats = payments.values('payment_method').annotate(
+        count=Count('id'),
+        total=Sum('amount')
+    ).order_by('payment_method')
+
+    # إحصائيات حسب الشهر (آخر 6 أشهر)
+    import datetime
+
+    from django.db.models.functions import TruncMonth
+
+    # الحصول على تاريخ قبل 6 أشهر
+    six_months_ago = timezone.now().date() - datetime.timedelta(days=180)
+
+    monthly_stats = payments.filter(payment_date__gte=six_months_ago).annotate(
+        month=TruncMonth('payment_date')
+    ).values('month').annotate(
+        count=Count('id'),
+        total=Sum('amount')
+    ).order_by('month')
+
+    context = {
+        'payments': page_obj,
+        'payment_number': payment_number,
+        'client': client,
+        'payment_method': payment_method,
+        'reference_number': reference_number,
+        'payment_date_from': payment_date_from,
+        'payment_date_to': payment_date_to,
+        'amount_min': amount_min,
+        'amount_max': amount_max,
+        'sort': sort_by,
+        'total_payments': total_payments,
+        'total_amount': total_amount,
+        'payment_methods_stats': payment_methods_stats,
+        'monthly_stats': monthly_stats
+    }
+
+    return render(request, 'core/payments/list.html', context)
 
 
 @login_required
@@ -1847,23 +1904,35 @@ def payment_create(request):
                         )
 
                         # تحديث حالة الفاتورة
-                        invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).aggregate(Sum('amount'))['amount__sum'] or 0
-
-                        if invoice_total_paid >= invoice.amount:
-                            invoice.status = 'paid'
-                        elif invoice_total_paid > 0:
-                            invoice.status = 'partially_paid'
-
+                        invoice.update_status()
                         invoice.save()
 
                         invoice_count += 1
                         total_amount += float(amount)
 
-            messages.success(request, f'تم إنشاء الدفعة رقم {payment.payment_number} بنجاح لعدد {invoice_count} فاتورة بإجمالي {total_amount} ريال')
+            messages.success(request, f'تم إنشاء الدفعة رقم {payment.payment_number} بنجاح لعدد {invoice_count} فاتورة بإجمالي {total_amount} ريال للعميل {payment.client.name}')
             return redirect('core:payment_detail', payment_id=payment.id)
     else:
+        # توليد رقم دفعة تلقائي
+        import datetime
+        import random
+        today = datetime.date.today()
+        date_string = today.strftime('%Y%m%d')
+        random_num = str(random.randint(100, 999))
+        payment_number = f'PAY-{date_string}-{random_num}'
+
+        # التحقق من عدم وجود رقم دفعة مطابق
+        while Payment.objects.filter(payment_number=payment_number).exists():
+            random_num = str(random.randint(100, 999))
+            payment_number = f'PAY-{date_string}-{random_num}'
+
+        # تعيين تاريخ اليوم كتاريخ افتراضي للدفع
+        initial_data = {
+            'payment_number': payment_number,
+            'payment_date': today
+        }
+
         # تعبئة البيانات من معلمات URL إذا كانت موجودة
-        initial_data = {}
         invoice_id = request.GET.get('invoice_id')
 
         if invoice_id:
@@ -1871,12 +1940,41 @@ def payment_create(request):
                 invoice = LeaveInvoice.objects.get(id=invoice_id)
                 initial_data['client'] = invoice.client.id
                 initial_data['amount'] = invoice.get_remaining()
+
+                # الحصول على الفواتير غير المدفوعة للعميل
+                unpaid_invoices = LeaveInvoice.objects.filter(
+                    client=invoice.client,
+                    status__in=['unpaid', 'partially_paid']
+                ).exclude(id=invoice.id)
+
             except LeaveInvoice.DoesNotExist:
                 pass
 
         form = PaymentForm(initial=initial_data)
 
-    return render(request, 'core/payments/create.html', {'form': form})
+        # الحصول على الفواتير غير المدفوعة للعرض في الصفحة
+        client_id = request.GET.get('client_id')
+        unpaid_invoices = []
+
+        if client_id:
+            try:
+                client = Client.objects.get(id=client_id)
+                unpaid_invoices = LeaveInvoice.objects.filter(
+                    client=client,
+                    status__in=['unpaid', 'partially_paid']
+                )
+
+                if not 'client' in initial_data:
+                    initial_data['client'] = client.id
+                    form = PaymentForm(initial=initial_data)
+
+            except Client.DoesNotExist:
+                pass
+
+    return render(request, 'core/payments/create.html', {
+        'form': form,
+        'unpaid_invoices': unpaid_invoices if 'unpaid_invoices' in locals() else []
+    })
 
 
 @login_required
@@ -1887,10 +1985,38 @@ def payment_detail(request, payment_id):
     # الحصول على تفاصيل الدفعة
     payment_details = PaymentDetail.objects.filter(payment=payment).select_related('invoice')
 
-    return render(request, 'core/payments/detail.html', {
+    # حساب إجمالي المبلغ المدفوع
+    total_paid = payment_details.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب المبلغ المتبقي
+    remaining_amount = payment.amount - total_paid
+
+    # الحصول على معلومات العميل
+    client_info = payment.client
+
+    # الحصول على الفواتير المرتبطة بالدفعة
+    invoices = [detail.invoice for detail in payment_details]
+
+    # الحصول على المدفوعات الأخرى للعميل
+    other_payments = Payment.objects.filter(client=payment.client).exclude(id=payment.id).order_by('-payment_date')[:5]
+
+    # الحصول على الفواتير غير المدفوعة للعميل
+    unpaid_invoices = LeaveInvoice.objects.filter(
+        client=payment.client,
+        status__in=['unpaid', 'partially_paid']
+    ).exclude(id__in=[invoice.id for invoice in invoices])
+
+    context = {
         'payment': payment,
-        'payment_details': payment_details
-    })
+        'payment_details': payment_details,
+        'total_paid': total_paid,
+        'remaining_amount': remaining_amount,
+        'client_info': client_info,
+        'other_payments': other_payments,
+        'unpaid_invoices': unpaid_invoices
+    }
+
+    return render(request, 'core/payments/detail.html', context)
 
 
 @login_required
@@ -1944,13 +2070,7 @@ def payment_edit(request, payment_id):
                         )
 
                         # تحديث حالة الفاتورة
-                        invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).aggregate(Sum('amount'))['amount__sum'] or 0
-
-                        if invoice_total_paid >= invoice.amount:
-                            invoice.status = 'paid'
-                        elif invoice_total_paid > 0:
-                            invoice.status = 'partially_paid'
-
+                        invoice.update_status()
                         invoice.save()
 
                         invoice_count += 1
@@ -1975,24 +2095,57 @@ def payment_delete(request, payment_id):
     payment_details = PaymentDetail.objects.filter(payment=payment).select_related('invoice')
 
     if request.method == 'POST':
+        # حفظ معلومات الدفعة قبل الحذف
+        payment_number = payment.payment_number
+        client_name = payment.client.name
+        payment_method_display = {
+            'cash': 'نقدًا',
+            'bank_transfer': 'تحويل بنكي',
+            'check': 'شيك',
+            'credit_card': 'بطاقة ائتمان'
+        }.get(payment.payment_method, payment.payment_method)
+        amount = payment.amount
+        payment_date = payment.payment_date
+
+        # حفظ عدد الفواتير المرتبطة
+        invoice_count = payment_details.count()
+
         # إعادة حالة الفواتير المرتبطة بالدفعة إلى حالتها الأصلية
+        affected_invoices = []
         for detail in payment_details:
             invoice = detail.invoice
+            old_status = invoice.status
+
+            # تحديث حالة الفاتورة بعد حذف الدفعة
             # حذف تفاصيل الدفعة الحالية من حساب المدفوعات
             invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).exclude(payment=payment).aggregate(Sum('amount'))['amount__sum'] or 0
 
+            # تحديث المبلغ المدفوع في الفاتورة
             if invoice_total_paid >= invoice.amount:
-                invoice.status = 'paid'
+                new_status = 'paid'
             elif invoice_total_paid > 0:
-                invoice.status = 'partially_paid'
+                new_status = 'partially_paid'
             else:
-                invoice.status = 'unpaid'
+                new_status = 'unpaid'
 
-            invoice.save()
+            if old_status != new_status:
+                invoice.status = new_status
+                invoice.save()
+                affected_invoices.append(invoice.invoice_number)
 
         # حذف الدفعة (سيتم حذف تفاصيل الدفعة تلقائيًا بسبب علاقة CASCADE)
         payment.delete()
-        messages.success(request, 'تم حذف الدفعة بنجاح')
+
+        # إعداد رسالة النجاح مع تفاصيل الدفعة المحذوفة
+        success_message = f'تم حذف الدفعة رقم {payment_number} للعميل {client_name} بمبلغ {amount} ريال ({payment_method_display}) بتاريخ {payment_date} بنجاح'
+
+        if invoice_count > 0:
+            success_message += f' مع {invoice_count} فاتورة مرتبطة'
+
+        if affected_invoices:
+            success_message += f'. تم تحديث حالة الفواتير التالية: {", ".join(affected_invoices)}'
+
+        messages.success(request, success_message)
         return redirect('core:payment_list')
 
     return render(request, 'core/payments/delete.html', {
