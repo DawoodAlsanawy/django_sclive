@@ -15,17 +15,25 @@
         <div class="alert alert-danger">
             <p><strong>تحذير:</strong> سيتم حذف هذا المستخدم نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
         </div>
-        
+
         <div class="mb-4">
             <h5>بيانات المستخدم:</h5>
             <ul>
                 <li><strong>اسم المستخدم:</strong> {{ user.username }}</li>
                 <li><strong>البريد الإلكتروني:</strong> {{ user.email }}</li>
-                <li><strong>الدور:</strong> {{ user.get_role_display }}</li>
+                <li><strong>الدور:</strong>
+                    {% if user.role == 'admin' %}
+                    مسؤول
+                    {% elif user.role == 'doctor' %}
+                    طبيب
+                    {% elif user.role == 'staff' %}
+                    موظف
+                    {% endif %}
+                </li>
                 <li><strong>تاريخ الإنشاء:</strong> {{ user.created_at|date:"Y-m-d" }}</li>
             </ul>
         </div>
-        
+
         <form method="post">
             {% csrf_token %}
             <div class="mt-4">

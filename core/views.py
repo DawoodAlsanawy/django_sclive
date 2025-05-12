@@ -1,6 +1,7 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,7 +10,7 @@ from django.utils import timezone
 from .forms import (ClientForm, CompanionLeaveForm, DoctorForm, EmployerForm,
                     HospitalForm, LeaveInvoiceForm, LeavePriceForm,
                     PatientForm, PaymentDetailForm, PaymentForm, RegisterForm,
-                    SickLeaveForm, UserForm)
+                    SickLeaveForm, UserCreateForm, UserEditForm)
 from .models import (Client, CompanionLeave, Doctor, Employer, Hospital,
                      LeaveInvoice, LeavePrice, Patient, Payment, PaymentDetail,
                      SickLeave, User)
@@ -98,6 +99,23 @@ def register(request):
     return render(request, 'core/auth/register.html', {'form': form})
 
 
+@login_required
+def password_change(request):
+    """تغيير كلمة المرور"""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # تحديث جلسة المستخدم لمنع تسجيل الخروج
+            update_session_auth_hash(request, user)
+            messages.success(request, 'تم تغيير كلمة المرور بنجاح')
+            return redirect('password_change_done')
+    else:
+        form = PasswordChangeForm(request.user)
+
+    return render(request, 'core/auth/password_change.html', {'form': form})
+
+
 def verify(request):
     """التحقق من صحة الإجازة"""
     result = None
@@ -170,13 +188,13 @@ def user_create(request):
         return redirect('core:home')
 
     if request.method == 'POST':
-        form = UserForm(request.POST)
+        form = UserCreateForm(request.POST)
         if form.is_valid():
             user = form.save()
             messages.success(request, f'تم إنشاء المستخدم {user.username} بنجاح')
             return redirect('core:user_list')
     else:
-        form = UserForm()
+        form = UserCreateForm()
 
     return render(request, 'core/users/create.html', {'form': form})
 
@@ -191,13 +209,13 @@ def user_edit(request, user_id):
     user = get_object_or_404(User, id=user_id)
 
     if request.method == 'POST':
-        form = UserForm(request.POST, instance=user)
+        form = UserEditForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
             messages.success(request, f'تم تعديل المستخدم {user.username} بنجاح')
             return redirect('core:user_list')
     else:
-        form = UserForm(instance=user)
+        form = UserEditForm(instance=user)
 
     return render(request, 'core/users/edit.html', {'form': form, 'user': user})
 
@@ -205,11 +223,23 @@ def user_edit(request, user_id):
 @login_required
 def user_delete(request, user_id):
     """حذف مستخدم"""
-    user = get_object_or_404(User, id=user_id)
-    if request.method == 'POST':
-        user.delete()
-        messages.success(request, 'تم حذف المستخدم بنجاح')
+    if not request.user.is_admin():
+        messages.error(request, 'ليس لديك صلاحية للوصول إلى هذه الصفحة')
+        return redirect('core:home')
+
+    # منع حذف المستخدم لنفسه
+    if request.user.id == int(user_id):
+        messages.error(request, 'لا يمكنك حذف حسابك الخاص')
         return redirect('core:user_list')
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        username = user.username  # حفظ اسم المستخدم قبل الحذف
+        user.delete()
+        messages.success(request, f'تم حذف المستخدم {username} بنجاح')
+        return redirect('core:user_list')
+
     return render(request, 'core/users/delete.html', {'user': user})
 
 

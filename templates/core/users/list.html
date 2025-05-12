@@ -55,12 +55,17 @@
                         <td>{{ user.created_at|date:"Y-m-d" }}</td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{% url 'core:user_edit' user.id %}" class="btn btn-sm btn-warning">
+                                <a href="{% url 'core:user_edit' user.id %}" class="btn btn-sm btn-warning" title="تعديل">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{% url 'core:user_delete' user.id %}" class="btn btn-sm btn-danger">
+                                <a href="{% url 'core:user_delete' user.id %}" class="btn btn-sm btn-danger" title="حذف">
                                     <i class="fas fa-trash"></i>
                                 </a>
+                                {% if request.user.id == user.id %}
+                                <a href="{% url 'password_change' %}" class="btn btn-sm btn-info" title="تغيير كلمة المرور">
+                                    <i class="fas fa-key"></i>
+                                </a>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
