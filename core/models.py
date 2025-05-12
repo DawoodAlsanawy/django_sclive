@@ -179,6 +179,12 @@ class LeavePrice(models.Model):
         leave_type_display = dict([('sick_leave', 'إجازة مرضية'), ('companion_leave', 'إجازة مرافق')])
         return f"{leave_type_display[self.leave_type]} - {self.duration_days} يوم - {self.price} ريال"
 
+    def get_daily_price(self):
+        """حساب السعر اليومي"""
+        if self.duration_days > 0:
+            return self.price / self.duration_days
+        return 0
+
     @classmethod
     def get_price(cls, leave_type, duration_days):
         """الحصول على سعر الإجازة بناءً على النوع والمدة"""
