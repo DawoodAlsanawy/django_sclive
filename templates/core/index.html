@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}الصفحة الرئيسية - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-primary text-white text-center">
+                <h2>نظام إدارة الإجازات المرضية</h2>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img src="/static/images/moh-logo.png" alt="وزارة الصحة" class="img-fluid" style="max-height: 150px;">
+                </div>
+                <p class="lead text-center">
+                    مرحبًا بك في نظام إدارة الإجازات المرضية وتقارير مرافقة المرضى
+                </p>
+                <p class="text-center">
+                    يتيح هذا النظام للأطباء والموظفين إدارة الإجازات المرضية وتقارير مرافقة المرضى بطريقة سهلة وفعالة.
+                </p>
+
+                <div class="row mt-5">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5>للمستخدمين المسجلين</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>إذا كنت مستخدمًا مسجلاً، يمكنك تسجيل الدخول للوصول إلى لوحة التحكم وإدارة الإجازات والتقارير.</p>
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'login' %}" class="btn btn-primary">تسجيل الدخول</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5>للزوار</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>يمكنك التحقق من صحة الإجازات المرضية وإجازات المرافقة من خلال إدخال رقم الإجازة.</p>
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'core:verify' %}" class="btn btn-success">التحقق من صحة الإجازة</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <i class="fas fa-procedures fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">الإجازات المرضية</h5>
+                                <p class="card-text">إدارة الإجازات المرضية للمرضى بكفاءة وسهولة.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <i class="fas fa-user-nurse fa-3x text-success mb-3"></i>
+                                <h5 class="card-title">إجازات المرافقين</h5>
+                                <p class="card-text">إدارة إجازات مرافقي المرضى بطريقة منظمة.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
+                                <h5 class="card-title">التقارير والإحصائيات</h5>
+                                <p class="card-text">إنشاء تقارير وإحصائيات متنوعة للإجازات.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{% url 'core:about' %}" class="btn btn-outline-primary">معرفة المزيد عن النظام</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

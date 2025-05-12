@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+
+{% block title %}تقرير المدفوعات - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>تقرير المدفوعات</h2>
+        <p class="text-muted">عرض وتحليل بيانات المدفوعات</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'core:report_index' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-right"></i> العودة للتقارير
+        </a>
+    </div>
+</div>
+
+<!-- فلاتر البحث -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">تصفية البيانات</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">تاريخ الدفع (من)</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">تاريخ الدفع (إلى)</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="payment_method" class="form-label">طريقة الدفع</label>
+                <select class="form-select" id="payment_method" name="payment_method">
+                    <option value="">الكل</option>
+                    <option value="cash" {% if payment_method == 'cash' %}selected{% endif %}>نقدًا</option>
+                    <option value="bank_transfer" {% if payment_method == 'bank_transfer' %}selected{% endif %}>تحويل بنكي</option>
+                    <option value="check" {% if payment_method == 'check' %}selected{% endif %}>شيك</option>
+                    <option value="credit_card" {% if payment_method == 'credit_card' %}selected{% endif %}>بطاقة ائتمان</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="client_id" class="form-label">العميل</label>
+                <select class="form-select" id="client_id" name="client_id">
+                    <option value="">الكل</option>
+                    {% for client in clients %}
+                    <option value="{{ client.id }}" {% if client_id == client.id|stringformat:"i" %}selected{% endif %}>{{ client.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-primary">تطبيق</button>
+                <a href="{% url 'core:report_payments' %}" class="btn btn-secondary">إعادة تعيين</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ملخص البيانات -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">عدد المدفوعات</h5>
+                        <h2 class="mb-0">{{ total_count }}</h2>
+                    </div>
+                    <i class="fas fa-money-check fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">إجمالي المبالغ</h5>
+                        <h2 class="mb-0">{{ total_amount|floatformat:2 }}</h2>
+                    </div>
+                    <i class="fas fa-money-bill-wave fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- الرسوم البيانية -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">توزيع المدفوعات حسب طريقة الدفع</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="paymentMethodChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">توزيع المدفوعات حسب طريقة الدفع (المبالغ)</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="paymentMethodAmountChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">توزيع المدفوعات حسب الشهر ({{ current_year }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="monthlyPaymentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">توزيع المدفوعات حسب العملاء (أعلى 5 عملاء)</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="clientsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- جدول البيانات -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">قائمة المدفوعات</h5>
+        <button class="btn btn-sm btn-success" onclick="exportToExcel()">
+            <i class="fas fa-file-excel"></i> تصدير إلى Excel
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="payments-table">
+                <thead>
+                    <tr>
+                        <th>رقم الدفعة</th>
+                        <th>العميل</th>
+                        <th>المبلغ</th>
+                        <th>طريقة الدفع</th>
+                        <th>تاريخ الدفع</th>
+                        <th>رقم المرجع</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.payment_number }}</td>
+                        <td>{{ payment.client.name }}</td>
+                        <td>{{ payment.amount }} ريال</td>
+                        <td>
+                            {% if payment.payment_method == 'cash' %}
+                            <span class="badge bg-success">نقدًا</span>
+                            {% elif payment.payment_method == 'bank_transfer' %}
+                            <span class="badge bg-primary">تحويل بنكي</span>
+                            {% elif payment.payment_method == 'check' %}
+                            <span class="badge bg-info">شيك</span>
+                            {% elif payment.payment_method == 'credit_card' %}
+                            <span class="badge bg-warning">بطاقة ائتمان</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ payment.payment_date }}</td>
+                        <td>{{ payment.reference_number|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">لا توجد بيانات</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // تفعيل Select2 للعميل
+        $('#client_id').select2({
+            placeholder: 'اختر العميل',
+            allowClear: true
+        });
+    });
+    
+    // بيانات الرسوم البيانية
+    const paymentMethodData = {
+        labels: ['نقدًا', 'تحويل بنكي', 'شيك', 'بطاقة ائتمان'],
+        datasets: [{
+            label: 'عدد المدفوعات',
+            data: [
+                {{ payment_method_counts.cash|default:0 }},
+                {{ payment_method_counts.bank_transfer|default:0 }},
+                {{ payment_method_counts.check|default:0 }},
+                {{ payment_method_counts.credit_card|default:0 }}
+            ],
+            backgroundColor: [
+                'rgba(40, 167, 69, 0.7)',
+                'rgba(0, 123, 255, 0.7)',
+                'rgba(23, 162, 184, 0.7)',
+                'rgba(255, 193, 7, 0.7)'
+            ],
+            borderColor: [
+                'rgba(40, 167, 69, 1)',
+                'rgba(0, 123, 255, 1)',
+                'rgba(23, 162, 184, 1)',
+                'rgba(255, 193, 7, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+    
+    const paymentMethodAmountData = {
+        labels: ['نقدًا', 'تحويل بنكي', 'شيك', 'بطاقة ائتمان'],
+        datasets: [{
+            label: 'المبالغ',
+            data: [
+                {{ payment_method_amounts.cash|default:0 }},
+                {{ payment_method_amounts.bank_transfer|default:0 }},
+                {{ payment_method_amounts.check|default:0 }},
+                {{ payment_method_amounts.credit_card|default:0 }}
+            ],
+            backgroundColor: [
+                'rgba(40, 167, 69, 0.7)',
+                'rgba(0, 123, 255, 0.7)',
+                'rgba(23, 162, 184, 0.7)',
+                'rgba(255, 193, 7, 0.7)'
+            ],
+            borderColor: [
+                'rgba(40, 167, 69, 1)',
+                'rgba(0, 123, 255, 1)',
+                'rgba(23, 162, 184, 1)',
+                'rgba(255, 193, 7, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+    
+    const monthlyPaymentsData = {
+        labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+        datasets: [{
+            label: 'المبالغ',
+            data: [
+                {{ monthly_payments.1|default:0 }},
+                {{ monthly_payments.2|default:0 }},
+                {{ monthly_payments.3|default:0 }},
+                {{ monthly_payments.4|default:0 }},
+                {{ monthly_payments.5|default:0 }},
+                {{ monthly_payments.6|default:0 }},
+                {{ monthly_payments.7|default:0 }},
+                {{ monthly_payments.8|default:0 }},
+                {{ monthly_payments.9|default:0 }},
+                {{ monthly_payments.10|default:0 }},
+                {{ monthly_payments.11|default:0 }},
+                {{ monthly_payments.12|default:0 }}
+            ],
+            backgroundColor: 'rgba(0, 123, 255, 0.7)',
+            borderColor: 'rgba(0, 123, 255, 1)',
+            borderWidth: 1
+        }]
+    };
+    
+    const clientsData = {
+        labels: [
+            {% for client_name, count in client_counts.items %}
+            '{{ client_name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'عدد المدفوعات',
+            data: [
+                {% for client_name, count in client_counts.items %}
+                {{ count }},
+                {% endfor %}
+            ],
+            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }]
+    };
+    
+    // إنشاء الرسوم البيانية
+    const paymentMethodChart = new Chart(
+        document.getElementById('paymentMethodChart'),
+        {
+            type: 'pie',
+            data: paymentMethodData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        }
+    );
+    
+    const paymentMethodAmountChart = new Chart(
+        document.getElementById('paymentMethodAmountChart'),
+        {
+            type: 'pie',
+            data: paymentMethodAmountData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        }
+    );
+    
+    const monthlyPaymentsChart = new Chart(
+        document.getElementById('monthlyPaymentsChart'),
+        {
+            type: 'bar',
+            data: monthlyPaymentsData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+    
+    const clientsChart = new Chart(
+        document.getElementById('clientsChart'),
+        {
+            type: 'bar',
+            data: clientsData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+    
+    // تصدير البيانات إلى Excel
+    function exportToExcel() {
+        const table = document.getElementById('payments-table');
+        const wb = XLSX.utils.table_to_book(table, { sheet: "المدفوعات" });
+        XLSX.writeFile(wb, "تقرير_المدفوعات.xlsx");
+    }
+</script>
+{% endblock %}

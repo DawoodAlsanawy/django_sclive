@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}التقارير - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>التقارير</h2>
+        <p class="text-muted">عرض وتحليل البيانات في النظام</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-procedures fa-4x mb-3 text-primary"></i>
+                <h4 class="card-title">تقرير الإجازات المرضية</h4>
+                <p class="card-text">عرض وتحليل بيانات الإجازات المرضية حسب الفترة والحالة</p>
+                <a href="{% url 'core:report_sick_leaves' %}" class="btn btn-primary">عرض التقرير</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-nurse fa-4x mb-3 text-success"></i>
+                <h4 class="card-title">تقرير إجازات المرافقين</h4>
+                <p class="card-text">عرض وتحليل بيانات إجازات المرافقين حسب الفترة والحالة</p>
+                <a href="{% url 'core:report_companion_leaves' %}" class="btn btn-success">عرض التقرير</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-file-invoice-dollar fa-4x mb-3 text-info"></i>
+                <h4 class="card-title">تقرير الفواتير</h4>
+                <p class="card-text">عرض وتحليل بيانات الفواتير حسب الفترة والحالة ونوع الإجازة</p>
+                <a href="{% url 'core:report_invoices' %}" class="btn btn-info">عرض التقرير</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-money-bill-wave fa-4x mb-3 text-warning"></i>
+                <h4 class="card-title">تقرير المدفوعات</h4>
+                <p class="card-text">عرض وتحليل بيانات المدفوعات حسب الفترة وطريقة الدفع</p>
+                <a href="{% url 'core:report_payments' %}" class="btn btn-warning">عرض التقرير</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-4x mb-3 text-danger"></i>
+                <h4 class="card-title">تقرير العملاء</h4>
+                <p class="card-text">عرض وتحليل بيانات العملاء والأرصدة المستحقة</p>
+                <a href="{% url 'core:report_clients' %}" class="btn btn-danger">عرض التقرير</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

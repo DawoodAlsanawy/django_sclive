@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}التحقق من صحة الإجازة - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white text-center">
+                <h2>التحقق من صحة الإجازة</h2>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img src="/static/images/moh-logo.png" alt="وزارة الصحة" class="img-fluid" style="max-height: 150px;">
+                </div>
+                
+                <p class="lead text-center mb-4">
+                    يمكنك التحقق من صحة الإجازة المرضية أو إجازة المرافقة من خلال إدخال رقم الإجازة أدناه
+                </p>
+                
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control form-control-lg" name="leave_id" placeholder="أدخل رقم الإجازة" required>
+                                <button class="btn btn-primary" type="submit">تحقق</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                {% if result %}
+                <div class="mt-4">
+                    {% if result.is_valid %}
+                    <div class="alert alert-success">
+                        <h4 class="alert-heading">الإجازة صحيحة!</h4>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>رقم الإجازة:</strong> {{ result.leave_id }}</p>
+                                <p><strong>نوع الإجازة:</strong> 
+                                    {% if result.leave_type == 'sick_leave' %}
+                                    إجازة مرضية
+                                    {% elif result.leave_type == 'companion_leave' %}
+                                    إجازة مرافق
+                                    {% endif %}
+                                </p>
+                                <p><strong>اسم المريض:</strong> {{ result.patient_name }}</p>
+                                {% if result.leave_type == 'companion_leave' %}
+                                <p><strong>اسم المرافق:</strong> {{ result.companion_name }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>تاريخ البداية:</strong> {{ result.start_date }}</p>
+                                <p><strong>تاريخ النهاية:</strong> {{ result.end_date }}</p>
+                                <p><strong>المدة:</strong> {{ result.duration_days }} يوم</p>
+                                <p><strong>اسم الطبيب:</strong> {{ result.doctor_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger">
+                        <h4 class="alert-heading">الإجازة غير صحيحة!</h4>
+                        <p>لم يتم العثور على إجازة بهذا الرقم في النظام. يرجى التأكد من رقم الإجازة والمحاولة مرة أخرى.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'core:home' %}" class="btn btn-outline-primary">العودة إلى الصفحة الرئيسية</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

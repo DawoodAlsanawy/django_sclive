@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}المستخدمين - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>المستخدمين</h2>
+        <p class="text-muted">إدارة مستخدمي النظام</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'core:user_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة مستخدم جديد
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم المستخدم</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>الدور</th>
+                        <th>الحالة</th>
+                        <th>تاريخ الإنشاء</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.role == 'admin' %}
+                            <span class="badge bg-danger">مسؤول</span>
+                            {% elif user.role == 'doctor' %}
+                            <span class="badge bg-primary">طبيب</span>
+                            {% elif user.role == 'staff' %}
+                            <span class="badge bg-info">موظف</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                            <span class="badge bg-success">نشط</span>
+                            {% else %}
+                            <span class="badge bg-secondary">غير نشط</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.created_at|date:"Y-m-d" }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'core:user_edit' user.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'core:user_delete' user.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">لا يوجد مستخدمين</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

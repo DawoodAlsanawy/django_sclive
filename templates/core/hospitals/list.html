@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}المستشفيات - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>المستشفيات</h2>
+        <p class="text-muted">إدارة المستشفيات في النظام</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'core:hospital_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة مستشفى جديد
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم المستشفى</th>
+                        <th>العنوان</th>
+                        <th>معلومات الاتصال</th>
+                        <th>تاريخ الإنشاء</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hospital in hospitals %}
+                    <tr>
+                        <td>{{ hospital.id }}</td>
+                        <td>{{ hospital.name }}</td>
+                        <td>{{ hospital.address|default:"-" }}</td>
+                        <td>{{ hospital.contact_info|default:"-" }}</td>
+                        <td>{{ hospital.created_at|date:"Y-m-d" }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'core:hospital_edit' hospital.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'core:hospital_delete' hospital.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">لا توجد مستشفيات</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

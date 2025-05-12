@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}قائمة أسعار الإجازات - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>إدارة أسعار الإجازات</h2>
+        <p class="text-muted">إدارة أسعار الإجازات المرضية وإجازات المرافقين</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'core:leave_price_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة سعر جديد
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <ul class="nav nav-tabs mb-3" id="priceTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="sick-leave-tab" data-bs-toggle="tab" data-bs-target="#sick-leave" type="button" role="tab" aria-controls="sick-leave" aria-selected="true">
+                    أسعار الإجازات المرضية
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="companion-leave-tab" data-bs-toggle="tab" data-bs-target="#companion-leave" type="button" role="tab" aria-controls="companion-leave" aria-selected="false">
+                    أسعار إجازات المرافقين
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="priceTabContent">
+            <div class="tab-pane fade show active" id="sick-leave" role="tabpanel" aria-labelledby="sick-leave-tab">
+                {% with sick_leave_prices=leave_prices|dictsort:"duration_days"|selectattr:"leave_type", "equalto", "sick_leave" %}
+                {% if sick_leave_prices %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>المدة (أيام)</th>
+                                <th>السعر (ريال)</th>
+                                <th>الحالة</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>تاريخ التحديث</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for price in sick_leave_prices %}
+                            <tr>
+                                <td>{{ price.id }}</td>
+                                <td>{{ price.duration_days }}</td>
+                                <td>{{ price.price }} ريال</td>
+                                <td>
+                                    {% if price.is_active %}
+                                    <span class="badge bg-success">نشط</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">غير نشط</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ price.created_at|date:"Y-m-d" }}</td>
+                                <td>{{ price.updated_at|date:"Y-m-d" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'core:leave_price_edit' price.id %}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'core:leave_price_delete' price.id %}" class="btn btn-sm btn-danger delete-price"
+                                           data-price-id="{{ price.id }}"
+                                           data-price-type="إجازة مرضية"
+                                           data-price-duration="{{ price.duration_days }}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    لا توجد أسعار محددة للإجازات المرضية. <a href="{% url 'core:leave_price_create' %}">إضافة سعر جديد</a>
+                </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <div class="tab-pane fade" id="companion-leave" role="tabpanel" aria-labelledby="companion-leave-tab">
+                {% with companion_leave_prices=leave_prices|dictsort:"duration_days"|selectattr:"leave_type", "equalto", "companion_leave" %}
+                {% if companion_leave_prices %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>المدة (أيام)</th>
+                                <th>السعر (ريال)</th>
+                                <th>الحالة</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>تاريخ التحديث</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for price in companion_leave_prices %}
+                            <tr>
+                                <td>{{ price.id }}</td>
+                                <td>{{ price.duration_days }}</td>
+                                <td>{{ price.price }} ريال</td>
+                                <td>
+                                    {% if price.is_active %}
+                                    <span class="badge bg-success">نشط</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">غير نشط</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ price.created_at|date:"Y-m-d" }}</td>
+                                <td>{{ price.updated_at|date:"Y-m-d" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'core:leave_price_edit' price.id %}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'core:leave_price_delete' price.id %}" class="btn btn-sm btn-danger delete-price"
+                                           data-price-id="{{ price.id }}"
+                                           data-price-type="إجازة مرافق"
+                                           data-price-duration="{{ price.duration_days }}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    لا توجد أسعار محددة لإجازات المرافقين. <a href="{% url 'core:leave_price_create' %}">إضافة سعر جديد</a>
+                </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تأكيد الحذف -->
+<div class="modal fade" id="deletePriceModal" tabindex="-1" aria-labelledby="deletePriceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deletePriceModalLabel">تأكيد الحذف</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من حذف سعر <span id="priceTypeToDelete"></span> لمدة <span id="priceDurationToDelete"></span> أيام؟</p>
+                <p class="text-danger">هذا الإجراء لا يمكن التراجع عنه.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <form id="deletePriceForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">حذف</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle delete price
+        const deleteButtons = document.querySelectorAll('.delete-price');
+        const deleteForm = document.getElementById('deletePriceForm');
+        const priceTypeSpan = document.getElementById('priceTypeToDelete');
+        const priceDurationSpan = document.getElementById('priceDurationToDelete');
+        const deleteModal = new bootstrap.Modal(document.getElementById('deletePriceModal'));
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const priceId = this.dataset.priceId;
+                const priceType = this.dataset.priceType;
+                const priceDuration = this.dataset.priceDuration;
+
+                priceTypeSpan.textContent = priceType;
+                priceDurationSpan.textContent = priceDuration;
+                deleteForm.action = "{% url 'core:leave_price_delete' 0 %}".replace('0', priceId);
+
+                deleteModal.show();
+            });
+        });
+    });
+</script>
+{% endblock %}

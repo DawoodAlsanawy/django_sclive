@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}الإجازات المرضية - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>الإجازات المرضية</h2>
+        <p class="text-muted">إدارة الإجازات المرضية في النظام</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'core:sick_leave_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة إجازة مرضية جديدة
+        </a>
+    </div>
+</div>
+
+<!-- فلاتر البحث -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">بحث وتصفية</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="leave_id" class="form-label">رقم الإجازة</label>
+                <input type="text" class="form-control" id="leave_id" name="leave_id" value="{{ request.GET.leave_id }}">
+            </div>
+            <div class="col-md-3">
+                <label for="patient" class="form-label">المريض</label>
+                <input type="text" class="form-control" id="patient" name="patient" value="{{ request.GET.patient }}">
+            </div>
+            <div class="col-md-3">
+                <label for="doctor" class="form-label">الطبيب</label>
+                <input type="text" class="form-control" id="doctor" name="doctor" value="{{ request.GET.doctor }}">
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">الحالة</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">الكل</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>نشطة</option>
+                    <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>ملغية</option>
+                    <option value="expired" {% if request.GET.status == 'expired' %}selected{% endif %}>منتهية</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="start_date_from" class="form-label">تاريخ البداية (من)</label>
+                <input type="date" class="form-control" id="start_date_from" name="start_date_from" value="{{ request.GET.start_date_from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="start_date_to" class="form-label">تاريخ البداية (إلى)</label>
+                <input type="date" class="form-control" id="start_date_to" name="start_date_to" value="{{ request.GET.start_date_to }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date_from" class="form-label">تاريخ النهاية (من)</label>
+                <input type="date" class="form-control" id="end_date_from" name="end_date_from" value="{{ request.GET.end_date_from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date_to" class="form-label">تاريخ النهاية (إلى)</label>
+                <input type="date" class="form-control" id="end_date_to" name="end_date_to" value="{{ request.GET.end_date_to }}">
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-primary">بحث</button>
+                <a href="{% url 'core:sick_leave_list' %}" class="btn btn-secondary">إعادة تعيين</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>رقم الإجازة</th>
+                        <th>المريض</th>
+                        <th>الطبيب</th>
+                        <th>تاريخ البداية</th>
+                        <th>تاريخ النهاية</th>
+                        <th>المدة (أيام)</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in sick_leaves %}
+                    <tr>
+                        <td>{{ leave.leave_id }}</td>
+                        <td>{{ leave.patient.name }}</td>
+                        <td>{{ leave.doctor.name }}</td>
+                        <td>{{ leave.start_date }}</td>
+                        <td>{{ leave.end_date }}</td>
+                        <td>{{ leave.duration_days }}</td>
+                        <td>
+                            {% if leave.status == 'active' %}
+                            <span class="badge bg-success">نشطة</span>
+                            {% elif leave.status == 'cancelled' %}
+                            <span class="badge bg-danger">ملغية</span>
+                            {% elif leave.status == 'expired' %}
+                            <span class="badge bg-secondary">منتهية</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'core:sick_leave_detail' leave.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'core:sick_leave_edit' leave.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'core:sick_leave_delete' leave.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">لا توجد إجازات مرضية</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف المستشفى - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>حذف المستشفى</h2>
+        <p class="text-muted">هل أنت متأكد من حذف المستشفى {{ hospital.name }}؟</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p><strong>تحذير:</strong> سيتم حذف هذا المستشفى نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
+            {% if hospital.doctors.count > 0 %}
+            <p><strong>ملاحظة:</strong> هذا المستشفى مرتبط بـ {{ hospital.doctors.count }} طبيب. سيؤدي حذف المستشفى إلى حذف هذه العلاقات.</p>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <h5>بيانات المستشفى:</h5>
+            <ul>
+                <li><strong>اسم المستشفى:</strong> {{ hospital.name }}</li>
+                <li><strong>العنوان:</strong> {{ hospital.address|default:"-" }}</li>
+                <li><strong>معلومات الاتصال:</strong> {{ hospital.contact_info|default:"-" }}</li>
+                <li><strong>تاريخ الإنشاء:</strong> {{ hospital.created_at|date:"Y-m-d" }}</li>
+            </ul>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                <a href="{% url 'core:hospital_list' %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

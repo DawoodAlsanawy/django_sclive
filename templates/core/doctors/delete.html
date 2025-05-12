@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف الطبيب - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>حذف الطبيب</h2>
+        <p class="text-muted">هل أنت متأكد من حذف الطبيب {{ doctor.name }}؟</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p><strong>تحذير:</strong> سيتم حذف هذا الطبيب نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
+            {% if sick_leaves_count > 0 or companion_leaves_count > 0 %}
+            <p><strong>ملاحظة:</strong> هذا الطبيب مرتبط بـ {{ sick_leaves_count }} إجازة مرضية و {{ companion_leaves_count }} إجازة مرافق. سيؤدي حذف الطبيب إلى تأثر هذه البيانات.</p>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <h5>بيانات الطبيب:</h5>
+            <ul>
+                <li><strong>الاسم:</strong> {{ doctor.name }}</li>
+                <li><strong>التخصص:</strong> {{ doctor.position }}</li>
+                <li><strong>المستشفى:</strong> {{ doctor.hospital.name }}</li>
+                <li><strong>رقم الهاتف:</strong> {{ doctor.phone|default:"-" }}</li>
+                <li><strong>البريد الإلكتروني:</strong> {{ doctor.email|default:"-" }}</li>
+            </ul>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                <a href="{% url 'core:doctor_detail' doctor.id %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

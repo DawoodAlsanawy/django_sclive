@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}إضافة إجازة مرافق جديدة - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>إضافة إجازة مرافق جديدة</h2>
+        <p class="text-muted">إنشاء إجازة مرافق جديدة في النظام</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" id="companion-leave-form">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.leave_id|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.issue_date|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.patient|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.companion|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.doctor|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.status|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.start_date|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.end_date|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.admission_date|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.discharge_date|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="duration_days">المدة (أيام)</label>
+                        <input type="text" class="form-control" id="duration_days" readonly>
+                        <small class="form-text text-muted">سيتم حساب المدة تلقائيًا بناءً على تاريخ البداية والنهاية</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">حفظ</button>
+                <a href="{% url 'core:companion_leave_list' %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // تفعيل Select2 للمريض والمرافق والطبيب
+        $('#id_patient').select2({
+            placeholder: 'اختر المريض',
+            allowClear: true
+        });
+        
+        $('#id_companion').select2({
+            placeholder: 'اختر المرافق',
+            allowClear: true
+        });
+        
+        $('#id_doctor').select2({
+            placeholder: 'اختر الطبيب',
+            allowClear: true
+        });
+        
+        // حساب المدة تلقائيًا
+        function calculateDuration() {
+            var startDate = $('#id_start_date').val();
+            var endDate = $('#id_end_date').val();
+            
+            if (startDate && endDate) {
+                var start = new Date(startDate);
+                var end = new Date(endDate);
+                var diffTime = Math.abs(end - start);
+                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 لأن اليوم الأخير محسوب
+                
+                $('#duration_days').val(diffDays);
+            }
+        }
+        
+        $('#id_start_date, #id_end_date').change(calculateDuration);
+        
+        // توليد رقم إجازة تلقائي إذا كان الحقل فارغًا
+        if (!$('#id_leave_id').val()) {
+            var today = new Date();
+            var dateString = today.getFullYear().toString() +
+                             (today.getMonth() + 1).toString().padStart(2, '0') +
+                             today.getDate().toString().padStart(2, '0');
+            var randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            $('#id_leave_id').val('CL-' + dateString + '-' + randomNum);
+        }
+        
+        // تعيين تاريخ اليوم كتاريخ افتراضي للإصدار إذا كان فارغًا
+        if (!$('#id_issue_date').val()) {
+            var today = new Date();
+            var dateString = today.toISOString().split('T')[0];
+            $('#id_issue_date').val(dateString);
+        }
+    });
+</script>
+{% endblock %}

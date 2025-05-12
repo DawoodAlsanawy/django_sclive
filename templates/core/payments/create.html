@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}إضافة دفعة جديدة - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+    
+    .invoice-item {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        position: relative;
+    }
+    
+    .invoice-item .remove-invoice {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>إضافة دفعة جديدة</h2>
+        <p class="text-muted">إنشاء دفعة جديدة في النظام</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" id="payment-form">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.payment_number|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.client|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.amount|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.payment_method|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.payment_date|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.reference_number|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12">
+                    {{ form.notes|as_crispy_field }}
+                </div>
+            </div>
+            
+            <hr>
+            
+            <h4>تفاصيل الدفعة</h4>
+            <p class="text-muted">اختر الفواتير التي تريد تسديدها من خلال هذه الدفعة</p>
+            
+            <div id="invoices-container">
+                <div class="invoice-item" id="invoice-item-1">
+                    <span class="remove-invoice" onclick="removeInvoice(1)"><i class="fas fa-times"></i></span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="invoice-1">الفاتورة</label>
+                                <select class="form-control invoice-select" id="invoice-1" name="invoice-1" required>
+                                    <option value="">اختر الفاتورة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="amount-1">المبلغ</label>
+                                <input type="number" class="form-control invoice-amount" id="amount-1" name="amount-1" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>المبلغ الكلي للفاتورة</label>
+                                <input type="text" class="form-control" id="total-amount-1" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>المبلغ المتبقي</label>
+                                <input type="text" class="form-control" id="remaining-amount-1" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <button type="button" class="btn btn-secondary" id="add-invoice">
+                    <i class="fas fa-plus"></i> إضافة فاتورة أخرى
+                </button>
+            </div>
+            
+            <hr>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>إجمالي المبلغ المدفوع</label>
+                        <input type="text" class="form-control" id="total-paid" readonly>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>المبلغ المتبقي من الدفعة</label>
+                        <input type="text" class="form-control" id="remaining-payment" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">حفظ</button>
+                <a href="{% url 'core:payment_list' %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // تفعيل Select2 للعميل
+        $('#id_client').select2({
+            placeholder: 'اختر العميل',
+            allowClear: true
+        });
+        
+        // توليد رقم دفعة تلقائي إذا كان الحقل فارغًا
+        if (!$('#id_payment_number').val()) {
+            var today = new Date();
+            var dateString = today.getFullYear().toString() +
+                             (today.getMonth() + 1).toString().padStart(2, '0') +
+                             today.getDate().toString().padStart(2, '0');
+            var randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            $('#id_payment_number').val('PAY-' + dateString + '-' + randomNum);
+        }
+        
+        // تعيين تاريخ اليوم كتاريخ افتراضي للدفع إذا كان فارغًا
+        if (!$('#id_payment_date').val()) {
+            var today = new Date();
+            var dateString = today.toISOString().split('T')[0];
+            $('#id_payment_date').val(dateString);
+        }
+        
+        // تحميل الفواتير عند اختيار العميل
+        $('#id_client').change(function() {
+            var clientId = $(this).val();
+            if (clientId) {
+                // هنا يمكن إضافة طلب AJAX لتحميل الفواتير الخاصة بالعميل
+                // وملء قائمة الفواتير في كل عنصر فاتورة
+            }
+        });
+        
+        // إضافة فاتورة جديدة
+        $('#add-invoice').click(function() {
+            var invoiceCount = $('.invoice-item').length + 1;
+            var newInvoice = `
+                <div class="invoice-item" id="invoice-item-${invoiceCount}">
+                    <span class="remove-invoice" onclick="removeInvoice(${invoiceCount})"><i class="fas fa-times"></i></span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="invoice-${invoiceCount}">الفاتورة</label>
+                                <select class="form-control invoice-select" id="invoice-${invoiceCount}" name="invoice-${invoiceCount}" required>
+                                    <option value="">اختر الفاتورة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="amount-${invoiceCount}">المبلغ</label>
+                                <input type="number" class="form-control invoice-amount" id="amount-${invoiceCount}" name="amount-${invoiceCount}" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>المبلغ الكلي للفاتورة</label>
+                                <input type="text" class="form-control" id="total-amount-${invoiceCount}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>المبلغ المتبقي</label>
+                                <input type="text" class="form-control" id="remaining-amount-${invoiceCount}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#invoices-container').append(newInvoice);
+            
+            // تفعيل Select2 للفاتورة الجديدة
+            $(`#invoice-${invoiceCount}`).select2({
+                placeholder: 'اختر الفاتورة',
+                allowClear: true
+            });
+            
+            // تحميل الفواتير للعنصر الجديد
+            var clientId = $('#id_client').val();
+            if (clientId) {
+                // هنا يمكن إضافة طلب AJAX لتحميل الفواتير الخاصة بالعميل
+                // وملء قائمة الفواتير في العنصر الجديد
+            }
+        });
+        
+        // حساب إجمالي المبلغ المدفوع والمتبقي
+        $(document).on('change', '.invoice-amount', function() {
+            calculateTotals();
+        });
+        
+        // تفعيل Select2 للفاتورة الأولى
+        $('.invoice-select').select2({
+            placeholder: 'اختر الفاتورة',
+            allowClear: true
+        });
+        
+        // ملء البيانات من معلمات URL إذا كانت موجودة
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('invoice_id')) {
+            // هنا يمكن إضافة طلب AJAX لتحميل بيانات الفاتورة وملء النموذج
+        }
+    });
+    
+    // حذف فاتورة
+    function removeInvoice(id) {
+        if ($('.invoice-item').length > 1) {
+            $(`#invoice-item-${id}`).remove();
+            calculateTotals();
+        } else {
+            alert('يجب أن تكون هناك فاتورة واحدة على الأقل');
+        }
+    }
+    
+    // حساب إجمالي المبلغ المدفوع والمتبقي
+    function calculateTotals() {
+        var totalPaid = 0;
+        $('.invoice-amount').each(function() {
+            var amount = parseFloat($(this).val()) || 0;
+            totalPaid += amount;
+        });
+        
+        var paymentAmount = parseFloat($('#id_amount').val()) || 0;
+        var remainingPayment = paymentAmount - totalPaid;
+        
+        $('#total-paid').val(totalPaid.toFixed(2) + ' ريال');
+        $('#remaining-payment').val(remainingPayment.toFixed(2) + ' ريال');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+
+{% block title %}تقرير الفواتير - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>تقرير الفواتير</h2>
+        <p class="text-muted">عرض وتحليل بيانات الفواتير</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'core:report_index' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-right"></i> العودة للتقارير
+        </a>
+    </div>
+</div>
+
+<!-- فلاتر البحث -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">تصفية البيانات</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">تاريخ الإصدار (من)</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">تاريخ الإصدار (إلى)</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">الحالة</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">الكل</option>
+                    <option value="unpaid" {% if status == 'unpaid' %}selected{% endif %}>غير مدفوعة</option>
+                    <option value="partially_paid" {% if status == 'partially_paid' %}selected{% endif %}>مدفوعة جزئيًا</option>
+                    <option value="paid" {% if status == 'paid' %}selected{% endif %}>مدفوعة بالكامل</option>
+                    <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>ملغية</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="leave_type" class="form-label">نوع الإجازة</label>
+                <select class="form-select" id="leave_type" name="leave_type">
+                    <option value="">الكل</option>
+                    <option value="sick_leave" {% if leave_type == 'sick_leave' %}selected{% endif %}>إجازة مرضية</option>
+                    <option value="companion_leave" {% if leave_type == 'companion_leave' %}selected{% endif %}>إجازة مرافق</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="client_id" class="form-label">العميل</label>
+                <select class="form-select" id="client_id" name="client_id">
+                    <option value="">الكل</option>
+                    {% for client in clients %}
+                    <option value="{{ client.id }}" {% if client_id == client.id|stringformat:"i" %}selected{% endif %}>{{ client.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-primary">تطبيق</button>
+                <a href="{% url 'core:report_invoices' %}" class="btn btn-secondary">إعادة تعيين</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ملخص البيانات -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">عدد الفواتير</h5>
+                        <h2 class="mb-0">{{ total_count }}</h2>
+                    </div>
+                    <i class="fas fa-file-invoice fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">إجمالي المبالغ</h5>
+                        <h2 class="mb-0">{{ total_amount|floatformat:2 }}</h2>
+                    </div>
+                    <i class="fas fa-money-bill-wave fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">المبالغ المدفوعة</h5>
+                        <h2 class="mb-0">{{ total_paid|floatformat:2 }}</h2>
+                    </div>
+                    <i class="fas fa-hand-holding-usd fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">المبالغ المتبقية</h5>
+                        <h2 class="mb-0">{{ total_remaining|floatformat:2 }}</h2>
+                    </div>
+                    <i class="fas fa-exclamation-circle fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- الرسوم البيانية -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">توزيع الفواتير حسب الحالة</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">توزيع الفواتير حسب نوع الإجازة</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="leaveTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">توزيع الفواتير حسب العملاء (أعلى 5 عملاء)</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="clientsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- جدول البيانات -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">قائمة الفواتير</h5>
+        <button class="btn btn-sm btn-success" onclick="exportToExcel()">
+            <i class="fas fa-file-excel"></i> تصدير إلى Excel
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="invoices-table">
+                <thead>
+                    <tr>
+                        <th>رقم الفاتورة</th>
+                        <th>العميل</th>
+                        <th>نوع الإجازة</th>
+                        <th>رقم الإجازة</th>
+                        <th>المبلغ</th>
+                        <th>المدفوع</th>
+                        <th>المتبقي</th>
+                        <th>تاريخ الإصدار</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td>{{ invoice.invoice_number }}</td>
+                        <td>{{ invoice.client.name }}</td>
+                        <td>
+                            {% if invoice.leave_type == 'sick_leave' %}
+                            <span class="badge bg-primary">إجازة مرضية</span>
+                            {% elif invoice.leave_type == 'companion_leave' %}
+                            <span class="badge bg-info">إجازة مرافق</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ invoice.leave_id }}</td>
+                        <td>{{ invoice.amount }} ريال</td>
+                        <td>{{ invoice.get_total_paid }} ريال</td>
+                        <td>{{ invoice.get_remaining }} ريال</td>
+                        <td>{{ invoice.issue_date }}</td>
+                        <td>
+                            {% if invoice.status == 'unpaid' %}
+                            <span class="badge bg-danger">غير مدفوعة</span>
+                            {% elif invoice.status == 'partially_paid' %}
+                            <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                            {% elif invoice.status == 'paid' %}
+                            <span class="badge bg-success">مدفوعة بالكامل</span>
+                            {% elif invoice.status == 'cancelled' %}
+                            <span class="badge bg-secondary">ملغية</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center">لا توجد بيانات</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // تفعيل Select2 للعميل
+        $('#client_id').select2({
+            placeholder: 'اختر العميل',
+            allowClear: true
+        });
+    });
+    
+    // بيانات الرسوم البيانية
+    const statusData = {
+        labels: ['غير مدفوعة', 'مدفوعة جزئيًا', 'مدفوعة بالكامل', 'ملغية'],
+        datasets: [{
+            label: 'عدد الفواتير',
+            data: [
+                {{ status_counts.unpaid|default:0 }},
+                {{ status_counts.partially_paid|default:0 }},
+                {{ status_counts.paid|default:0 }},
+                {{ status_counts.cancelled|default:0 }}
+            ],
+            backgroundColor: [
+                'rgba(220, 53, 69, 0.7)',
+                'rgba(255, 193, 7, 0.7)',
+                'rgba(40, 167, 69, 0.7)',
+                'rgba(108, 117, 125, 0.7)'
+            ],
+            borderColor: [
+                'rgba(220, 53, 69, 1)',
+                'rgba(255, 193, 7, 1)',
+                'rgba(40, 167, 69, 1)',
+                'rgba(108, 117, 125, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+    
+    const leaveTypeData = {
+        labels: ['إجازة مرضية', 'إجازة مرافق'],
+        datasets: [{
+            label: 'عدد الفواتير',
+            data: [
+                {{ leave_type_counts.sick_leave|default:0 }},
+                {{ leave_type_counts.companion_leave|default:0 }}
+            ],
+            backgroundColor: [
+                'rgba(0, 123, 255, 0.7)',
+                'rgba(23, 162, 184, 0.7)'
+            ],
+            borderColor: [
+                'rgba(0, 123, 255, 1)',
+                'rgba(23, 162, 184, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+    
+    const clientsData = {
+        labels: [
+            {% for client_name, count in client_counts.items %}
+            '{{ client_name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'عدد الفواتير',
+            data: [
+                {% for client_name, count in client_counts.items %}
+                {{ count }},
+                {% endfor %}
+            ],
+            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }]
+    };
+    
+    // إنشاء الرسوم البيانية
+    const statusChart = new Chart(
+        document.getElementById('statusChart'),
+        {
+            type: 'pie',
+            data: statusData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        }
+    );
+    
+    const leaveTypeChart = new Chart(
+        document.getElementById('leaveTypeChart'),
+        {
+            type: 'pie',
+            data: leaveTypeData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        }
+    );
+    
+    const clientsChart = new Chart(
+        document.getElementById('clientsChart'),
+        {
+            type: 'bar',
+            data: clientsData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+    
+    // تصدير البيانات إلى Excel
+    function exportToExcel() {
+        const table = document.getElementById('invoices-table');
+        const wb = XLSX.utils.table_to_book(table, { sheet: "الفواتير" });
+        XLSX.writeFile(wb, "تقرير_الفواتير.xlsx");
+    }
+</script>
+{% endblock %}

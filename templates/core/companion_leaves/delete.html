@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف إجازة المرافق - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>حذف إجازة المرافق</h2>
+        <p class="text-muted">هل أنت متأكد من حذف إجازة المرافق رقم {{ companion_leave.leave_id }}؟</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p><strong>تحذير:</strong> سيتم حذف هذه الإجازة نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
+            {% if related_invoices %}
+            <p><strong>ملاحظة:</strong> هذه الإجازة مرتبطة بـ {{ related_invoices.count }} فاتورة. سيؤدي حذف الإجازة إلى تأثر هذه الفواتير.</p>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <h5>بيانات إجازة المرافق:</h5>
+            <ul>
+                <li><strong>رقم الإجازة:</strong> {{ companion_leave.leave_id }}</li>
+                <li><strong>المريض:</strong> {{ companion_leave.patient.name }}</li>
+                <li><strong>المرافق:</strong> {{ companion_leave.companion.name }}</li>
+                <li><strong>الطبيب:</strong> {{ companion_leave.doctor.name }}</li>
+                <li><strong>تاريخ البداية:</strong> {{ companion_leave.start_date }}</li>
+                <li><strong>تاريخ النهاية:</strong> {{ companion_leave.end_date }}</li>
+                <li><strong>المدة (أيام):</strong> {{ companion_leave.duration_days }}</li>
+                <li><strong>الحالة:</strong> 
+                    {% if companion_leave.status == 'active' %}
+                    <span class="badge bg-success">نشطة</span>
+                    {% elif companion_leave.status == 'cancelled' %}
+                    <span class="badge bg-danger">ملغية</span>
+                    {% elif companion_leave.status == 'expired' %}
+                    <span class="badge bg-secondary">منتهية</span>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                <a href="{% url 'core:companion_leave_detail' companion_leave.id %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

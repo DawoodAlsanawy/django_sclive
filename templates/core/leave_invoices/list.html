@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}فواتير الإجازات - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>فواتير الإجازات</h2>
+        <p class="text-muted">إدارة فواتير الإجازات في النظام</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'core:leave_invoice_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة فاتورة جديدة
+        </a>
+    </div>
+</div>
+
+<!-- فلاتر البحث -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">بحث وتصفية</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="invoice_number" class="form-label">رقم الفاتورة</label>
+                <input type="text" class="form-control" id="invoice_number" name="invoice_number" value="{{ request.GET.invoice_number }}">
+            </div>
+            <div class="col-md-3">
+                <label for="client" class="form-label">العميل</label>
+                <input type="text" class="form-control" id="client" name="client" value="{{ request.GET.client }}">
+            </div>
+            <div class="col-md-3">
+                <label for="leave_type" class="form-label">نوع الإجازة</label>
+                <select class="form-select" id="leave_type" name="leave_type">
+                    <option value="">الكل</option>
+                    <option value="sick_leave" {% if request.GET.leave_type == 'sick_leave' %}selected{% endif %}>إجازة مرضية</option>
+                    <option value="companion_leave" {% if request.GET.leave_type == 'companion_leave' %}selected{% endif %}>إجازة مرافق</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="leave_id" class="form-label">رقم الإجازة</label>
+                <input type="text" class="form-control" id="leave_id" name="leave_id" value="{{ request.GET.leave_id }}">
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">الحالة</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">الكل</option>
+                    <option value="unpaid" {% if request.GET.status == 'unpaid' %}selected{% endif %}>غير مدفوعة</option>
+                    <option value="partially_paid" {% if request.GET.status == 'partially_paid' %}selected{% endif %}>مدفوعة جزئيًا</option>
+                    <option value="paid" {% if request.GET.status == 'paid' %}selected{% endif %}>مدفوعة بالكامل</option>
+                    <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>ملغية</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="issue_date_from" class="form-label">تاريخ الإصدار (من)</label>
+                <input type="date" class="form-control" id="issue_date_from" name="issue_date_from" value="{{ request.GET.issue_date_from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="issue_date_to" class="form-label">تاريخ الإصدار (إلى)</label>
+                <input type="date" class="form-control" id="issue_date_to" name="issue_date_to" value="{{ request.GET.issue_date_to }}">
+            </div>
+            <div class="col-md-3">
+                <label for="due_date_from" class="form-label">تاريخ الاستحقاق (من)</label>
+                <input type="date" class="form-control" id="due_date_from" name="due_date_from" value="{{ request.GET.due_date_from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="due_date_to" class="form-label">تاريخ الاستحقاق (إلى)</label>
+                <input type="date" class="form-control" id="due_date_to" name="due_date_to" value="{{ request.GET.due_date_to }}">
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-primary">بحث</button>
+                <a href="{% url 'core:leave_invoice_list' %}" class="btn btn-secondary">إعادة تعيين</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>رقم الفاتورة</th>
+                        <th>العميل</th>
+                        <th>نوع الإجازة</th>
+                        <th>رقم الإجازة</th>
+                        <th>المبلغ</th>
+                        <th>المدفوع</th>
+                        <th>المتبقي</th>
+                        <th>تاريخ الإصدار</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in leave_invoices %}
+                    <tr>
+                        <td>{{ invoice.invoice_number }}</td>
+                        <td>{{ invoice.client.name }}</td>
+                        <td>
+                            {% if invoice.leave_type == 'sick_leave' %}
+                            <span class="badge bg-primary">إجازة مرضية</span>
+                            {% elif invoice.leave_type == 'companion_leave' %}
+                            <span class="badge bg-info">إجازة مرافق</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ invoice.leave_id }}</td>
+                        <td>{{ invoice.amount }} ريال</td>
+                        <td>{{ invoice.get_total_paid }} ريال</td>
+                        <td>{{ invoice.get_remaining }} ريال</td>
+                        <td>{{ invoice.issue_date }}</td>
+                        <td>
+                            {% if invoice.status == 'unpaid' %}
+                            <span class="badge bg-danger">غير مدفوعة</span>
+                            {% elif invoice.status == 'partially_paid' %}
+                            <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                            {% elif invoice.status == 'paid' %}
+                            <span class="badge bg-success">مدفوعة بالكامل</span>
+                            {% elif invoice.status == 'cancelled' %}
+                            <span class="badge bg-secondary">ملغية</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'core:leave_invoice_detail' invoice.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'core:leave_invoice_edit' invoice.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'core:leave_invoice_delete' invoice.id %}" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center">لا توجد فواتير</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}تفاصيل الدفعة - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>تفاصيل الدفعة</h2>
+        <p class="text-muted">عرض تفاصيل الدفعة رقم {{ payment.payment_number }}</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <div class="btn-group" role="group">
+            <a href="{% url 'core:payment_edit' payment.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> تعديل
+            </a>
+            <a href="{% url 'core:payment_delete' payment.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> حذف
+            </a>
+            <a href="{% url 'core:payment_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> العودة للقائمة
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات الدفعة</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>رقم الدفعة:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ payment.payment_number }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>العميل:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ payment.client.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>المبلغ:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ payment.amount }} ريال
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>طريقة الدفع:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if payment.payment_method == 'cash' %}
+                        <span class="badge bg-success">نقدًا</span>
+                        {% elif payment.payment_method == 'bank_transfer' %}
+                        <span class="badge bg-primary">تحويل بنكي</span>
+                        {% elif payment.payment_method == 'check' %}
+                        <span class="badge bg-info">شيك</span>
+                        {% elif payment.payment_method == 'credit_card' %}
+                        <span class="badge bg-warning">بطاقة ائتمان</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الدفع:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ payment.payment_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>رقم المرجع:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ payment.reference_number|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>ملاحظات:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ payment.notes|default:"لا توجد ملاحظات"|linebreaks }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الإنشاء:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ payment.created_at }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ التحديث:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ payment.updated_at }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات العميل</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الاسم:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ payment.client.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>رقم الهاتف:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ payment.client.phone }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>البريد الإلكتروني:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ payment.client.email|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>العنوان:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ payment.client.address|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الرصيد الكلي:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ payment.client.get_balance }} ريال
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">تفاصيل الدفعة</h5>
+            </div>
+            <div class="card-body">
+                {% if payment_details %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>المبلغ</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detail in payment_details %}
+                            <tr>
+                                <td>{{ detail.invoice.invoice_number }}</td>
+                                <td>{{ detail.amount }} ريال</td>
+                                <td>
+                                    <a href="{% url 'core:leave_invoice_detail' detail.invoice.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>الإجمالي</th>
+                                <th colspan="2">{{ payment.amount }} ريال</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted">لا توجد تفاصيل لهذه الدفعة</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

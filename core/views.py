@@ -1,0 +1,1622 @@
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q, Sum
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+from .forms import (ClientForm, CompanionLeaveForm, DoctorForm, EmployerForm,
+                    HospitalForm, LeaveInvoiceForm, LeavePriceForm,
+                    PatientForm, PaymentDetailForm, PaymentForm, RegisterForm,
+                    SickLeaveForm, UserForm)
+from .models import (Client, CompanionLeave, Doctor, Employer, Hospital,
+                     LeaveInvoice, LeavePrice, Patient, Payment, PaymentDetail,
+                     SickLeave, User)
+
+
+def home(request):
+    """الصفحة الرئيسية"""
+    # إذا كان المستخدم مسجل الدخول، عرض لوحة التحكم
+    if request.user.is_authenticated:
+        # إحصائيات عامة
+        stats = {
+            'sick_leaves_count': SickLeave.objects.count(),
+            'companion_leaves_count': CompanionLeave.objects.count(),
+            'invoices_count': LeaveInvoice.objects.count(),
+            'payments_count': Payment.objects.count(),
+            'clients_count': Client.objects.count(),
+            'patients_count': Patient.objects.count(),
+            'doctors_count': Doctor.objects.count(),
+        }
+
+        # آخر الإجازات المرضية
+        recent_sick_leaves = SickLeave.objects.order_by('-created_at')[:5]
+
+        # آخر إجازات المرافقين
+        recent_companion_leaves = CompanionLeave.objects.order_by('-created_at')[:5]
+
+        # آخر الفواتير
+        recent_invoices = LeaveInvoice.objects.order_by('-created_at')[:5]
+
+        # آخر المدفوعات
+        recent_payments = Payment.objects.order_by('-created_at')[:5]
+
+        context = {
+            'stats': stats,
+            'recent_sick_leaves': recent_sick_leaves,
+            'recent_companion_leaves': recent_companion_leaves,
+            'recent_invoices': recent_invoices,
+            'recent_payments': recent_payments,
+        }
+
+        return render(request, 'core/home.html', context)
+
+    # إذا كان المستخدم غير مسجل الدخول، عرض صفحة الترحيب
+    else:
+        return render(request, 'core/index.html')
+
+
+def about(request):
+    """صفحة حول التطبيق"""
+    return render(request, 'core/about.html')
+
+
+def register(request):
+    """تسجيل حساب جديد"""
+    if request.user.is_authenticated:
+        return redirect('core:home')
+
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'تم تسجيل حسابك بنجاح')
+            return redirect('core:home')
+    else:
+        form = RegisterForm()
+
+    return render(request, 'core/auth/register.html', {'form': form})
+
+
+def verify(request):
+    """التحقق من صحة الإجازة"""
+    result = None
+
+    if request.method == 'POST':
+        leave_id = request.POST.get('leave_id')
+
+        # البحث عن الإجازة المرضية
+        sick_leave = SickLeave.objects.filter(leave_id=leave_id).first()
+
+        if sick_leave:
+            result = {
+                'is_valid': True,
+                'leave_id': sick_leave.leave_id,
+                'leave_type': 'sick_leave',
+                'patient_name': sick_leave.patient.name,
+                'start_date': sick_leave.start_date,
+                'end_date': sick_leave.end_date,
+                'duration_days': sick_leave.duration_days,
+                'doctor_name': sick_leave.doctor.name
+            }
+        else:
+            # البحث عن إجازة المرافق
+            companion_leave = CompanionLeave.objects.filter(leave_id=leave_id).first()
+
+            if companion_leave:
+                result = {
+                    'is_valid': True,
+                    'leave_id': companion_leave.leave_id,
+                    'leave_type': 'companion_leave',
+                    'patient_name': companion_leave.patient.name,
+                    'companion_name': companion_leave.companion.name,
+                    'start_date': companion_leave.start_date,
+                    'end_date': companion_leave.end_date,
+                    'duration_days': companion_leave.duration_days,
+                    'doctor_name': companion_leave.doctor.name
+                }
+            else:
+                result = {
+                    'is_valid': False
+                }
+
+    return render(request, 'core/verify.html', {'result': result})
+
+
+# وظائف إدارة المستخدمين
+@login_required
+def user_list(request):
+    """قائمة المستخدمين"""
+    users = User.objects.all()
+    return render(request, 'core/users/list.html', {'users': users})
+
+
+@login_required
+def user_create(request):
+    """إنشاء مستخدم جديد"""
+    if not request.user.is_admin():
+        messages.error(request, 'ليس لديك صلاحية للوصول إلى هذه الصفحة')
+        return redirect('core:home')
+
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, f'تم إنشاء المستخدم {user.username} بنجاح')
+            return redirect('core:user_list')
+    else:
+        form = UserForm()
+
+    return render(request, 'core/users/create.html', {'form': form})
+
+
+@login_required
+def user_edit(request, user_id):
+    """تعديل مستخدم"""
+    if not request.user.is_admin():
+        messages.error(request, 'ليس لديك صلاحية للوصول إلى هذه الصفحة')
+        return redirect('core:home')
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل المستخدم {user.username} بنجاح')
+            return redirect('core:user_list')
+    else:
+        form = UserForm(instance=user)
+
+    return render(request, 'core/users/edit.html', {'form': form, 'user': user})
+
+
+@login_required
+def user_delete(request, user_id):
+    """حذف مستخدم"""
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'تم حذف المستخدم بنجاح')
+        return redirect('core:user_list')
+    return render(request, 'core/users/delete.html', {'user': user})
+
+
+# وظائف إدارة المستشفيات
+@login_required
+def hospital_list(request):
+    """قائمة المستشفيات"""
+    hospitals = Hospital.objects.all()
+    return render(request, 'core/hospitals/list.html', {'hospitals': hospitals})
+
+
+@login_required
+def hospital_create(request):
+    """إنشاء مستشفى جديد"""
+    if request.method == 'POST':
+        form = HospitalForm(request.POST)
+        if form.is_valid():
+            hospital = form.save()
+            messages.success(request, f'تم إنشاء المستشفى {hospital.name} بنجاح')
+            return redirect('core:hospital_list')
+    else:
+        form = HospitalForm()
+
+    return render(request, 'core/hospitals/create.html', {'form': form})
+
+
+@login_required
+def hospital_edit(request, hospital_id):
+    """تعديل مستشفى"""
+    hospital = get_object_or_404(Hospital, id=hospital_id)
+
+    if request.method == 'POST':
+        form = HospitalForm(request.POST, instance=hospital)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل المستشفى {hospital.name} بنجاح')
+            return redirect('core:hospital_list')
+    else:
+        form = HospitalForm(instance=hospital)
+
+    return render(request, 'core/hospitals/edit.html', {'form': form, 'hospital': hospital})
+
+
+@login_required
+def hospital_delete(request, hospital_id):
+    """حذف مستشفى"""
+    hospital = get_object_or_404(Hospital, id=hospital_id)
+    if request.method == 'POST':
+        hospital.delete()
+        messages.success(request, 'تم حذف المستشفى بنجاح')
+        return redirect('core:hospital_list')
+    return render(request, 'core/hospitals/delete.html', {'hospital': hospital})
+
+
+# وظائف إدارة جهات العمل
+@login_required
+def employer_list(request):
+    """قائمة جهات العمل"""
+    employers = Employer.objects.all()
+    return render(request, 'core/employers/list.html', {'employers': employers})
+
+
+@login_required
+def employer_create(request):
+    """إنشاء جهة عمل جديدة"""
+    if request.method == 'POST':
+        form = EmployerForm(request.POST)
+        if form.is_valid():
+            employer = form.save()
+            messages.success(request, f'تم إنشاء جهة العمل {employer.name} بنجاح')
+            return redirect('core:employer_list')
+    else:
+        form = EmployerForm()
+
+    return render(request, 'core/employers/create.html', {'form': form})
+
+
+@login_required
+def employer_edit(request, employer_id):
+    """تعديل جهة عمل"""
+    employer = get_object_or_404(Employer, id=employer_id)
+
+    if request.method == 'POST':
+        form = EmployerForm(request.POST, instance=employer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل جهة العمل {employer.name} بنجاح')
+            return redirect('core:employer_list')
+    else:
+        form = EmployerForm(instance=employer)
+
+    return render(request, 'core/employers/edit.html', {'form': form, 'employer': employer})
+
+
+@login_required
+def employer_delete(request, employer_id):
+    """حذف جهة عمل"""
+    employer = get_object_or_404(Employer, id=employer_id)
+    if request.method == 'POST':
+        employer.delete()
+        messages.success(request, 'تم حذف جهة العمل بنجاح')
+        return redirect('core:employer_list')
+    return render(request, 'core/employers/delete.html', {'employer': employer})
+
+
+# وظائف إدارة الأطباء
+@login_required
+def doctor_list(request):
+    """قائمة الأطباء"""
+    doctors = Doctor.objects.all()
+    return render(request, 'core/doctors/list.html', {'doctors': doctors})
+
+
+@login_required
+def doctor_create(request):
+    """إنشاء طبيب جديد"""
+    if request.method == 'POST':
+        form = DoctorForm(request.POST)
+        if form.is_valid():
+            doctor = form.save()
+            messages.success(request, f'تم إنشاء الطبيب {doctor.name} بنجاح')
+            return redirect('core:doctor_list')
+    else:
+        form = DoctorForm()
+
+    return render(request, 'core/doctors/create.html', {'form': form})
+
+
+@login_required
+def doctor_edit(request, doctor_id):
+    """تعديل طبيب"""
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+
+    if request.method == 'POST':
+        form = DoctorForm(request.POST, instance=doctor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل الطبيب {doctor.name} بنجاح')
+            return redirect('core:doctor_list')
+    else:
+        form = DoctorForm(instance=doctor)
+
+    return render(request, 'core/doctors/edit.html', {'form': form, 'doctor': doctor})
+
+
+@login_required
+def doctor_delete(request, doctor_id):
+    """حذف طبيب"""
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    if request.method == 'POST':
+        doctor.delete()
+        messages.success(request, 'تم حذف الطبيب بنجاح')
+        return redirect('core:doctor_list')
+    return render(request, 'core/doctors/delete.html', {'doctor': doctor})
+
+
+@login_required
+def doctor_search_api(request):
+    """واجهة برمجة تطبيقات للبحث عن الأطباء"""
+    query = request.GET.get('q', '')
+    if not query:
+        return JsonResponse([])
+
+    doctors = Doctor.objects.filter(
+        Q(name__icontains=query) | Q(national_id__icontains=query)
+    )[:10]
+
+    results = []
+    for doctor in doctors:
+        results.append({
+            'id': doctor.id,
+            'display': doctor.name,
+            'national_id': doctor.national_id,
+            'position': doctor.position,
+            'hospital': doctor.hospital.name
+        })
+
+    return JsonResponse(results, safe=False)
+
+
+# وظائف إدارة المرضى
+@login_required
+def patient_list(request):
+    """قائمة المرضى"""
+    # تصفية البيانات حسب المعايير
+    name = request.GET.get('name')
+    national_id = request.GET.get('national_id')
+    employer_id = request.GET.get('employer')
+
+    patients = Patient.objects.all().order_by('name')
+
+    if name:
+        patients = patients.filter(name__icontains=name)
+
+    if national_id:
+        patients = patients.filter(national_id__icontains=national_id)
+
+    if employer_id:
+        patients = patients.filter(employer_id=employer_id)
+
+    # الحصول على جميع جهات العمل للفلتر
+    employers = Employer.objects.all().order_by('name')
+
+    return render(request, 'core/patients/list.html', {
+        'patients': patients,
+        'employers': employers
+    })
+
+
+@login_required
+def patient_detail(request, patient_id):
+    """تفاصيل المريض"""
+    patient = get_object_or_404(Patient, id=patient_id)
+
+    # الحصول على الإجازات المرضية للمريض
+    sick_leaves = SickLeave.objects.filter(patient=patient).order_by('-start_date')
+
+    # الحصول على إجازات المرافقين للمريض
+    companion_leaves = CompanionLeave.objects.filter(patient=patient).order_by('-start_date')
+
+    context = {
+        'patient': patient,
+        'sick_leaves': sick_leaves,
+        'companion_leaves': companion_leaves
+    }
+
+    return render(request, 'core/patients/detail.html', context)
+
+
+@login_required
+def patient_create(request):
+    """إنشاء مريض جديد"""
+    if request.method == 'POST':
+        form = PatientForm(request.POST)
+        if form.is_valid():
+            patient = form.save()
+            messages.success(request, f'تم إنشاء المريض {patient.name} بنجاح')
+            return redirect('core:patient_detail', patient_id=patient.id)
+    else:
+        form = PatientForm()
+
+    return render(request, 'core/patients/create.html', {'form': form})
+
+
+@login_required
+def patient_edit(request, patient_id):
+    """تعديل مريض"""
+    patient = get_object_or_404(Patient, id=patient_id)
+
+    if request.method == 'POST':
+        form = PatientForm(request.POST, instance=patient)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل المريض {patient.name} بنجاح')
+            return redirect('core:patient_detail', patient_id=patient.id)
+    else:
+        form = PatientForm(instance=patient)
+
+    return render(request, 'core/patients/edit.html', {'form': form, 'patient': patient})
+
+
+@login_required
+def patient_delete(request, patient_id):
+    """حذف مريض"""
+    patient = get_object_or_404(Patient, id=patient_id)
+
+    # التحقق من وجود إجازات مرتبطة بالمريض
+    sick_leaves = SickLeave.objects.filter(patient=patient).count()
+    companion_leaves = CompanionLeave.objects.filter(patient=patient).count()
+
+    if request.method == 'POST':
+        patient.delete()
+        messages.success(request, 'تم حذف المريض بنجاح')
+        return redirect('core:patient_list')
+
+    context = {
+        'patient': patient,
+        'sick_leaves_count': sick_leaves,
+        'companion_leaves_count': companion_leaves,
+    }
+
+    return render(request, 'core/patients/delete.html', context)
+
+
+@login_required
+def patient_search_api(request):
+    """واجهة برمجة تطبيقات للبحث عن المرضى"""
+    query = request.GET.get('q', '')
+    if not query:
+        return JsonResponse([], safe=False)
+
+    patients = Patient.objects.filter(
+        Q(name__icontains=query) | Q(national_id__icontains=query)
+    )[:10]
+
+    results = []
+    for patient in patients:
+        employer_name = patient.employer.name if patient.employer else "غير محدد"
+        results.append({
+            'id': patient.id,
+            'text': f"{patient.name} ({patient.national_id})",
+            'display': patient.name,
+            'national_id': patient.national_id,
+            'nationality': patient.nationality,
+            'employer': employer_name
+        })
+
+    return JsonResponse(results, safe=False)
+
+
+# وظائف إدارة العملاء
+@login_required
+def client_list(request):
+    """قائمة العملاء"""
+    # تطبيق الفلاتر
+    clients = Client.objects.all().order_by('name')
+
+    # فلتر الاسم
+    name = request.GET.get('name')
+    if name:
+        clients = clients.filter(name__icontains=name)
+
+    # فلتر رقم الهاتف
+    phone = request.GET.get('phone')
+    if phone:
+        clients = clients.filter(phone__icontains=phone)
+
+    # فلتر البريد الإلكتروني
+    email = request.GET.get('email')
+    if email:
+        clients = clients.filter(email__icontains=email)
+
+    return render(request, 'core/clients/list.html', {'clients': clients})
+
+
+@login_required
+def client_detail(request, client_id):
+    """تفاصيل العميل"""
+    client = get_object_or_404(Client, id=client_id)
+
+    # الحصول على الفواتير المرتبطة بالعميل
+    invoices = LeaveInvoice.objects.filter(client=client).order_by('-created_at')
+
+    # الحصول على المدفوعات المرتبطة بالعميل
+    payments = Payment.objects.filter(client=client).order_by('-payment_date')
+
+    context = {
+        'client': client,
+        'invoices': invoices,
+        'payments': payments
+    }
+
+    return render(request, 'core/clients/detail.html', context)
+
+
+@login_required
+def client_create(request):
+    """إنشاء عميل جديد"""
+    if request.method == 'POST':
+        form = ClientForm(request.POST)
+        if form.is_valid():
+            client = form.save()
+            messages.success(request, f'تم إنشاء العميل {client.name} بنجاح')
+            return redirect('core:client_detail', client_id=client.id)
+    else:
+        form = ClientForm()
+
+    return render(request, 'core/clients/create.html', {'form': form})
+
+
+@login_required
+def client_edit(request, client_id):
+    """تعديل عميل"""
+    client = get_object_or_404(Client, id=client_id)
+
+    if request.method == 'POST':
+        form = ClientForm(request.POST, instance=client)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل العميل {client.name} بنجاح')
+            return redirect('core:client_detail', client_id=client.id)
+    else:
+        form = ClientForm(instance=client)
+
+    return render(request, 'core/clients/edit.html', {'form': form, 'client': client})
+
+
+@login_required
+def client_delete(request, client_id):
+    """حذف عميل"""
+    client = get_object_or_404(Client, id=client_id)
+
+    # التحقق من وجود فواتير مرتبطة بالعميل
+    invoices_count = LeaveInvoice.objects.filter(client=client).count()
+    payments_count = Payment.objects.filter(client=client).count()
+
+    if request.method == 'POST':
+        client.delete()
+        messages.success(request, 'تم حذف العميل بنجاح')
+        return redirect('core:client_list')
+
+    context = {
+        'client': client,
+        'invoices_count': invoices_count,
+        'payments_count': payments_count,
+    }
+
+    return render(request, 'core/clients/delete.html', context)
+
+
+@login_required
+def client_search_api(request):
+    """واجهة برمجة تطبيقات للبحث عن العملاء"""
+    query = request.GET.get('q', '')
+    if not query:
+        return JsonResponse([], safe=False)
+
+    clients = Client.objects.filter(
+        Q(name__icontains=query) | Q(phone__icontains=query) | Q(email__icontains=query)
+    )[:10]
+
+    results = []
+    for client in clients:
+        results.append({
+            'id': client.id,
+            'text': f"{client.name} ({client.phone})",
+            'display': client.name,
+            'phone': client.phone,
+            'email': client.email or '',
+            'address': client.address or '',
+            'balance': client.get_balance()
+        })
+
+    return JsonResponse(results, safe=False)
+
+
+# وظائف إدارة أسعار الإجازات
+@login_required
+def leave_price_list(request):
+    """قائمة أسعار الإجازات"""
+    leave_prices = LeavePrice.objects.all()
+    return render(request, 'core/leave_prices/list.html', {'leave_prices': leave_prices})
+
+
+@login_required
+def leave_price_create(request):
+    """إنشاء سعر إجازة جديد"""
+    if request.method == 'POST':
+        form = LeavePriceForm(request.POST)
+        if form.is_valid():
+            leave_price = form.save()
+            messages.success(request, f'تم إنشاء سعر الإجازة بنجاح')
+            return redirect('core:leave_price_list')
+    else:
+        form = LeavePriceForm()
+
+    return render(request, 'core/leave_prices/create.html', {'form': form})
+
+
+@login_required
+def leave_price_edit(request, leave_price_id):
+    """تعديل سعر إجازة"""
+    leave_price = get_object_or_404(LeavePrice, id=leave_price_id)
+
+    if request.method == 'POST':
+        form = LeavePriceForm(request.POST, instance=leave_price)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'تم تعديل سعر الإجازة بنجاح')
+            return redirect('core:leave_price_list')
+    else:
+        form = LeavePriceForm(instance=leave_price)
+
+    return render(request, 'core/leave_prices/edit.html', {'form': form, 'leave_price': leave_price})
+
+
+@login_required
+def leave_price_delete(request, leave_price_id):
+    """حذف سعر إجازة"""
+    leave_price = get_object_or_404(LeavePrice, id=leave_price_id)
+
+    # التحقق من استخدام السعر في الفواتير
+    invoices_count = LeaveInvoice.objects.filter(
+        Q(leave_type=leave_price.leave_type) &
+        Q(amount=leave_price.price)
+    ).count()
+
+    if request.method == 'POST':
+        leave_price.delete()
+        messages.success(request, 'تم حذف سعر الإجازة بنجاح')
+        return redirect('core:leave_price_list')
+
+    context = {
+        'leave_price': leave_price,
+        'invoices_count': invoices_count
+    }
+
+    return render(request, 'core/leave_prices/delete.html', context)
+
+
+@login_required
+def leave_price_api_get_price(request):
+    """واجهة برمجية للحصول على سعر الإجازة"""
+    leave_type = request.GET.get('leave_type', '')
+    duration_days = request.GET.get('duration_days', 0, type=int)
+
+    if not leave_type or duration_days <= 0:
+        return JsonResponse({'success': False, 'message': 'بيانات غير صحيحة'})
+
+    price = LeavePrice.get_price(leave_type, duration_days)
+
+    return JsonResponse({
+        'success': True,
+        'price': float(price)
+    })
+
+
+# وظائف إدارة الإجازات المرضية
+@login_required
+def sick_leave_list(request):
+    """قائمة الإجازات المرضية"""
+    sick_leaves = SickLeave.objects.all()
+    return render(request, 'core/sick_leaves/list.html', {'sick_leaves': sick_leaves})
+
+
+@login_required
+def sick_leave_create(request):
+    """إنشاء إجازة مرضية جديدة"""
+    if request.method == 'POST':
+        form = SickLeaveForm(request.POST)
+        if form.is_valid():
+            sick_leave = form.save()
+            messages.success(request, f'تم إنشاء الإجازة المرضية رقم {sick_leave.leave_id} بنجاح')
+            return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
+    else:
+        form = SickLeaveForm()
+
+    return render(request, 'core/sick_leaves/create.html', {'form': form})
+
+
+@login_required
+def sick_leave_detail(request, sick_leave_id):
+    """تفاصيل إجازة مرضية"""
+    sick_leave = get_object_or_404(SickLeave, id=sick_leave_id)
+
+    # الحصول على الفواتير المرتبطة بالإجازة
+    related_invoices = LeaveInvoice.objects.filter(
+        leave_type='sick_leave',
+        leave_id=sick_leave.leave_id
+    )
+
+    return render(request, 'core/sick_leaves/detail.html', {
+        'sick_leave': sick_leave,
+        'related_invoices': related_invoices
+    })
+
+
+@login_required
+def sick_leave_edit(request, sick_leave_id):
+    """تعديل إجازة مرضية"""
+    sick_leave = get_object_or_404(SickLeave, id=sick_leave_id)
+
+    if request.method == 'POST':
+        form = SickLeaveForm(request.POST, instance=sick_leave)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل الإجازة المرضية رقم {sick_leave.leave_id} بنجاح')
+            return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
+    else:
+        form = SickLeaveForm(instance=sick_leave)
+
+    return render(request, 'core/sick_leaves/edit.html', {'form': form, 'sick_leave': sick_leave})
+
+
+@login_required
+def sick_leave_delete(request, sick_leave_id):
+    """حذف إجازة مرضية"""
+    sick_leave = get_object_or_404(SickLeave, id=sick_leave_id)
+
+    # الحصول على الفواتير المرتبطة بالإجازة
+    related_invoices = LeaveInvoice.objects.filter(
+        leave_type='sick_leave',
+        leave_id=sick_leave.leave_id
+    )
+
+    if request.method == 'POST':
+        sick_leave.delete()
+        messages.success(request, 'تم حذف الإجازة المرضية بنجاح')
+        return redirect('core:sick_leave_list')
+
+    return render(request, 'core/sick_leaves/delete.html', {
+        'sick_leave': sick_leave,
+        'related_invoices': related_invoices
+    })
+
+
+@login_required
+def sick_leave_search_api(request):
+    """واجهة برمجة تطبيقات للبحث عن الإجازات المرضية"""
+    query = request.GET.get('q', '')
+    if not query:
+        return JsonResponse([], safe=False)
+
+    sick_leaves = SickLeave.objects.filter(
+        Q(leave_id__icontains=query) |
+        Q(patient__name__icontains=query) |
+        Q(doctor__name__icontains=query) |
+        Q(patient__national_id__icontains=query)
+    )[:10]
+
+    results = []
+    for sick_leave in sick_leaves:
+        results.append({
+            'id': sick_leave.id,
+            'text': f"{sick_leave.leave_id} - {sick_leave.patient.name}",
+            'leave_id': sick_leave.leave_id,
+            'patient': sick_leave.patient.name,
+            'doctor': sick_leave.doctor.name,
+            'start_date': sick_leave.start_date.strftime('%Y-%m-%d'),
+            'end_date': sick_leave.end_date.strftime('%Y-%m-%d'),
+            'duration_days': sick_leave.duration_days,
+            'status': sick_leave.status
+        })
+
+    return JsonResponse(results, safe=False)
+
+
+# وظائف إدارة إجازات المرافقين
+@login_required
+def companion_leave_list(request):
+    """قائمة إجازات المرافقين"""
+    companion_leaves = CompanionLeave.objects.all()
+    return render(request, 'core/companion_leaves/list.html', {'companion_leaves': companion_leaves})
+
+
+@login_required
+def companion_leave_create(request):
+    """إنشاء إجازة مرافق جديدة"""
+    if request.method == 'POST':
+        form = CompanionLeaveForm(request.POST)
+        if form.is_valid():
+            companion_leave = form.save()
+            messages.success(request, f'تم إنشاء إجازة المرافق رقم {companion_leave.leave_id} بنجاح')
+            return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
+    else:
+        form = CompanionLeaveForm()
+
+    return render(request, 'core/companion_leaves/create.html', {'form': form})
+
+
+@login_required
+def companion_leave_detail(request, companion_leave_id):
+    """تفاصيل إجازة مرافق"""
+    companion_leave = get_object_or_404(CompanionLeave, id=companion_leave_id)
+
+    # الحصول على الفواتير المرتبطة بالإجازة
+    related_invoices = LeaveInvoice.objects.filter(
+        leave_type='companion_leave',
+        leave_id=companion_leave.leave_id
+    )
+
+    return render(request, 'core/companion_leaves/detail.html', {
+        'companion_leave': companion_leave,
+        'related_invoices': related_invoices
+    })
+
+
+@login_required
+def companion_leave_edit(request, companion_leave_id):
+    """تعديل إجازة مرافق"""
+    companion_leave = get_object_or_404(CompanionLeave, id=companion_leave_id)
+
+    if request.method == 'POST':
+        form = CompanionLeaveForm(request.POST, instance=companion_leave)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل إجازة المرافق رقم {companion_leave.leave_id} بنجاح')
+            return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
+    else:
+        form = CompanionLeaveForm(instance=companion_leave)
+
+    return render(request, 'core/companion_leaves/edit.html', {'form': form, 'companion_leave': companion_leave})
+
+
+@login_required
+def companion_leave_delete(request, companion_leave_id):
+    """حذف إجازة مرافق"""
+    companion_leave = get_object_or_404(CompanionLeave, id=companion_leave_id)
+
+    # الحصول على الفواتير المرتبطة بالإجازة
+    related_invoices = LeaveInvoice.objects.filter(
+        leave_type='companion_leave',
+        leave_id=companion_leave.leave_id
+    )
+
+    if request.method == 'POST':
+        companion_leave.delete()
+        messages.success(request, 'تم حذف إجازة المرافق بنجاح')
+        return redirect('core:companion_leave_list')
+
+    return render(request, 'core/companion_leaves/delete.html', {
+        'companion_leave': companion_leave,
+        'related_invoices': related_invoices
+    })
+
+
+@login_required
+def companion_leave_search_api(request):
+    """واجهة برمجة تطبيقات للبحث عن إجازات المرافقين"""
+    query = request.GET.get('q', '')
+    if not query:
+        return JsonResponse([], safe=False)
+
+    companion_leaves = CompanionLeave.objects.filter(
+        Q(leave_id__icontains=query) |
+        Q(patient__name__icontains=query) |
+        Q(companion__name__icontains=query) |
+        Q(doctor__name__icontains=query) |
+        Q(patient__national_id__icontains=query) |
+        Q(companion__national_id__icontains=query)
+    )[:10]
+
+    results = []
+    for companion_leave in companion_leaves:
+        results.append({
+            'id': companion_leave.id,
+            'text': f"{companion_leave.leave_id} - {companion_leave.patient.name} - {companion_leave.companion.name}",
+            'leave_id': companion_leave.leave_id,
+            'patient': companion_leave.patient.name,
+            'companion': companion_leave.companion.name,
+            'doctor': companion_leave.doctor.name,
+            'start_date': companion_leave.start_date.strftime('%Y-%m-%d'),
+            'end_date': companion_leave.end_date.strftime('%Y-%m-%d'),
+            'duration_days': companion_leave.duration_days,
+            'status': companion_leave.status
+        })
+
+    return JsonResponse(results, safe=False)
+
+
+# وظائف إدارة فواتير الإجازات
+@login_required
+def leave_invoice_list(request):
+    """قائمة فواتير الإجازات"""
+    leave_invoices = LeaveInvoice.objects.all()
+    return render(request, 'core/leave_invoices/list.html', {'leave_invoices': leave_invoices})
+
+
+@login_required
+def leave_invoice_create(request):
+    """إنشاء فاتورة إجازة جديدة"""
+    if request.method == 'POST':
+        form = LeaveInvoiceForm(request.POST)
+        if form.is_valid():
+            invoice = form.save()
+            messages.success(request, f'تم إنشاء الفاتورة رقم {invoice.invoice_number} بنجاح')
+            return redirect('core:leave_invoice_detail', leave_invoice_id=invoice.id)
+    else:
+        # تعبئة البيانات من معلمات URL إذا كانت موجودة
+        initial_data = {}
+        leave_type = request.GET.get('leave_type')
+        leave_id = request.GET.get('leave_id')
+
+        if leave_type and leave_id:
+            initial_data['leave_type'] = leave_type
+            initial_data['leave_id'] = leave_id
+
+            # البحث عن الإجازة وتعبئة بيانات العميل
+            if leave_type == 'sick_leave':
+                try:
+                    sick_leave = SickLeave.objects.get(leave_id=leave_id)
+                    if sick_leave.patient.employer:
+                        initial_data['client'] = sick_leave.patient.employer.id
+                except SickLeave.DoesNotExist:
+                    pass
+            elif leave_type == 'companion_leave':
+                try:
+                    companion_leave = CompanionLeave.objects.get(leave_id=leave_id)
+                    if companion_leave.companion.employer:
+                        initial_data['client'] = companion_leave.companion.employer.id
+                except CompanionLeave.DoesNotExist:
+                    pass
+
+        form = LeaveInvoiceForm(initial=initial_data)
+
+    return render(request, 'core/leave_invoices/create.html', {'form': form})
+
+
+@login_required
+def leave_invoice_detail(request, leave_invoice_id):
+    """تفاصيل فاتورة إجازة"""
+    leave_invoice = get_object_or_404(LeaveInvoice, id=leave_invoice_id)
+
+    # الحصول على تفاصيل المدفوعات المرتبطة بالفاتورة
+    payment_details = PaymentDetail.objects.filter(invoice=leave_invoice).select_related('payment')
+
+    return render(request, 'core/leave_invoices/detail.html', {
+        'leave_invoice': leave_invoice,
+        'payment_details': payment_details
+    })
+
+
+@login_required
+def leave_invoice_edit(request, leave_invoice_id):
+    """تعديل فاتورة إجازة"""
+    leave_invoice = get_object_or_404(LeaveInvoice, id=leave_invoice_id)
+
+    if request.method == 'POST':
+        form = LeaveInvoiceForm(request.POST, instance=leave_invoice)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'تم تعديل الفاتورة رقم {leave_invoice.invoice_number} بنجاح')
+            return redirect('core:leave_invoice_detail', leave_invoice_id=leave_invoice.id)
+    else:
+        form = LeaveInvoiceForm(instance=leave_invoice)
+
+    return render(request, 'core/leave_invoices/edit.html', {
+        'form': form,
+        'leave_invoice': leave_invoice
+    })
+
+
+@login_required
+def leave_invoice_delete(request, leave_invoice_id):
+    """حذف فاتورة إجازة"""
+    leave_invoice = get_object_or_404(LeaveInvoice, id=leave_invoice_id)
+
+    # الحصول على تفاصيل المدفوعات المرتبطة بالفاتورة
+    payment_details = PaymentDetail.objects.filter(invoice=leave_invoice).select_related('payment')
+
+    if request.method == 'POST':
+        # حذف تفاصيل المدفوعات المرتبطة بالفاتورة أولاً
+        payment_details.delete()
+
+        # ثم حذف الفاتورة
+        leave_invoice.delete()
+        messages.success(request, 'تم حذف فاتورة الإجازة بنجاح')
+        return redirect('core:leave_invoice_list')
+
+    return render(request, 'core/leave_invoices/delete.html', {
+        'leave_invoice': leave_invoice,
+        'payment_details': payment_details
+    })
+
+
+# وظائف إدارة المدفوعات
+@login_required
+def payment_list(request):
+    """قائمة المدفوعات"""
+    # تطبيق الفلاتر
+    payments = Payment.objects.all().order_by('-payment_date')
+
+    # فلتر رقم الدفعة
+    payment_number = request.GET.get('payment_number')
+    if payment_number:
+        payments = payments.filter(payment_number__icontains=payment_number)
+
+    # فلتر العميل
+    client = request.GET.get('client')
+    if client:
+        payments = payments.filter(client__name__icontains=client)
+
+    # فلتر طريقة الدفع
+    payment_method = request.GET.get('payment_method')
+    if payment_method:
+        payments = payments.filter(payment_method=payment_method)
+
+    # فلتر رقم المرجع
+    reference_number = request.GET.get('reference_number')
+    if reference_number:
+        payments = payments.filter(reference_number__icontains=reference_number)
+
+    # فلتر تاريخ الدفع (من)
+    payment_date_from = request.GET.get('payment_date_from')
+    if payment_date_from:
+        payments = payments.filter(payment_date__gte=payment_date_from)
+
+    # فلتر تاريخ الدفع (إلى)
+    payment_date_to = request.GET.get('payment_date_to')
+    if payment_date_to:
+        payments = payments.filter(payment_date__lte=payment_date_to)
+
+    # فلتر المبلغ (من)
+    amount_min = request.GET.get('amount_min')
+    if amount_min:
+        payments = payments.filter(amount__gte=amount_min)
+
+    # فلتر المبلغ (إلى)
+    amount_max = request.GET.get('amount_max')
+    if amount_max:
+        payments = payments.filter(amount__lte=amount_max)
+
+    return render(request, 'core/payments/list.html', {'payments': payments})
+
+
+@login_required
+def payment_create(request):
+    """إنشاء دفعة جديدة"""
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save()
+
+            # معالجة تفاصيل الدفعة
+            invoice_count = 0
+            total_amount = 0
+
+            # الحصول على عدد الفواتير من النموذج
+            for key in request.POST:
+                if key.startswith('invoice-') and not key.startswith('invoice-amount-'):
+                    invoice_id = request.POST.get(key)
+                    amount_key = key.replace('invoice-', 'amount-')
+                    amount = request.POST.get(amount_key)
+
+                    if invoice_id and amount and float(amount) > 0:
+                        invoice = get_object_or_404(LeaveInvoice, id=invoice_id)
+
+                        # إنشاء تفاصيل الدفعة
+                        PaymentDetail.objects.create(
+                            payment=payment,
+                            invoice=invoice,
+                            amount=amount
+                        )
+
+                        # تحديث حالة الفاتورة
+                        invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).aggregate(Sum('amount'))['amount__sum'] or 0
+
+                        if invoice_total_paid >= invoice.amount:
+                            invoice.status = 'paid'
+                        elif invoice_total_paid > 0:
+                            invoice.status = 'partially_paid'
+
+                        invoice.save()
+
+                        invoice_count += 1
+                        total_amount += float(amount)
+
+            messages.success(request, f'تم إنشاء الدفعة رقم {payment.payment_number} بنجاح لعدد {invoice_count} فاتورة بإجمالي {total_amount} ريال')
+            return redirect('core:payment_detail', payment_id=payment.id)
+    else:
+        # تعبئة البيانات من معلمات URL إذا كانت موجودة
+        initial_data = {}
+        invoice_id = request.GET.get('invoice_id')
+
+        if invoice_id:
+            try:
+                invoice = LeaveInvoice.objects.get(id=invoice_id)
+                initial_data['client'] = invoice.client.id
+                initial_data['amount'] = invoice.get_remaining()
+            except LeaveInvoice.DoesNotExist:
+                pass
+
+        form = PaymentForm(initial=initial_data)
+
+    return render(request, 'core/payments/create.html', {'form': form})
+
+
+@login_required
+def payment_detail(request, payment_id):
+    """تفاصيل دفعة"""
+    payment = get_object_or_404(Payment, id=payment_id)
+
+    # الحصول على تفاصيل الدفعة
+    payment_details = PaymentDetail.objects.filter(payment=payment).select_related('invoice')
+
+    return render(request, 'core/payments/detail.html', {
+        'payment': payment,
+        'payment_details': payment_details
+    })
+
+
+@login_required
+def payment_edit(request, payment_id):
+    """تعديل دفعة"""
+    payment = get_object_or_404(Payment, id=payment_id)
+    payment_details = PaymentDetail.objects.filter(payment=payment).select_related('invoice')
+
+    if request.method == 'POST':
+        form = PaymentForm(request.POST, instance=payment)
+        if form.is_valid():
+            payment = form.save()
+
+            # معالجة تفاصيل الدفعة
+            # أولاً: إعادة حالة الفواتير المرتبطة بالدفعة إلى حالتها الأصلية
+            for detail in payment_details:
+                invoice = detail.invoice
+                # حذف تفاصيل الدفعة الحالية من حساب المدفوعات
+                invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).exclude(payment=payment).aggregate(Sum('amount'))['amount__sum'] or 0
+
+                if invoice_total_paid >= invoice.amount:
+                    invoice.status = 'paid'
+                elif invoice_total_paid > 0:
+                    invoice.status = 'partially_paid'
+                else:
+                    invoice.status = 'unpaid'
+
+                invoice.save()
+
+            # حذف تفاصيل الدفعة الحالية
+            payment_details.delete()
+
+            # إضافة تفاصيل الدفعة الجديدة
+            invoice_count = 0
+            total_amount = 0
+
+            for key in request.POST:
+                if key.startswith('invoice-') and not key.startswith('invoice-amount-'):
+                    invoice_id = request.POST.get(key)
+                    amount_key = key.replace('invoice-', 'amount-')
+                    amount = request.POST.get(amount_key)
+
+                    if invoice_id and amount and float(amount) > 0:
+                        invoice = get_object_or_404(LeaveInvoice, id=invoice_id)
+
+                        # إنشاء تفاصيل الدفعة
+                        PaymentDetail.objects.create(
+                            payment=payment,
+                            invoice=invoice,
+                            amount=amount
+                        )
+
+                        # تحديث حالة الفاتورة
+                        invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).aggregate(Sum('amount'))['amount__sum'] or 0
+
+                        if invoice_total_paid >= invoice.amount:
+                            invoice.status = 'paid'
+                        elif invoice_total_paid > 0:
+                            invoice.status = 'partially_paid'
+
+                        invoice.save()
+
+                        invoice_count += 1
+                        total_amount += float(amount)
+
+            messages.success(request, f'تم تعديل الدفعة رقم {payment.payment_number} بنجاح لعدد {invoice_count} فاتورة بإجمالي {total_amount} ريال')
+            return redirect('core:payment_detail', payment_id=payment.id)
+    else:
+        form = PaymentForm(instance=payment)
+
+    return render(request, 'core/payments/edit.html', {
+        'form': form,
+        'payment': payment,
+        'payment_details': payment_details
+    })
+
+
+@login_required
+def payment_delete(request, payment_id):
+    """حذف دفعة"""
+    payment = get_object_or_404(Payment, id=payment_id)
+    payment_details = PaymentDetail.objects.filter(payment=payment).select_related('invoice')
+
+    if request.method == 'POST':
+        # إعادة حالة الفواتير المرتبطة بالدفعة إلى حالتها الأصلية
+        for detail in payment_details:
+            invoice = detail.invoice
+            # حذف تفاصيل الدفعة الحالية من حساب المدفوعات
+            invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).exclude(payment=payment).aggregate(Sum('amount'))['amount__sum'] or 0
+
+            if invoice_total_paid >= invoice.amount:
+                invoice.status = 'paid'
+            elif invoice_total_paid > 0:
+                invoice.status = 'partially_paid'
+            else:
+                invoice.status = 'unpaid'
+
+            invoice.save()
+
+        # حذف الدفعة (سيتم حذف تفاصيل الدفعة تلقائيًا بسبب علاقة CASCADE)
+        payment.delete()
+        messages.success(request, 'تم حذف الدفعة بنجاح')
+        return redirect('core:payment_list')
+
+    return render(request, 'core/payments/delete.html', {
+        'payment': payment,
+        'payment_details': payment_details
+    })
+
+
+# وظائف التقارير
+@login_required
+def report_index(request):
+    """صفحة التقارير الرئيسية"""
+    return render(request, 'core/reports/index.html')
+
+
+@login_required
+def report_sick_leaves(request):
+    """تقرير الإجازات المرضية"""
+    # تصفية البيانات حسب المعايير
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    status = request.GET.get('status')
+
+    sick_leaves = SickLeave.objects.all().order_by('-start_date')
+
+    if start_date:
+        sick_leaves = sick_leaves.filter(start_date__gte=start_date)
+
+    if end_date:
+        sick_leaves = sick_leaves.filter(end_date__lte=end_date)
+
+    if status:
+        sick_leaves = sick_leaves.filter(status=status)
+
+    # إحصائيات
+    total_count = sick_leaves.count()
+    total_days = sick_leaves.aggregate(Sum('duration_days'))['duration_days__sum'] or 0
+    avg_days = total_days / total_count if total_count > 0 else 0
+
+    # توزيع الإجازات حسب الحالة
+    status_counts = {
+        'active': sick_leaves.filter(status='active').count(),
+        'cancelled': sick_leaves.filter(status='cancelled').count(),
+        'expired': sick_leaves.filter(status='expired').count()
+    }
+
+    # توزيع الإجازات حسب المدة
+    duration_counts = {
+        'short': sick_leaves.filter(duration_days__lte=3).count(),
+        'medium': sick_leaves.filter(duration_days__gt=3, duration_days__lte=7).count(),
+        'long': sick_leaves.filter(duration_days__gt=7, duration_days__lte=14).count(),
+        'very_long': sick_leaves.filter(duration_days__gt=14, duration_days__lte=30).count(),
+        'extended': sick_leaves.filter(duration_days__gt=30).count()
+    }
+
+    context = {
+        'sick_leaves': sick_leaves,
+        'total_count': total_count,
+        'total_days': total_days,
+        'avg_days': avg_days,
+        'start_date': start_date,
+        'end_date': end_date,
+        'status': status,
+        'status_counts': status_counts,
+        'duration_counts': duration_counts
+    }
+
+    return render(request, 'core/reports/sick_leaves.html', context)
+
+
+@login_required
+def report_companion_leaves(request):
+    """تقرير إجازات المرافقين"""
+    # تصفية البيانات حسب المعايير
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    status = request.GET.get('status')
+
+    companion_leaves = CompanionLeave.objects.all().order_by('-start_date')
+
+    if start_date:
+        companion_leaves = companion_leaves.filter(start_date__gte=start_date)
+
+    if end_date:
+        companion_leaves = companion_leaves.filter(end_date__lte=end_date)
+
+    if status:
+        companion_leaves = companion_leaves.filter(status=status)
+
+    # إحصائيات
+    total_count = companion_leaves.count()
+    total_days = companion_leaves.aggregate(Sum('duration_days'))['duration_days__sum'] or 0
+    avg_days = total_days / total_count if total_count > 0 else 0
+
+    # توزيع الإجازات حسب الحالة
+    status_counts = {
+        'active': companion_leaves.filter(status='active').count(),
+        'cancelled': companion_leaves.filter(status='cancelled').count(),
+        'expired': companion_leaves.filter(status='expired').count()
+    }
+
+    # توزيع الإجازات حسب المدة
+    duration_counts = {
+        'short': companion_leaves.filter(duration_days__lte=3).count(),
+        'medium': companion_leaves.filter(duration_days__gt=3, duration_days__lte=7).count(),
+        'long': companion_leaves.filter(duration_days__gt=7, duration_days__lte=14).count(),
+        'very_long': companion_leaves.filter(duration_days__gt=14, duration_days__lte=30).count(),
+        'extended': companion_leaves.filter(duration_days__gt=30).count()
+    }
+
+    context = {
+        'companion_leaves': companion_leaves,
+        'total_count': total_count,
+        'total_days': total_days,
+        'avg_days': avg_days,
+        'start_date': start_date,
+        'end_date': end_date,
+        'status': status,
+        'status_counts': status_counts,
+        'duration_counts': duration_counts
+    }
+
+    return render(request, 'core/reports/companion_leaves.html', context)
+
+
+@login_required
+def report_invoices(request):
+    """تقرير الفواتير"""
+    # تصفية البيانات حسب المعايير
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    status = request.GET.get('status')
+    leave_type = request.GET.get('leave_type')
+    client_id = request.GET.get('client_id')
+
+    invoices = LeaveInvoice.objects.all().order_by('-issue_date')
+
+    if start_date:
+        invoices = invoices.filter(issue_date__gte=start_date)
+
+    if end_date:
+        invoices = invoices.filter(issue_date__lte=end_date)
+
+    if status:
+        invoices = invoices.filter(status=status)
+
+    if leave_type:
+        invoices = invoices.filter(leave_type=leave_type)
+
+    if client_id:
+        invoices = invoices.filter(client_id=client_id)
+
+    # إحصائيات
+    total_count = invoices.count()
+    total_amount = invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب المبالغ المدفوعة والمتبقية
+    total_paid = 0
+    total_remaining = 0
+
+    for invoice in invoices:
+        total_paid += invoice.get_total_paid()
+        total_remaining += invoice.get_remaining()
+
+    # توزيع الفواتير حسب الحالة
+    status_counts = {
+        'unpaid': invoices.filter(status='unpaid').count(),
+        'partially_paid': invoices.filter(status='partially_paid').count(),
+        'paid': invoices.filter(status='paid').count(),
+        'cancelled': invoices.filter(status='cancelled').count()
+    }
+
+    # توزيع الفواتير حسب نوع الإجازة
+    leave_type_counts = {
+        'sick_leave': invoices.filter(leave_type='sick_leave').count(),
+        'companion_leave': invoices.filter(leave_type='companion_leave').count()
+    }
+
+    # توزيع الفواتير حسب العملاء (أعلى 5 عملاء)
+    top_clients = Client.objects.annotate(
+        invoice_count=Count('leave_invoices', filter=Q(leave_invoices__in=invoices))
+    ).filter(invoice_count__gt=0).order_by('-invoice_count')[:5]
+
+    client_counts = {}
+    for client in top_clients:
+        client_counts[client.name] = client.invoice_count
+
+    context = {
+        'invoices': invoices,
+        'total_count': total_count,
+        'total_amount': total_amount,
+        'total_paid': total_paid,
+        'total_remaining': total_remaining,
+        'start_date': start_date,
+        'end_date': end_date,
+        'status': status,
+        'leave_type': leave_type,
+        'client_id': client_id,
+        'status_counts': status_counts,
+        'leave_type_counts': leave_type_counts,
+        'client_counts': client_counts,
+        'clients': Client.objects.all()
+    }
+
+    return render(request, 'core/reports/invoices.html', context)
+
+
+@login_required
+def report_payments(request):
+    """تقرير المدفوعات"""
+    # تصفية البيانات حسب المعايير
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    payment_method = request.GET.get('payment_method')
+    client_id = request.GET.get('client_id')
+
+    payments = Payment.objects.all().order_by('-payment_date')
+
+    if start_date:
+        payments = payments.filter(payment_date__gte=start_date)
+
+    if end_date:
+        payments = payments.filter(payment_date__lte=end_date)
+
+    if payment_method:
+        payments = payments.filter(payment_method=payment_method)
+
+    if client_id:
+        payments = payments.filter(client_id=client_id)
+
+    # إحصائيات
+    total_count = payments.count()
+    total_amount = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # توزيع المدفوعات حسب طريقة الدفع
+    payment_method_counts = {
+        'cash': payments.filter(payment_method='cash').count(),
+        'bank_transfer': payments.filter(payment_method='bank_transfer').count(),
+        'check': payments.filter(payment_method='check').count(),
+        'credit_card': payments.filter(payment_method='credit_card').count()
+    }
+
+    payment_method_amounts = {
+        'cash': payments.filter(payment_method='cash').aggregate(Sum('amount'))['amount__sum'] or 0,
+        'bank_transfer': payments.filter(payment_method='bank_transfer').aggregate(Sum('amount'))['amount__sum'] or 0,
+        'check': payments.filter(payment_method='check').aggregate(Sum('amount'))['amount__sum'] or 0,
+        'credit_card': payments.filter(payment_method='credit_card').aggregate(Sum('amount'))['amount__sum'] or 0
+    }
+
+    # توزيع المدفوعات حسب الشهر (للسنة الحالية)
+    current_year = timezone.now().year
+    monthly_payments = {}
+
+    for month in range(1, 13):
+        month_payments = payments.filter(
+            payment_date__year=current_year,
+            payment_date__month=month
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+        monthly_payments[month] = month_payments
+
+    # توزيع المدفوعات حسب العملاء (أعلى 5 عملاء)
+    top_clients = Client.objects.annotate(
+        payment_count=Count('payments', filter=Q(payments__in=payments))
+    ).filter(payment_count__gt=0).order_by('-payment_count')[:5]
+
+    client_counts = {}
+    for client in top_clients:
+        client_counts[client.name] = client.payment_count
+
+    context = {
+        'payments': payments,
+        'total_count': total_count,
+        'total_amount': total_amount,
+        'start_date': start_date,
+        'end_date': end_date,
+        'payment_method': payment_method,
+        'client_id': client_id,
+        'payment_method_counts': payment_method_counts,
+        'payment_method_amounts': payment_method_amounts,
+        'monthly_payments': monthly_payments,
+        'client_counts': client_counts,
+        'clients': Client.objects.all()
+    }
+
+    return render(request, 'core/reports/payments.html', context)
+
+
+@login_required
+def report_clients(request):
+    """تقرير العملاء"""
+    # تصفية البيانات حسب المعايير
+    search_query = request.GET.get('search')
+    balance_filter = request.GET.get('balance_filter')
+
+    clients = Client.objects.all().order_by('name')
+
+    if search_query:
+        clients = clients.filter(
+            Q(name__icontains=search_query) |
+            Q(phone__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
+    # حساب إجمالي الفواتير والمدفوعات لكل عميل
+    client_data = []
+    for client in clients:
+        total_invoices = client.leave_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+        total_payments = client.payments.aggregate(Sum('amount'))['amount__sum'] or 0
+        balance = total_invoices - total_payments
+
+        # تصفية حسب الرصيد
+        if balance_filter == 'positive' and balance <= 0:
+            continue
+        elif balance_filter == 'negative' and balance >= 0:
+            continue
+        elif balance_filter == 'zero' and balance != 0:
+            continue
+
+        # عدد الفواتير والمدفوعات
+        invoices_count = client.leave_invoices.count()
+        payments_count = client.payments.count()
+
+        # حالة الفواتير
+        unpaid_invoices = client.leave_invoices.filter(status='unpaid').count()
+        partially_paid_invoices = client.leave_invoices.filter(status='partially_paid').count()
+        paid_invoices = client.leave_invoices.filter(status='paid').count()
+
+        client_data.append({
+            'client': client,
+            'total_invoices': total_invoices,
+            'total_payments': total_payments,
+            'balance': balance,
+            'invoices_count': invoices_count,
+            'payments_count': payments_count,
+            'unpaid_invoices': unpaid_invoices,
+            'partially_paid_invoices': partially_paid_invoices,
+            'paid_invoices': paid_invoices
+        })
+
+    # ترتيب البيانات حسب الرصيد (من الأعلى إلى الأقل)
+    client_data.sort(key=lambda x: x['balance'], reverse=True)
+
+    # إحصائيات
+    total_clients = len(client_data)
+    total_invoices = sum(data['total_invoices'] for data in client_data)
+    total_payments = sum(data['total_payments'] for data in client_data)
+    total_balance = total_invoices - total_payments
+
+    # العملاء ذوو الرصيد الأعلى (أعلى 5 عملاء)
+    top_balance_clients = sorted(client_data, key=lambda x: x['balance'], reverse=True)[:5]
+
+    # العملاء الأكثر نشاطًا (أعلى 5 عملاء من حيث عدد الفواتير)
+    top_active_clients = sorted(client_data, key=lambda x: x['invoices_count'], reverse=True)[:5]
+
+    context = {
+        'client_data': client_data,
+        'total_clients': total_clients,
+        'total_invoices': total_invoices,
+        'total_payments': total_payments,
+        'total_balance': total_balance,
+        'search_query': search_query,
+        'balance_filter': balance_filter,
+        'top_balance_clients': top_balance_clients,
+        'top_active_clients': top_active_clients
+    }
+
+    return render(request, 'core/reports/clients.html', context)

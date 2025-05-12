@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}تفاصيل إجازة المرافق - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>تفاصيل إجازة المرافق</h2>
+        <p class="text-muted">عرض تفاصيل إجازة المرافق رقم {{ companion_leave.leave_id }}</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <div class="btn-group" role="group">
+            <a href="{% url 'core:companion_leave_edit' companion_leave.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> تعديل
+            </a>
+            <a href="{% url 'core:companion_leave_delete' companion_leave.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> حذف
+            </a>
+            <a href="{% url 'core:companion_leave_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> العودة للقائمة
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات إجازة المرافق</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>رقم الإجازة:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.leave_id }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>المريض:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.patient.name }}
+                        <small class="text-muted">({{ companion_leave.patient.national_id }})</small>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>المرافق:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.companion.name }}
+                        <small class="text-muted">({{ companion_leave.companion.national_id }})</small>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>الطبيب:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.doctor.name }}
+                        <small class="text-muted">({{ companion_leave.doctor.position }} - {{ companion_leave.doctor.hospital.name }})</small>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ البداية:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.start_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ النهاية:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.end_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>المدة (أيام):</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.duration_days }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الدخول:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.admission_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الخروج:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.discharge_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الإصدار:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.issue_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>الحالة:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if companion_leave.status == 'active' %}
+                        <span class="badge bg-success">نشطة</span>
+                        {% elif companion_leave.status == 'cancelled' %}
+                        <span class="badge bg-danger">ملغية</span>
+                        {% elif companion_leave.status == 'expired' %}
+                        <span class="badge bg-secondary">منتهية</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الإنشاء:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.created_at }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ التحديث:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ companion_leave.updated_at }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات المريض</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الاسم:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ companion_leave.patient.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>رقم الهوية:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ companion_leave.patient.national_id }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الجنسية:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ companion_leave.patient.nationality }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>جهة العمل:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {% if companion_leave.patient.employer %}
+                        {{ companion_leave.patient.employer.name }}
+                        {% else %}
+                        <span class="text-muted">غير محدد</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات المرافق</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الاسم:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ companion_leave.companion.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>رقم الهوية:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ companion_leave.companion.national_id }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الجنسية:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ companion_leave.companion.nationality }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>جهة العمل:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {% if companion_leave.companion.employer %}
+                        {{ companion_leave.companion.employer.name }}
+                        {% else %}
+                        <span class="text-muted">غير محدد</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">الفواتير المرتبطة</h5>
+            </div>
+            <div class="card-body">
+                {% if related_invoices %}
+                <div class="list-group">
+                    {% for invoice in related_invoices %}
+                    <a href="{% url 'core:leave_invoice_detail' invoice.id %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ invoice.invoice_number }}</h6>
+                            <small>{{ invoice.issue_date }}</small>
+                        </div>
+                        <p class="mb-1">{{ invoice.amount }} ريال</p>
+                        <small>
+                            {% if invoice.status == 'unpaid' %}
+                            <span class="badge bg-danger">غير مدفوعة</span>
+                            {% elif invoice.status == 'partially_paid' %}
+                            <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                            {% elif invoice.status == 'paid' %}
+                            <span class="badge bg-success">مدفوعة بالكامل</span>
+                            {% elif invoice.status == 'cancelled' %}
+                            <span class="badge bg-secondary">ملغية</span>
+                            {% endif %}
+                        </small>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-center text-muted">لا توجد فواتير مرتبطة بهذه الإجازة</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'core:leave_invoice_create' %}?leave_type=companion_leave&leave_id={{ companion_leave.leave_id }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> إنشاء فاتورة
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

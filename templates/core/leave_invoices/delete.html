@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف الفاتورة - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>حذف الفاتورة</h2>
+        <p class="text-muted">هل أنت متأكد من حذف الفاتورة رقم {{ leave_invoice.invoice_number }}؟</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p><strong>تحذير:</strong> سيتم حذف هذه الفاتورة نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
+            {% if payment_details %}
+            <p><strong>ملاحظة:</strong> هذه الفاتورة مرتبطة بـ {{ payment_details.count }} دفعة. سيؤدي حذف الفاتورة إلى تأثر هذه المدفوعات.</p>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <h5>بيانات الفاتورة:</h5>
+            <ul>
+                <li><strong>رقم الفاتورة:</strong> {{ leave_invoice.invoice_number }}</li>
+                <li><strong>العميل:</strong> {{ leave_invoice.client.name }}</li>
+                <li><strong>نوع الإجازة:</strong> 
+                    {% if leave_invoice.leave_type == 'sick_leave' %}
+                    إجازة مرضية
+                    {% elif leave_invoice.leave_type == 'companion_leave' %}
+                    إجازة مرافق
+                    {% endif %}
+                </li>
+                <li><strong>رقم الإجازة:</strong> {{ leave_invoice.leave_id }}</li>
+                <li><strong>المبلغ:</strong> {{ leave_invoice.amount }} ريال</li>
+                <li><strong>المبلغ المدفوع:</strong> {{ leave_invoice.get_total_paid }} ريال</li>
+                <li><strong>المبلغ المتبقي:</strong> {{ leave_invoice.get_remaining }} ريال</li>
+                <li><strong>تاريخ الإصدار:</strong> {{ leave_invoice.issue_date }}</li>
+                <li><strong>الحالة:</strong> 
+                    {% if leave_invoice.status == 'unpaid' %}
+                    <span class="badge bg-danger">غير مدفوعة</span>
+                    {% elif leave_invoice.status == 'partially_paid' %}
+                    <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                    {% elif leave_invoice.status == 'paid' %}
+                    <span class="badge bg-success">مدفوعة بالكامل</span>
+                    {% elif leave_invoice.status == 'cancelled' %}
+                    <span class="badge bg-secondary">ملغية</span>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                <a href="{% url 'core:leave_invoice_detail' leave_invoice.id %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

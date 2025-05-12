@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف الدفعة - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>حذف الدفعة</h2>
+        <p class="text-muted">هل أنت متأكد من حذف الدفعة رقم {{ payment.payment_number }}؟</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p><strong>تحذير:</strong> سيتم حذف هذه الدفعة نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
+            <p><strong>ملاحظة:</strong> سيؤدي حذف هذه الدفعة إلى تغيير حالة الفواتير المرتبطة بها.</p>
+        </div>
+        
+        <div class="mb-4">
+            <h5>بيانات الدفعة:</h5>
+            <ul>
+                <li><strong>رقم الدفعة:</strong> {{ payment.payment_number }}</li>
+                <li><strong>العميل:</strong> {{ payment.client.name }}</li>
+                <li><strong>المبلغ:</strong> {{ payment.amount }} ريال</li>
+                <li><strong>طريقة الدفع:</strong> 
+                    {% if payment.payment_method == 'cash' %}
+                    نقدًا
+                    {% elif payment.payment_method == 'bank_transfer' %}
+                    تحويل بنكي
+                    {% elif payment.payment_method == 'check' %}
+                    شيك
+                    {% elif payment.payment_method == 'credit_card' %}
+                    بطاقة ائتمان
+                    {% endif %}
+                </li>
+                <li><strong>تاريخ الدفع:</strong> {{ payment.payment_date }}</li>
+                <li><strong>رقم المرجع:</strong> {{ payment.reference_number|default:"-" }}</li>
+            </ul>
+        </div>
+        
+        {% if payment_details %}
+        <div class="mb-4">
+            <h5>الفواتير المرتبطة:</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>رقم الفاتورة</th>
+                            <th>المبلغ</th>
+                            <th>الحالة الحالية</th>
+                            <th>الحالة بعد الحذف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detail in payment_details %}
+                        <tr>
+                            <td>{{ detail.invoice.invoice_number }}</td>
+                            <td>{{ detail.amount }} ريال</td>
+                            <td>
+                                {% if detail.invoice.status == 'unpaid' %}
+                                <span class="badge bg-danger">غير مدفوعة</span>
+                                {% elif detail.invoice.status == 'partially_paid' %}
+                                <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                                {% elif detail.invoice.status == 'paid' %}
+                                <span class="badge bg-success">مدفوعة بالكامل</span>
+                                {% elif detail.invoice.status == 'cancelled' %}
+                                <span class="badge bg-secondary">ملغية</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if detail.invoice.get_total_paid == detail.amount %}
+                                <span class="badge bg-danger">غير مدفوعة</span>
+                                {% elif detail.invoice.get_total_paid > detail.amount %}
+                                <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                                {% else %}
+                                <span class="badge bg-danger">غير مدفوعة</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                <a href="{% url 'core:payment_detail' payment.id %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

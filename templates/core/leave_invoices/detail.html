@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}تفاصيل الفاتورة - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>تفاصيل الفاتورة</h2>
+        <p class="text-muted">عرض تفاصيل الفاتورة رقم {{ leave_invoice.invoice_number }}</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <div class="btn-group" role="group">
+            <a href="{% url 'core:leave_invoice_edit' leave_invoice.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> تعديل
+            </a>
+            <a href="{% url 'core:leave_invoice_delete' leave_invoice.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> حذف
+            </a>
+            <a href="{% url 'core:leave_invoice_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> العودة للقائمة
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات الفاتورة</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>رقم الفاتورة:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.invoice_number }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>العميل:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.client.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>نوع الإجازة:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if leave_invoice.leave_type == 'sick_leave' %}
+                        <span class="badge bg-primary">إجازة مرضية</span>
+                        {% elif leave_invoice.leave_type == 'companion_leave' %}
+                        <span class="badge bg-info">إجازة مرافق</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>رقم الإجازة:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.leave_id }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>المبلغ:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.amount }} ريال
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>المبلغ المدفوع:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.get_total_paid }} ريال
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>المبلغ المتبقي:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.get_remaining }} ريال
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الإصدار:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.issue_date }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الاستحقاق:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.due_date|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>الحالة:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if leave_invoice.status == 'unpaid' %}
+                        <span class="badge bg-danger">غير مدفوعة</span>
+                        {% elif leave_invoice.status == 'partially_paid' %}
+                        <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                        {% elif leave_invoice.status == 'paid' %}
+                        <span class="badge bg-success">مدفوعة بالكامل</span>
+                        {% elif leave_invoice.status == 'cancelled' %}
+                        <span class="badge bg-secondary">ملغية</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>ملاحظات:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.notes|default:"لا توجد ملاحظات"|linebreaks }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الإنشاء:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.created_at }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ التحديث:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ leave_invoice.updated_at }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات العميل</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الاسم:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_invoice.client.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>رقم الهاتف:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_invoice.client.phone }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>البريد الإلكتروني:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_invoice.client.email|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>العنوان:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_invoice.client.address|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>الرصيد الكلي:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_invoice.client.get_balance }} ريال
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">المدفوعات المرتبطة</h5>
+                <a href="{% url 'core:payment_create' %}?invoice_id={{ leave_invoice.id }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> إضافة دفعة
+                </a>
+            </div>
+            <div class="card-body">
+                {% if payment_details %}
+                <div class="list-group">
+                    {% for detail in payment_details %}
+                    <a href="{% url 'core:payment_detail' detail.payment.id %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ detail.payment.payment_number }}</h6>
+                            <small>{{ detail.payment.payment_date }}</small>
+                        </div>
+                        <p class="mb-1">{{ detail.amount }} ريال</p>
+                        <small>
+                            {% if detail.payment.payment_method == 'cash' %}
+                            <span class="badge bg-success">نقدًا</span>
+                            {% elif detail.payment.payment_method == 'bank_transfer' %}
+                            <span class="badge bg-primary">تحويل بنكي</span>
+                            {% elif detail.payment.payment_method == 'check' %}
+                            <span class="badge bg-info">شيك</span>
+                            {% elif detail.payment.payment_method == 'credit_card' %}
+                            <span class="badge bg-warning">بطاقة ائتمان</span>
+                            {% endif %}
+                        </small>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-center text-muted">لا توجد مدفوعات مرتبطة بهذه الفاتورة</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

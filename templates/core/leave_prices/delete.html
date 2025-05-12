@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف سعر الإجازة - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>حذف سعر الإجازة</h2>
+        <p class="text-muted">هل أنت متأكد من حذف سعر الإجازة هذا؟</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p><strong>تحذير:</strong> سيتم حذف سعر الإجازة نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
+            {% if invoices_count > 0 %}
+            <p><strong>ملاحظة:</strong> هذا السعر مرتبط بـ {{ invoices_count }} فاتورة. سيؤدي حذف السعر إلى تأثر هذه الفواتير.</p>
+            {% endif %}
+        </div>
+
+        <div class="mb-4">
+            <h5>بيانات سعر الإجازة:</h5>
+            <ul>
+                <li><strong>نوع الإجازة:</strong>
+                    {% if leave_price.leave_type == 'sick_leave' %}
+                    إجازة مرضية
+                    {% elif leave_price.leave_type == 'companion_leave' %}
+                    إجازة مرافق
+                    {% endif %}
+                </li>
+                <li><strong>المدة (أيام):</strong> {{ leave_price.duration_days }}</li>
+                <li><strong>السعر:</strong> {{ leave_price.price }} ريال</li>
+                <li><strong>الحالة:</strong>
+                    {% if leave_price.is_active %}
+                    <span class="badge bg-success">نشط</span>
+                    {% else %}
+                    <span class="badge bg-danger">غير نشط</span>
+                    {% endif %}
+                </li>
+                <li><strong>تاريخ الإنشاء:</strong> {{ leave_price.created_at|date:"Y-m-d" }}</li>
+                <li><strong>تاريخ التحديث:</strong> {{ leave_price.updated_at|date:"Y-m-d" }}</li>
+            </ul>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                <a href="{% url 'core:leave_price_list' %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

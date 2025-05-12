@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}حول النظام - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-primary text-white text-center">
+                <h2>حول نظام إدارة الإجازات المرضية</h2>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img src="/static/images/moh-logo.png" alt="وزارة الصحة" class="img-fluid" style="max-height: 150px;">
+                </div>
+                
+                <h3 class="mb-3">نبذة عن النظام</h3>
+                <p>
+                    نظام إدارة الإجازات المرضية هو نظام متكامل يهدف إلى تسهيل عملية إصدار وإدارة الإجازات المرضية وتقارير مرافقة المرضى في المملكة العربية السعودية.
+                    يتيح النظام للأطباء والموظفين إنشاء وإدارة الإجازات المرضية وتقارير المرافقة بطريقة سهلة وفعالة، مع إمكانية التحقق من صحة هذه الإجازات إلكترونيًا.
+                </p>
+                
+                <h3 class="mb-3 mt-4">المميزات الرئيسية</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5>إدارة الإجازات المرضية</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul>
+                                    <li>إنشاء إجازات مرضية جديدة</li>
+                                    <li>البحث عن الإجازات المرضية</li>
+                                    <li>طباعة تقارير الإجازات المرضية</li>
+                                    <li>التحقق من صحة الإجازات المرضية</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5>إدارة إجازات المرافقة</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul>
+                                    <li>إنشاء إجازات مرافقة جديدة</li>
+                                    <li>البحث عن إجازات المرافقة</li>
+                                    <li>طباعة تقارير إجازات المرافقة</li>
+                                    <li>التحقق من صحة إجازات المرافقة</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5>إدارة الفواتير والمدفوعات</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul>
+                                    <li>إنشاء فواتير للإجازات</li>
+                                    <li>تسجيل المدفوعات</li>
+                                    <li>متابعة حالة الفواتير</li>
+                                    <li>إصدار تقارير مالية</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5>إدارة العملاء والمرضى</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul>
+                                    <li>إدارة بيانات العملاء</li>
+                                    <li>إدارة بيانات المرضى</li>
+                                    <li>ربط المرضى بجهات العمل</li>
+                                    <li>متابعة حالة العملاء والمرضى</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="mb-3 mt-4">كيفية استخدام النظام</h3>
+                <p>
+                    لاستخدام النظام، يجب أولاً تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور الخاصة بك.
+                    بعد تسجيل الدخول، يمكنك الوصول إلى جميع ميزات النظام حسب صلاحياتك.
+                </p>
+                
+                <div class="alert alert-info mt-4">
+                    <h5>ملاحظة هامة</h5>
+                    <p>
+                        يمكن للجمهور التحقق من صحة الإجازات المرضية وإجازات المرافقة من خلال إدخال رقم الإجازة في صفحة التحقق،
+                        أو من خلال مسح رمز QR الموجود في التقرير المطبوع.
+                    </p>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'core:home' %}" class="btn btn-primary">العودة إلى الصفحة الرئيسية</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

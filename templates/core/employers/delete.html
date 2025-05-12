@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}حذف جهة العمل - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>حذف جهة العمل</h2>
+        <p class="text-muted">هل أنت متأكد من حذف جهة العمل {{ employer.name }}؟</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p><strong>تحذير:</strong> سيتم حذف جهة العمل نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
+            {% if employer.patients.count > 0 %}
+            <p><strong>ملاحظة:</strong> هذه الجهة مرتبطة بـ {{ employer.patients.count }} موظف. سيؤدي حذف الجهة إلى إزالة ارتباط الموظفين بها.</p>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <h5>بيانات جهة العمل:</h5>
+            <ul>
+                <li><strong>الاسم:</strong> {{ employer.name }}</li>
+                <li><strong>رقم الهاتف:</strong> {{ employer.phone|default:"-" }}</li>
+                <li><strong>البريد الإلكتروني:</strong> {{ employer.email|default:"-" }}</li>
+                <li><strong>العنوان:</strong> {{ employer.address|default:"-" }}</li>
+                <li><strong>عدد الموظفين:</strong> {{ employer.patients.count }}</li>
+            </ul>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="mt-4">
+                <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                <a href="{% url 'core:employer_detail' employer.id %}" class="btn btn-secondary">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

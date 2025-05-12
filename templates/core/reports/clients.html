@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block title %}تقرير العملاء - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+<style>
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>تقرير العملاء</h2>
+        <p class="text-muted">عرض وتحليل بيانات العملاء والأرصدة المستحقة</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <a href="{% url 'core:report_index' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-right"></i> العودة للتقارير
+        </a>
+    </div>
+</div>
+
+<!-- فلاتر البحث -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">تصفية البيانات</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">بحث</label>
+                <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="اسم العميل، رقم الهاتف، البريد الإلكتروني">
+            </div>
+            <div class="col-md-4">
+                <label for="balance_filter" class="form-label">تصفية حسب الرصيد</label>
+                <select class="form-select" id="balance_filter" name="balance_filter">
+                    <option value="">الكل</option>
+                    <option value="positive" {% if balance_filter == 'positive' %}selected{% endif %}>رصيد موجب (مستحق للعميل)</option>
+                    <option value="negative" {% if balance_filter == 'negative' %}selected{% endif %}>رصيد سالب (مستحق على العميل)</option>
+                    <option value="zero" {% if balance_filter == 'zero' %}selected{% endif %}>رصيد صفر</option>
+                </select>
+            </div>
+            <div class="col-12 mt-3">
+                <button type="submit" class="btn btn-primary">تطبيق</button>
+                <a href="{% url 'core:report_clients' %}" class="btn btn-secondary">إعادة تعيين</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ملخص البيانات -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">عدد العملاء</h5>
+                        <h2 class="mb-0">{{ total_clients }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">إجمالي الفواتير</h5>
+                        <h2 class="mb-0">{{ total_invoices|floatformat:2 }}</h2>
+                    </div>
+                    <i class="fas fa-file-invoice-dollar fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">إجمالي المدفوعات</h5>
+                        <h2 class="mb-0">{{ total_payments|floatformat:2 }}</h2>
+                    </div>
+                    <i class="fas fa-money-bill-wave fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">إجمالي الرصيد</h5>
+                        <h2 class="mb-0">{{ total_balance|floatformat:2 }}</h2>
+                    </div>
+                    <i class="fas fa-balance-scale fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- الرسوم البيانية -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">العملاء ذوو الرصيد الأعلى (أعلى 5 عملاء)</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="topBalanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">العملاء الأكثر نشاطًا (أعلى 5 عملاء)</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="topActiveChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- جدول البيانات -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">قائمة العملاء</h5>
+        <button class="btn btn-sm btn-success" onclick="exportToExcel()">
+            <i class="fas fa-file-excel"></i> تصدير إلى Excel
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="clients-table">
+                <thead>
+                    <tr>
+                        <th>العميل</th>
+                        <th>رقم الهاتف</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>إجمالي الفواتير</th>
+                        <th>إجمالي المدفوعات</th>
+                        <th>الرصيد</th>
+                        <th>عدد الفواتير</th>
+                        <th>الفواتير غير المدفوعة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in client_data %}
+                    <tr>
+                        <td>{{ data.client.name }}</td>
+                        <td>{{ data.client.phone }}</td>
+                        <td>{{ data.client.email|default:"-" }}</td>
+                        <td>{{ data.total_invoices|floatformat:2 }} ريال</td>
+                        <td>{{ data.total_payments|floatformat:2 }} ريال</td>
+                        <td>
+                            {% if data.balance > 0 %}
+                            <span class="text-danger">{{ data.balance|floatformat:2 }} ريال</span>
+                            {% elif data.balance < 0 %}
+                            <span class="text-success">{{ data.balance|floatformat:2 }} ريال</span>
+                            {% else %}
+                            <span>{{ data.balance|floatformat:2 }} ريال</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ data.invoices_count }}</td>
+                        <td>{{ data.unpaid_invoices }}</td>
+                        <td>
+                            <a href="{% url 'core:client_detail' data.client.id %}" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center">لا توجد بيانات</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+    // بيانات الرسوم البيانية
+    const topBalanceData = {
+        labels: [
+            {% for data in top_balance_clients %}
+            '{{ data.client.name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'الرصيد',
+            data: [
+                {% for data in top_balance_clients %}
+                {{ data.balance }},
+                {% endfor %}
+            ],
+            backgroundColor: 'rgba(220, 53, 69, 0.7)',
+            borderColor: 'rgba(220, 53, 69, 1)',
+            borderWidth: 1
+        }]
+    };
+    
+    const topActiveData = {
+        labels: [
+            {% for data in top_active_clients %}
+            '{{ data.client.name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'عدد الفواتير',
+            data: [
+                {% for data in top_active_clients %}
+                {{ data.invoices_count }},
+                {% endfor %}
+            ],
+            backgroundColor: 'rgba(0, 123, 255, 0.7)',
+            borderColor: 'rgba(0, 123, 255, 1)',
+            borderWidth: 1
+        }]
+    };
+    
+    // إنشاء الرسوم البيانية
+    const topBalanceChart = new Chart(
+        document.getElementById('topBalanceChart'),
+        {
+            type: 'bar',
+            data: topBalanceData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+    
+    const topActiveChart = new Chart(
+        document.getElementById('topActiveChart'),
+        {
+            type: 'bar',
+            data: topActiveData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        }
+    );
+    
+    // تصدير البيانات إلى Excel
+    function exportToExcel() {
+        const table = document.getElementById('clients-table');
+        const wb = XLSX.utils.table_to_book(table, { sheet: "العملاء" });
+        XLSX.writeFile(wb, "تقرير_العملاء.xlsx");
+    }
+</script>
+{% endblock %}
