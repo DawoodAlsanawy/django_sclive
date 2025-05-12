@@ -30,3 +30,121 @@ def static_exists(path):
                 return True
 
     return False
+
+@register.filter
+def selectattr(items, args):
+    """
+    فلتر لتصفية قائمة العناصر بناءً على قيمة سمة معينة
+
+    الاستخدام:
+    {{ items|selectattr:"attribute_name", "operator", "value" }}
+
+    المعلمات:
+    - items: قائمة العناصر المراد تصفيتها
+    - args: سلسلة تحتوي على اسم السمة والعملية والقيمة مفصولة بفواصل
+
+    العمليات المدعومة:
+    - equalto: تساوي
+    - notequalto: لا تساوي
+    - contains: تحتوي على
+    - startswith: تبدأ بـ
+    - endswith: تنتهي بـ
+
+    مثال:
+    {{ items|selectattr:"status", "equalto", "active" }}
+    """
+    if not items:
+        return []
+
+    # تقسيم المعلمات
+    parts = args.split(',')
+    if len(parts) < 3:
+        return []
+
+    attr_name = parts[0].strip()
+    operator = parts[1].strip().strip('"\'')
+    value = parts[2].strip().strip('"\'')
+
+    result = []
+    for item in items:
+        # الحصول على قيمة السمة
+        if not hasattr(item, attr_name):
+            continue
+
+        attr_value = getattr(item, attr_name)
+
+        # تطبيق العملية المناسبة
+        if operator == 'equalto' and attr_value == value:
+            result.append(item)
+        elif operator == 'notequalto' and attr_value != value:
+            result.append(item)
+        elif operator == 'contains' and value in attr_value:
+            result.append(item)
+        elif operator == 'startswith' and attr_value.startswith(value):
+            result.append(item)
+        elif operator == 'endswith' and attr_value.endswith(value):
+            result.append(item)
+
+    return result
+
+@register.filter
+def dictsortreversed(value, arg):
+    """
+    فلتر لترتيب قائمة القواميس أو كائنات النموذج بشكل عكسي حسب مفتاح أو سمة معينة
+
+    الاستخدام:
+    {{ items|dictsortreversed:"key" }}
+    """
+    def get_value(obj, key):
+        """الحصول على قيمة المفتاح أو السمة من الكائن"""
+        try:
+            # محاولة الوصول كقاموس
+            return obj[key]
+        except (TypeError, KeyError):
+            try:
+                # محاولة الوصول كسمة
+                return getattr(obj, key)
+            except (AttributeError, TypeError):
+                # إرجاع قيمة افتراضية إذا لم يتم العثور على المفتاح أو السمة
+                return ""
+
+    return sorted(value, key=lambda x: get_value(x, arg), reverse=True)
+
+@register.filter
+def add(value, arg):
+    """
+    فلتر لإضافة قيمة إلى قيمة أخرى
+
+    الاستخدام:
+    {{ value|add:arg }}
+
+    مثال:
+    {{ 5|add:3 }} -> 8
+    {{ "Hello "|add:"World" }} -> "Hello World"
+    """
+    try:
+        return value + arg
+    except (ValueError, TypeError):
+        try:
+            return str(value) + str(arg)
+        except Exception:
+            return value
+
+@register.filter(name='list')
+def to_list(value):
+    """
+    فلتر لتحويل القيمة إلى قائمة
+
+    الاستخدام:
+    {{ value|list }}
+
+    مثال:
+    {{ queryset|list }} -> [obj1, obj2, ...]
+    """
+    if value is None:
+        return []
+
+    try:
+        return list(value)
+    except (ValueError, TypeError):
+        return [value]

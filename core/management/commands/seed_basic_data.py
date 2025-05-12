@@ -1,0 +1,264 @@
+from django.core.management.base import BaseCommand
+from django.db import transaction
+from django.utils import timezone
+from django.contrib.auth.hashers import make_password
+
+from core.models import (
+    User, Hospital, Employer, Doctor, Patient, Client, LeavePrice
+)
+
+
+class Command(BaseCommand):
+    help = 'تعبئة البيانات الأساسية للمشروع'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help='إجبار إعادة تعبئة البيانات حتى لو كانت موجودة',
+        )
+
+    def handle(self, *args, **options):
+        force = options['force']
+        
+        self.stdout.write(self.style.SUCCESS('بدء تعبئة البيانات الأساسية للمشروع...'))
+        
+        try:
+            with transaction.atomic():
+                # إنشاء المستخدمين الأساسيين
+                self.create_basic_users(force)
+                
+                # إنشاء المستشفيات الأساسية
+                self.create_basic_hospitals(force)
+                
+                # إنشاء جهات العمل الأساسية
+                self.create_basic_employers(force)
+                
+                # إنشاء الأطباء الأساسيين
+                self.create_basic_doctors(force)
+                
+                # إنشاء العملاء الأساسيين
+                self.create_basic_clients(force)
+                
+                # إنشاء أسعار الإجازات
+                self.create_leave_prices(force)
+                
+            self.stdout.write(self.style.SUCCESS('تم تعبئة البيانات الأساسية للمشروع بنجاح!'))
+        
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'حدث خطأ أثناء تعبئة البيانات: {str(e)}'))
+    
+    def create_basic_users(self, force):
+        """إنشاء المستخدمين الأساسيين"""
+        users_data = [
+            {
+                'username': 'admin',
+                'email': 'admin@example.com',
+                'password': 'admin123',
+                'role': 'admin',
+                'is_staff': True,
+                'is_superuser': True
+            },
+            {
+                'username': 'doctor',
+                'email': 'doctor@example.com',
+                'password': 'doctor123',
+                'role': 'doctor'
+            },
+            {
+                'username': 'staff',
+                'email': 'staff@example.com',
+                'password': 'staff123',
+                'role': 'staff'
+            }
+        ]
+        
+        for user_data in users_data:
+            if force or not User.objects.filter(username=user_data['username']).exists():
+                User.objects.create(
+                    username=user_data['username'],
+                    email=user_data['email'],
+                    password=make_password(user_data['password']),
+                    role=user_data['role'],
+                    is_staff=user_data.get('is_staff', False),
+                    is_superuser=user_data.get('is_superuser', False)
+                )
+                self.stdout.write(self.style.SUCCESS(f"تم إنشاء المستخدم {user_data['username']}"))
+    
+    def create_basic_hospitals(self, force):
+        """إنشاء المستشفيات الأساسية"""
+        hospitals_data = [
+            {
+                'name': 'مجمع عيادات بسمة الرياض الطبي',
+                'address': 'الرياض، المملكة العربية السعودية',
+                'contact_info': '011-1234567'
+            },
+            {
+                'name': 'مستشفى الملك فهد التخصصي',
+                'address': 'الدمام، المملكة العربية السعودية',
+                'contact_info': '013-8912345'
+            },
+            {
+                'name': 'مستشفى الملك فيصل التخصصي',
+                'address': 'جدة، المملكة العربية السعودية',
+                'contact_info': '012-6789012'
+            }
+        ]
+        
+        for hospital_data in hospitals_data:
+            if force or not Hospital.objects.filter(name=hospital_data['name']).exists():
+                Hospital.objects.create(**hospital_data)
+                self.stdout.write(self.style.SUCCESS(f"تم إنشاء المستشفى {hospital_data['name']}"))
+    
+    def create_basic_employers(self, force):
+        """إنشاء جهات العمل الأساسية"""
+        employers_data = [
+            {
+                'name': 'شركة الاتصالات السعودية',
+                'address': 'الرياض، المملكة العربية السعودية',
+                'contact_info': '011-2345678'
+            },
+            {
+                'name': 'شركة أرامكو السعودية',
+                'address': 'الظهران، المملكة العربية السعودية',
+                'contact_info': '013-8765432'
+            },
+            {
+                'name': 'شركة سابك',
+                'address': 'الرياض، المملكة العربية السعودية',
+                'contact_info': '011-3456789'
+            },
+            {
+                'name': 'البنك الأهلي السعودي',
+                'address': 'جدة، المملكة العربية السعودية',
+                'contact_info': '012-5678901'
+            },
+            {
+                'name': 'مصرف الراجحي',
+                'address': 'الرياض، المملكة العربية السعودية',
+                'contact_info': '011-4567890'
+            }
+        ]
+        
+        for employer_data in employers_data:
+            if force or not Employer.objects.filter(name=employer_data['name']).exists():
+                Employer.objects.create(**employer_data)
+                self.stdout.write(self.style.SUCCESS(f"تم إنشاء جهة العمل {employer_data['name']}"))
+    
+    def create_basic_doctors(self, force):
+        """إنشاء الأطباء الأساسيين"""
+        # التأكد من وجود مستشفيات
+        hospitals = Hospital.objects.all()
+        if not hospitals.exists():
+            self.stdout.write(self.style.WARNING('لا توجد مستشفيات لإضافة الأطباء إليها'))
+            return
+        
+        doctors_data = [
+            {
+                'national_id': '1000000001',
+                'name': 'د. أحمد محمد',
+                'position': 'استشاري طب باطني',
+                'hospital': hospitals[0],
+                'phone': '0501234567',
+                'email': 'ahmed@example.com'
+            },
+            {
+                'national_id': '1000000002',
+                'name': 'د. سارة عبدالله',
+                'position': 'استشاري أمراض قلب',
+                'hospital': hospitals[0],
+                'phone': '0502345678',
+                'email': 'sara@example.com'
+            },
+            {
+                'national_id': '1000000003',
+                'name': 'د. خالد عبدالرحمن',
+                'position': 'استشاري جراحة عامة',
+                'hospital': hospitals[1],
+                'phone': '0503456789',
+                'email': 'khalid@example.com'
+            },
+            {
+                'national_id': '1000000004',
+                'name': 'د. نورة سعد',
+                'position': 'استشاري أمراض نساء وولادة',
+                'hospital': hospitals[1],
+                'phone': '0504567890',
+                'email': 'noura@example.com'
+            },
+            {
+                'national_id': '1000000005',
+                'name': 'د. محمد فهد',
+                'position': 'استشاري أمراض عصبية',
+                'hospital': hospitals[2],
+                'phone': '0505678901',
+                'email': 'mohammed@example.com'
+            }
+        ]
+        
+        for doctor_data in doctors_data:
+            if force or not Doctor.objects.filter(national_id=doctor_data['national_id']).exists():
+                Doctor.objects.create(**doctor_data)
+                self.stdout.write(self.style.SUCCESS(f"تم إنشاء الطبيب {doctor_data['name']}"))
+    
+    def create_basic_clients(self, force):
+        """إنشاء العملاء الأساسيين"""
+        clients_data = [
+            {
+                'name': 'شركة التأمين الوطنية',
+                'phone': '0511234567',
+                'email': 'info@nationalinsurance.com',
+                'address': 'الرياض، المملكة العربية السعودية'
+            },
+            {
+                'name': 'شركة التأمين التعاوني',
+                'phone': '0512345678',
+                'email': 'info@cooperativeinsurance.com',
+                'address': 'جدة، المملكة العربية السعودية'
+            },
+            {
+                'name': 'شركة بوبا العربية للتأمين',
+                'phone': '0513456789',
+                'email': 'info@bupa.com',
+                'address': 'الخبر، المملكة العربية السعودية'
+            }
+        ]
+        
+        for client_data in clients_data:
+            if force or not Client.objects.filter(phone=client_data['phone']).exists():
+                Client.objects.create(**client_data)
+                self.stdout.write(self.style.SUCCESS(f"تم إنشاء العميل {client_data['name']}"))
+    
+    def create_leave_prices(self, force):
+        """إنشاء أسعار الإجازات"""
+        leave_prices = [
+            # أسعار الإجازات المرضية
+            {'leave_type': 'sick_leave', 'duration_days': 1, 'price': 100},
+            {'leave_type': 'sick_leave', 'duration_days': 2, 'price': 180},
+            {'leave_type': 'sick_leave', 'duration_days': 3, 'price': 250},
+            {'leave_type': 'sick_leave', 'duration_days': 5, 'price': 400},
+            {'leave_type': 'sick_leave', 'duration_days': 7, 'price': 550},
+            {'leave_type': 'sick_leave', 'duration_days': 10, 'price': 750},
+            {'leave_type': 'sick_leave', 'duration_days': 14, 'price': 1000},
+            {'leave_type': 'sick_leave', 'duration_days': 30, 'price': 2000},
+            
+            # أسعار إجازات المرافقة
+            {'leave_type': 'companion_leave', 'duration_days': 1, 'price': 150},
+            {'leave_type': 'companion_leave', 'duration_days': 2, 'price': 280},
+            {'leave_type': 'companion_leave', 'duration_days': 3, 'price': 400},
+            {'leave_type': 'companion_leave', 'duration_days': 5, 'price': 650},
+            {'leave_type': 'companion_leave', 'duration_days': 7, 'price': 900},
+            {'leave_type': 'companion_leave', 'duration_days': 10, 'price': 1200},
+            {'leave_type': 'companion_leave', 'duration_days': 14, 'price': 1600},
+            {'leave_type': 'companion_leave', 'duration_days': 30, 'price': 3000}
+        ]
+        
+        for price_data in leave_prices:
+            if force or not LeavePrice.objects.filter(
+                leave_type=price_data['leave_type'],
+                duration_days=price_data['duration_days']
+            ).exists():
+                LeavePrice.objects.create(**price_data)
+                self.stdout.write(self.style.SUCCESS(
+                    f"تم إنشاء سعر إجازة {price_data['leave_type']} لمدة {price_data['duration_days']} يوم"
+                ))

@@ -12,6 +12,7 @@
             <div class="card-body">
                 <div class="text-center mb-4">
                     {% load static %}
+                    {% load core_extras %}
                     {% if 'images/moh-logo.png'|static_exists %}
                         <img src="{% static 'images/moh-logo.png' %}" alt="وزارة الصحة" class="img-fluid" style="max-height: 150px;">
                     {% else %}

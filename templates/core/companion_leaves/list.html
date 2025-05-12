@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}إجازات المرافقين - نظام إدارة الإجازات المرضية{% endblock %}
-
+{% load core_extras %}
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-6">
@@ -201,7 +201,7 @@
                 <div class="card bg-success text-white">
                     <div class="card-body">
                         <h5 class="card-title">الإجازات النشطة</h5>
-                        <p class="card-text display-6">{{ companion_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status", "equalto", "active"|list|length }}</p>
+                        <p class="card-text display-6">{{ companion_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status,equalto,active"|list|length }}</p>
                     </div>
                 </div>
             </div>
@@ -209,7 +209,7 @@
                 <div class="card bg-danger text-white">
                     <div class="card-body">
                         <h5 class="card-title">الإجازات الملغية</h5>
-                        <p class="card-text display-6">{{ companion_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status", "equalto", "cancelled"|list|length }}</p>
+                        <p class="card-text display-6">{{ companion_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status,equalto,cancelled"|list|length }}</p>
                     </div>
                 </div>
             </div>
@@ -217,7 +217,7 @@
                 <div class="card bg-secondary text-white">
                     <div class="card-body">
                         <h5 class="card-title">الإجازات المنتهية</h5>
-                        <p class="card-text display-6">{{ companion_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status", "equalto", "expired"|list|length }}</p>
+                        <p class="card-text display-6">{{ companion_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status,equalto,expired"|list|length }}</p>
                     </div>
                 </div>
             </div>
