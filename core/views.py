@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
+from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -660,7 +661,14 @@ def patient_search_api(request):
 def client_list(request):
     """قائمة العملاء"""
     # تطبيق الفلاتر
-    clients = Client.objects.all().order_by('name')
+    clients = Client.objects.all()
+
+    # الترتيب الافتراضي
+    sort_by = request.GET.get('sort', 'name')
+    if sort_by not in ['name', '-name', 'created_at', '-created_at']:
+        sort_by = 'name'
+
+    clients = clients.order_by(sort_by)
 
     # فلتر الاسم
     name = request.GET.get('name')
@@ -677,7 +685,20 @@ def client_list(request):
     if email:
         clients = clients.filter(email__icontains=email)
 
-    return render(request, 'core/clients/list.html', {'clients': clients})
+    # الترقيم الصفحي
+    paginator = Paginator(clients, 10)  # 10 عملاء في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'clients': page_obj,
+        'sort': sort_by,
+        'name': name,
+        'phone': phone,
+        'email': email
+    }
+
+    return render(request, 'core/clients/list.html', context)
 
 
 @login_required
@@ -691,10 +712,18 @@ def client_detail(request, client_id):
     # الحصول على المدفوعات المرتبطة بالعميل
     payments = Payment.objects.filter(client=client).order_by('-payment_date')
 
+    # حساب إجمالي المبالغ
+    total_invoices_amount = invoices.aggregate(total=Sum('amount'))['total'] or 0
+    total_payments_amount = payments.aggregate(total=Sum('amount'))['total'] or 0
+    balance = total_invoices_amount - total_payments_amount
+
     context = {
         'client': client,
         'invoices': invoices,
-        'payments': payments
+        'payments': payments,
+        'total_invoices_amount': total_invoices_amount,
+        'total_payments_amount': total_payments_amount,
+        'balance': balance
     }
 
     return render(request, 'core/clients/detail.html', context)
@@ -742,8 +771,9 @@ def client_delete(request, client_id):
     payments_count = Payment.objects.filter(client=client).count()
 
     if request.method == 'POST':
+        client_name = client.name  # حفظ اسم العميل قبل الحذف
         client.delete()
-        messages.success(request, 'تم حذف العميل بنجاح')
+        messages.success(request, f'تم حذف العميل {client_name} بنجاح')
         return redirect('core:client_list')
 
     context = {
