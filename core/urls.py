@@ -32,6 +32,7 @@ urlpatterns = [
     # إدارة الأطباء
     path('doctors/', views.doctor_list, name='doctor_list'),
     path('doctors/create/', views.doctor_create, name='doctor_create'),
+    path('doctors/<int:doctor_id>/', views.doctor_detail, name='doctor_detail'),
     path('doctors/<int:doctor_id>/edit/', views.doctor_edit, name='doctor_edit'),
     path('doctors/<int:doctor_id>/delete/', views.doctor_delete, name='doctor_delete'),
     path('doctors/api/search/', views.doctor_search_api, name='doctor_search_api'),
@@ -60,6 +61,7 @@ urlpatterns = [
     path('leave-prices/api/get-price/', views.leave_price_api_get_price, name='leave_price_api_get_price'),
 
     # إدارة الإجازات المرضية
+    path('leaves/update-status/', views.update_all_leaves_status, name='update_all_leaves_status'),
     path('sick-leaves/', views.sick_leave_list, name='sick_leave_list'),
     path('sick-leaves/create/', views.sick_leave_create, name='sick_leave_create'),
     path('sick-leaves/<int:sick_leave_id>/', views.sick_leave_detail, name='sick_leave_detail'),
@@ -88,6 +90,9 @@ urlpatterns = [
     path('payments/<int:payment_id>/', views.payment_detail, name='payment_detail'),
     path('payments/<int:payment_id>/edit/', views.payment_edit, name='payment_edit'),
     path('payments/<int:payment_id>/delete/', views.payment_delete, name='payment_delete'),
+
+    # مسارات API
+    path('api/client/<int:client_id>/unpaid-invoices/', views.api_client_unpaid_invoices, name='api_client_unpaid_invoices'),
 
     # التقارير
     path('reports/', views.report_index, name='report_index'),

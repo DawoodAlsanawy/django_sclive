@@ -97,6 +97,8 @@ class Doctor(models.Model):
     name = models.CharField(max_length=100, verbose_name='اسم الطبيب')
     position = models.CharField(max_length=100, verbose_name='المنصب')
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', verbose_name='المستشفى')
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
+    email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
 
@@ -114,6 +116,9 @@ class Patient(models.Model):
     name = models.CharField(max_length=100, verbose_name='اسم المريض')
     nationality = models.CharField(max_length=50, verbose_name='الجنسية')
     employer = models.ForeignKey(Employer, on_delete=models.SET_NULL, null=True, blank=True, related_name='patients', verbose_name='جهة العمل')
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
+    email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
+    address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
 
@@ -174,6 +179,12 @@ class LeavePrice(models.Model):
         leave_type_display = dict([('sick_leave', 'إجازة مرضية'), ('companion_leave', 'إجازة مرافق')])
         return f"{leave_type_display[self.leave_type]} - {self.duration_days} يوم - {self.price} ريال"
 
+    def get_daily_price(self):
+        """حساب السعر اليومي"""
+        if self.duration_days > 0:
+            return self.price / self.duration_days
+        return 0
+
     @classmethod
     def get_price(cls, leave_type, duration_days):
         """الحصول على سعر الإجازة بناءً على النوع والمدة"""
@@ -227,7 +238,30 @@ class SickLeave(models.Model):
         # حساب مدة الإجازة
         if self.start_date and self.end_date:
             self.duration_days = (self.end_date - self.start_date).days + 1
+
+        # تحديث حالة الإجازة بناءً على التواريخ
+        if self.status != 'cancelled':  # لا نقوم بتحديث الحالة إذا كانت الإجازة ملغية
+            today = timezone.now().date()
+            if self.end_date < today:
+                self.status = 'expired'
+            else:
+                self.status = 'active'
+
         super().save(*args, **kwargs)
+
+    def update_status(self):
+        """تحديث حالة الإجازة بناءً على التواريخ"""
+        if self.status != 'cancelled':  # لا نقوم بتحديث الحالة إذا كانت الإجازة ملغية
+            today = timezone.now().date()
+            old_status = self.status
+
+            if self.end_date < today:
+                self.status = 'expired'
+            else:
+                self.status = 'active'
+
+            if old_status != self.status:
+                self.save()
 
 
 class CompanionLeave(models.Model):
@@ -261,7 +295,30 @@ class CompanionLeave(models.Model):
         # حساب مدة الإجازة
         if self.start_date and self.end_date:
             self.duration_days = (self.end_date - self.start_date).days + 1
+
+        # تحديث حالة الإجازة بناءً على التواريخ
+        if self.status != 'cancelled':  # لا نقوم بتحديث الحالة إذا كانت الإجازة ملغية
+            today = timezone.now().date()
+            if self.end_date < today:
+                self.status = 'expired'
+            else:
+                self.status = 'active'
+
         super().save(*args, **kwargs)
+
+    def update_status(self):
+        """تحديث حالة الإجازة بناءً على التواريخ"""
+        if self.status != 'cancelled':  # لا نقوم بتحديث الحالة إذا كانت الإجازة ملغية
+            today = timezone.now().date()
+            old_status = self.status
+
+            if self.end_date < today:
+                self.status = 'expired'
+            else:
+                self.status = 'active'
+
+            if old_status != self.status:
+                self.save()
 
 
 class LeaveInvoice(models.Model):
@@ -304,14 +361,23 @@ class LeaveInvoice(models.Model):
 
     def update_status(self):
         """تحديث حالة الفاتورة بناءً على المدفوعات"""
+        # لا نقوم بتحديث الحالة إذا كانت الفاتورة ملغية
+        if self.status == 'cancelled':
+            return self.status
+
         total_paid = self.get_total_paid()
+        old_status = self.status
 
         if total_paid <= 0:
-            self.status = 'unpaid'
+            new_status = 'unpaid'
         elif total_paid < self.amount:
-            self.status = 'partially_paid'
+            new_status = 'partially_paid'
         else:
-            self.status = 'paid'
+            new_status = 'paid'
+
+        # تحديث الحالة فقط إذا تغيرت
+        if old_status != new_status:
+            self.status = new_status
 
         return self.status
 

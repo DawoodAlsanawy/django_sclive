@@ -82,15 +82,15 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>رقم الفاتورة</th>
-                        <th>العميل</th>
-                        <th>نوع الإجازة</th>
-                        <th>رقم الإجازة</th>
-                        <th>المبلغ</th>
+                        <th data-sort="invoice_number" style="cursor: pointer;">رقم الفاتورة {% if sort == 'invoice_number' %}<i class="fas fa-sort-up"></i>{% elif sort == '-invoice_number' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="client__name" style="cursor: pointer;">العميل {% if sort == 'client__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-client__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="leave_type" style="cursor: pointer;">نوع الإجازة {% if sort == 'leave_type' %}<i class="fas fa-sort-up"></i>{% elif sort == '-leave_type' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="leave_id" style="cursor: pointer;">رقم الإجازة {% if sort == 'leave_id' %}<i class="fas fa-sort-up"></i>{% elif sort == '-leave_id' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="amount" style="cursor: pointer;">المبلغ {% if sort == 'amount' %}<i class="fas fa-sort-up"></i>{% elif sort == '-amount' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th>المدفوع</th>
                         <th>المتبقي</th>
-                        <th>تاريخ الإصدار</th>
-                        <th>الحالة</th>
+                        <th data-sort="issue_date" style="cursor: pointer;">تاريخ الإصدار {% if sort == 'issue_date' %}<i class="fas fa-sort-up"></i>{% elif sort == '-issue_date' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="status" style="cursor: pointer;">الحالة {% if sort == 'status' %}<i class="fas fa-sort-up"></i>{% elif sort == '-status' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -144,6 +144,119 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- الترقيم الصفحي -->
+        {% if leave_invoices.has_other_pages %}
+        <div class="pagination justify-content-center mt-4">
+            <ul class="pagination">
+                {% if leave_invoices.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leave_invoices.previous_page_number }}{% if invoice_number %}&invoice_number={{ invoice_number }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if leave_type %}&leave_type={{ leave_type }}{% endif %}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if issue_date_from %}&issue_date_from={{ issue_date_from }}{% endif %}{% if issue_date_to %}&issue_date_to={{ issue_date_to }}{% endif %}{% if due_date_from %}&due_date_from={{ due_date_from }}{% endif %}{% if due_date_to %}&due_date_to={{ due_date_to }}{% endif %}{% if amount_min %}&amount_min={{ amount_min }}{% endif %}{% if amount_max %}&amount_max={{ amount_max }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="السابق">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="السابق">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for i in leave_invoices.paginator.page_range %}
+                    {% if leave_invoices.number == i %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                    {% elif i > leave_invoices.number|add:'-3' and i < leave_invoices.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if invoice_number %}&invoice_number={{ invoice_number }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if leave_type %}&leave_type={{ leave_type }}{% endif %}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if issue_date_from %}&issue_date_from={{ issue_date_from }}{% endif %}{% if issue_date_to %}&issue_date_to={{ issue_date_to }}{% endif %}{% if due_date_from %}&due_date_from={{ due_date_from }}{% endif %}{% if due_date_to %}&due_date_to={{ due_date_to }}{% endif %}{% if amount_min %}&amount_min={{ amount_min }}{% endif %}{% if amount_max %}&amount_max={{ amount_max }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if leave_invoices.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ leave_invoices.next_page_number }}{% if invoice_number %}&invoice_number={{ invoice_number }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if leave_type %}&leave_type={{ leave_type }}{% endif %}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if issue_date_from %}&issue_date_from={{ issue_date_from }}{% endif %}{% if issue_date_to %}&issue_date_to={{ issue_date_to }}{% endif %}{% if due_date_from %}&due_date_from={{ due_date_from }}{% endif %}{% if due_date_to %}&due_date_to={{ due_date_to }}{% endif %}{% if amount_min %}&amount_min={{ amount_min }}{% endif %}{% if amount_max %}&amount_max={{ amount_max }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="التالي">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="التالي">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<!-- إحصائيات سريعة -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">إحصائيات سريعة</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">إجمالي الفواتير</h5>
+                        <p class="card-text display-6">{{ total_invoices }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">إجمالي المبالغ</h5>
+                        <p class="card-text display-6">{{ total_amount|floatformat:2 }} ريال</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">إجمالي المدفوعات</h5>
+                        <p class="card-text display-6">{{ total_paid|floatformat:2 }} ريال</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">إجمالي المتبقي</h5>
+                        <p class="card-text display-6">{{ total_remaining|floatformat:2 }} ريال</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // إضافة دعم الترتيب
+        const tableHeaders = document.querySelectorAll('th[data-sort]');
+        tableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortField = this.dataset.sort;
+                const currentSort = new URLSearchParams(window.location.search).get('sort') || '';
+
+                let newSort = sortField;
+                if (currentSort === sortField) {
+                    newSort = '-' + sortField;
+                }
+
+                // إنشاء URL جديد مع معلمة الترتيب الجديدة
+                const url = new URL(window.location.href);
+                url.searchParams.set('sort', newSort);
+                window.location.href = url.toString();
+            });
+        });
+    });
+</script>
 {% endblock %}

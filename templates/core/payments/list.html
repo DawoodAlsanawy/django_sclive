@@ -74,12 +74,12 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>رقم الدفعة</th>
-                        <th>العميل</th>
-                        <th>المبلغ</th>
-                        <th>طريقة الدفع</th>
-                        <th>تاريخ الدفع</th>
-                        <th>رقم المرجع</th>
+                        <th data-sort="payment_number" style="cursor: pointer;">رقم الدفعة {% if sort == 'payment_number' %}<i class="fas fa-sort-up"></i>{% elif sort == '-payment_number' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="client__name" style="cursor: pointer;">العميل {% if sort == 'client__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-client__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="amount" style="cursor: pointer;">المبلغ {% if sort == 'amount' %}<i class="fas fa-sort-up"></i>{% elif sort == '-amount' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="payment_method" style="cursor: pointer;">طريقة الدفع {% if sort == 'payment_method' %}<i class="fas fa-sort-up"></i>{% elif sort == '-payment_method' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="payment_date" style="cursor: pointer;">تاريخ الدفع {% if sort == 'payment_date' %}<i class="fas fa-sort-up"></i>{% elif sort == '-payment_date' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="reference_number" style="cursor: pointer;">رقم المرجع {% if sort == 'reference_number' %}<i class="fas fa-sort-up"></i>{% elif sort == '-reference_number' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -124,6 +124,167 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- الترقيم الصفحي -->
+        {% if payments.has_other_pages %}
+        <div class="pagination justify-content-center mt-4">
+            <ul class="pagination">
+                {% if payments.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ payments.previous_page_number }}{% if payment_number %}&payment_number={{ payment_number }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if payment_method %}&payment_method={{ payment_method }}{% endif %}{% if reference_number %}&reference_number={{ reference_number }}{% endif %}{% if payment_date_from %}&payment_date_from={{ payment_date_from }}{% endif %}{% if payment_date_to %}&payment_date_to={{ payment_date_to }}{% endif %}{% if amount_min %}&amount_min={{ amount_min }}{% endif %}{% if amount_max %}&amount_max={{ amount_max }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="السابق">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="السابق">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for i in payments.paginator.page_range %}
+                    {% if payments.number == i %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                    {% elif i > payments.number|add:'-3' and i < payments.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if payment_number %}&payment_number={{ payment_number }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if payment_method %}&payment_method={{ payment_method }}{% endif %}{% if reference_number %}&reference_number={{ reference_number }}{% endif %}{% if payment_date_from %}&payment_date_from={{ payment_date_from }}{% endif %}{% if payment_date_to %}&payment_date_to={{ payment_date_to }}{% endif %}{% if amount_min %}&amount_min={{ amount_min }}{% endif %}{% if amount_max %}&amount_max={{ amount_max }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if payments.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ payments.next_page_number }}{% if payment_number %}&payment_number={{ payment_number }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if payment_method %}&payment_method={{ payment_method }}{% endif %}{% if reference_number %}&reference_number={{ reference_number }}{% endif %}{% if payment_date_from %}&payment_date_from={{ payment_date_from }}{% endif %}{% if payment_date_to %}&payment_date_to={{ payment_date_to }}{% endif %}{% if amount_min %}&amount_min={{ amount_min }}{% endif %}{% if amount_max %}&amount_max={{ amount_max }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="التالي">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="التالي">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<!-- إحصائيات سريعة -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">إحصائيات سريعة</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">إجمالي المدفوعات</h5>
+                        <p class="card-text display-6">{{ total_payments }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">إجمالي المبالغ</h5>
+                        <p class="card-text display-6">{{ total_amount|floatformat:2 }} ريال</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- إحصائيات حسب طريقة الدفع -->
+        {% if payment_methods_stats %}
+        <div class="mt-4">
+            <h5>إحصائيات حسب طريقة الدفع</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>طريقة الدفع</th>
+                            <th>عدد المدفوعات</th>
+                            <th>إجمالي المبالغ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in payment_methods_stats %}
+                        <tr>
+                            <td>
+                                {% if stat.payment_method == 'cash' %}
+                                <span class="badge bg-success">نقدًا</span>
+                                {% elif stat.payment_method == 'bank_transfer' %}
+                                <span class="badge bg-primary">تحويل بنكي</span>
+                                {% elif stat.payment_method == 'check' %}
+                                <span class="badge bg-info">شيك</span>
+                                {% elif stat.payment_method == 'credit_card' %}
+                                <span class="badge bg-warning">بطاقة ائتمان</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ stat.count }}</td>
+                            <td>{{ stat.total|floatformat:2 }} ريال</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- إحصائيات حسب الشهر -->
+        {% if monthly_stats %}
+        <div class="mt-4">
+            <h5>إحصائيات حسب الشهر (آخر 6 أشهر)</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>الشهر</th>
+                            <th>عدد المدفوعات</th>
+                            <th>إجمالي المبالغ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in monthly_stats %}
+                        <tr>
+                            <td>{{ stat.month|date:"F Y" }}</td>
+                            <td>{{ stat.count }}</td>
+                            <td>{{ stat.total|floatformat:2 }} ريال</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // إضافة دعم الترتيب
+        const tableHeaders = document.querySelectorAll('th[data-sort]');
+        tableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortField = this.dataset.sort;
+                const currentSort = new URLSearchParams(window.location.search).get('sort') || '';
+
+                let newSort = sortField;
+                if (currentSort === sortField) {
+                    newSort = '-' + sortField;
+                }
+
+                // إنشاء URL جديد مع معلمة الترتيب الجديدة
+                const url = new URL(window.location.href);
+                url.searchParams.set('sort', newSort);
+                window.location.href = url.toString();
+            });
+        });
+    });
+</script>
 {% endblock %}

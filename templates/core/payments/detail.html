@@ -56,6 +56,26 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-4">
+                        <strong>المبلغ المدفوع:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ total_paid|default:payment.amount }} ريال
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>المبلغ المتبقي:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if remaining_amount > 0 %}
+                        <span class="text-danger">{{ remaining_amount }} ريال</span>
+                        {% else %}
+                        <span class="text-success">0 ريال</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
                         <strong>طريقة الدفع:</strong>
                     </div>
                     <div class="col-md-8">
@@ -113,7 +133,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-4">
         <div class="card mb-4">
             <div class="card-header">
@@ -162,8 +182,8 @@
                 </div>
             </div>
         </div>
-        
-        <div class="card">
+
+        <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">تفاصيل الدفعة</h5>
             </div>
@@ -174,7 +194,11 @@
                         <thead>
                             <tr>
                                 <th>رقم الفاتورة</th>
-                                <th>المبلغ</th>
+                                <th>نوع الفاتورة</th>
+                                <th>المبلغ المدفوع</th>
+                                <th>إجمالي الفاتورة</th>
+                                <th>المتبقي</th>
+                                <th>الحالة</th>
                                 <th>الإجراءات</th>
                             </tr>
                         </thead>
@@ -182,10 +206,30 @@
                             {% for detail in payment_details %}
                             <tr>
                                 <td>{{ detail.invoice.invoice_number }}</td>
+                                <td>
+                                    {% if detail.invoice.invoice_type == 'leave_invoice' %}
+                                    <span class="badge bg-primary">فاتورة إجازة</span>
+                                    {% elif detail.invoice.invoice_type == 'service_invoice' %}
+                                    <span class="badge bg-success">فاتورة خدمة</span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ detail.amount }} ريال</td>
+                                <td>{{ detail.invoice.amount }} ريال</td>
+                                <td>{{ detail.invoice.get_remaining }} ريال</td>
+                                <td>
+                                    {% if detail.invoice.status == 'paid' %}
+                                    <span class="badge bg-success">مدفوعة</span>
+                                    {% elif detail.invoice.status == 'partially_paid' %}
+                                    <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                                    {% elif detail.invoice.status == 'unpaid' %}
+                                    <span class="badge bg-danger">غير مدفوعة</span>
+                                    {% elif detail.invoice.status == 'cancelled' %}
+                                    <span class="badge bg-secondary">ملغية</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <a href="{% url 'core:leave_invoice_detail' detail.invoice.id %}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
+                                        <i class="fas fa-eye"></i> عرض الفاتورة
                                     </a>
                                 </td>
                             </tr>
@@ -194,7 +238,7 @@
                         <tfoot>
                             <tr>
                                 <th>الإجمالي</th>
-                                <th colspan="2">{{ payment.amount }} ريال</th>
+                                <th colspan="6">{{ payment.amount }} ريال</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -206,4 +250,132 @@
         </div>
     </div>
 </div>
+
+<!-- الفواتير غير المدفوعة للعميل -->
+{% if unpaid_invoices %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">الفواتير غير المدفوعة للعميل</h5>
+                <a href="{% url 'core:payment_create' %}?client_id={{ payment.client.id }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> إنشاء دفعة جديدة
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>نوع الفاتورة</th>
+                                <th>تاريخ الإصدار</th>
+                                <th>تاريخ الاستحقاق</th>
+                                <th>إجمالي الفاتورة</th>
+                                <th>المدفوع</th>
+                                <th>المتبقي</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in unpaid_invoices %}
+                            <tr>
+                                <td>{{ invoice.invoice_number }}</td>
+                                <td>
+                                    {% if invoice.invoice_type == 'leave_invoice' %}
+                                    <span class="badge bg-primary">فاتورة إجازة</span>
+                                    {% elif invoice.invoice_type == 'service_invoice' %}
+                                    <span class="badge bg-success">فاتورة خدمة</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ invoice.issue_date }}</td>
+                                <td>{{ invoice.due_date }}</td>
+                                <td>{{ invoice.amount }} ريال</td>
+                                <td>{{ invoice.get_total_paid }} ريال</td>
+                                <td>{{ invoice.get_remaining }} ريال</td>
+                                <td>
+                                    {% if invoice.status == 'paid' %}
+                                    <span class="badge bg-success">مدفوعة</span>
+                                    {% elif invoice.status == 'partially_paid' %}
+                                    <span class="badge bg-warning">مدفوعة جزئيًا</span>
+                                    {% elif invoice.status == 'unpaid' %}
+                                    <span class="badge bg-danger">غير مدفوعة</span>
+                                    {% elif invoice.status == 'cancelled' %}
+                                    <span class="badge bg-secondary">ملغية</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'core:leave_invoice_detail' invoice.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i> عرض
+                                    </a>
+                                    <a href="{% url 'core:payment_create' %}?invoice_id={{ invoice.id }}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-money-bill"></i> دفع
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- المدفوعات الأخرى للعميل -->
+{% if other_payments %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">المدفوعات الأخرى للعميل</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>رقم الدفعة</th>
+                                <th>تاريخ الدفع</th>
+                                <th>المبلغ</th>
+                                <th>طريقة الدفع</th>
+                                <th>رقم المرجع</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for other_payment in other_payments %}
+                            <tr>
+                                <td>{{ other_payment.payment_number }}</td>
+                                <td>{{ other_payment.payment_date }}</td>
+                                <td>{{ other_payment.amount }} ريال</td>
+                                <td>
+                                    {% if other_payment.payment_method == 'cash' %}
+                                    <span class="badge bg-success">نقدًا</span>
+                                    {% elif other_payment.payment_method == 'bank_transfer' %}
+                                    <span class="badge bg-primary">تحويل بنكي</span>
+                                    {% elif other_payment.payment_method == 'check' %}
+                                    <span class="badge bg-info">شيك</span>
+                                    {% elif other_payment.payment_method == 'credit_card' %}
+                                    <span class="badge bg-warning">بطاقة ائتمان</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ other_payment.reference_number|default:"غير متوفر" }}</td>
+                                <td>
+                                    <a href="{% url 'core:payment_detail' other_payment.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i> عرض
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

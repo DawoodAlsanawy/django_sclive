@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
+from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -387,8 +388,29 @@ def employer_delete(request, employer_id):
 @login_required
 def doctor_list(request):
     """قائمة الأطباء"""
-    doctors = Doctor.objects.all()
-    return render(request, 'core/doctors/list.html', {'doctors': doctors})
+    doctors = Doctor.objects.all().order_by('name')
+
+    # تطبيق الفلاتر
+    name = request.GET.get('name')
+    position = request.GET.get('position')
+    hospital_id = request.GET.get('hospital')
+
+    if name:
+        doctors = doctors.filter(name__icontains=name)
+
+    if position:
+        doctors = doctors.filter(position__icontains=position)
+
+    if hospital_id:
+        doctors = doctors.filter(hospital_id=hospital_id)
+
+    # الحصول على جميع المستشفيات للفلتر
+    hospitals = Hospital.objects.all().order_by('name')
+
+    return render(request, 'core/doctors/list.html', {
+        'doctors': doctors,
+        'hospitals': hospitals
+    })
 
 
 @login_required
@@ -416,7 +438,7 @@ def doctor_edit(request, doctor_id):
         if form.is_valid():
             form.save()
             messages.success(request, f'تم تعديل الطبيب {doctor.name} بنجاح')
-            return redirect('core:doctor_list')
+            return redirect('core:doctor_detail', doctor_id=doctor.id)
     else:
         form = DoctorForm(instance=doctor)
 
@@ -427,11 +449,44 @@ def doctor_edit(request, doctor_id):
 def doctor_delete(request, doctor_id):
     """حذف طبيب"""
     doctor = get_object_or_404(Doctor, id=doctor_id)
+
+    # التحقق من وجود إجازات مرتبطة بالطبيب
+    sick_leaves_count = doctor.sick_leaves.count()
+    companion_leaves_count = doctor.companion_leaves.count()
+
     if request.method == 'POST':
+        doctor_name = doctor.name  # حفظ اسم الطبيب قبل الحذف
         doctor.delete()
-        messages.success(request, 'تم حذف الطبيب بنجاح')
+        messages.success(request, f'تم حذف الطبيب {doctor_name} بنجاح')
         return redirect('core:doctor_list')
-    return render(request, 'core/doctors/delete.html', {'doctor': doctor})
+
+    context = {
+        'doctor': doctor,
+        'sick_leaves_count': sick_leaves_count,
+        'companion_leaves_count': companion_leaves_count
+    }
+
+    return render(request, 'core/doctors/delete.html', context)
+
+
+@login_required
+def doctor_detail(request, doctor_id):
+    """تفاصيل الطبيب"""
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+
+    # الحصول على الإجازات المرضية للطبيب
+    sick_leaves = SickLeave.objects.filter(doctor=doctor).order_by('-start_date')
+
+    # الحصول على إجازات المرافقين للطبيب
+    companion_leaves = CompanionLeave.objects.filter(doctor=doctor).order_by('-start_date')
+
+    context = {
+        'doctor': doctor,
+        'sick_leaves': sick_leaves,
+        'companion_leaves': companion_leaves
+    }
+
+    return render(request, 'core/doctors/detail.html', context)
 
 
 @login_required
@@ -452,7 +507,9 @@ def doctor_search_api(request):
             'display': doctor.name,
             'national_id': doctor.national_id,
             'position': doctor.position,
-            'hospital': doctor.hospital.name
+            'hospital': doctor.hospital.name,
+            'phone': doctor.phone or '',
+            'email': doctor.email or ''
         })
 
     return JsonResponse(results, safe=False)
@@ -465,6 +522,7 @@ def patient_list(request):
     # تصفية البيانات حسب المعايير
     name = request.GET.get('name')
     national_id = request.GET.get('national_id')
+    phone = request.GET.get('phone')
     employer_id = request.GET.get('employer')
 
     patients = Patient.objects.all().order_by('name')
@@ -474,6 +532,9 @@ def patient_list(request):
 
     if national_id:
         patients = patients.filter(national_id__icontains=national_id)
+
+    if phone:
+        patients = patients.filter(phone__icontains=phone)
 
     if employer_id:
         patients = patients.filter(employer_id=employer_id)
@@ -549,8 +610,9 @@ def patient_delete(request, patient_id):
     companion_leaves = CompanionLeave.objects.filter(patient=patient).count()
 
     if request.method == 'POST':
+        patient_name = patient.name  # حفظ اسم المريض قبل الحذف
         patient.delete()
-        messages.success(request, 'تم حذف المريض بنجاح')
+        messages.success(request, f'تم حذف المريض {patient_name} بنجاح')
         return redirect('core:patient_list')
 
     context = {
@@ -570,7 +632,10 @@ def patient_search_api(request):
         return JsonResponse([], safe=False)
 
     patients = Patient.objects.filter(
-        Q(name__icontains=query) | Q(national_id__icontains=query)
+        Q(name__icontains=query) |
+        Q(national_id__icontains=query) |
+        Q(phone__icontains=query) |
+        Q(email__icontains=query)
     )[:10]
 
     results = []
@@ -582,7 +647,10 @@ def patient_search_api(request):
             'display': patient.name,
             'national_id': patient.national_id,
             'nationality': patient.nationality,
-            'employer': employer_name
+            'employer': employer_name,
+            'phone': patient.phone or '',
+            'email': patient.email or '',
+            'address': patient.address or ''
         })
 
     return JsonResponse(results, safe=False)
@@ -593,7 +661,14 @@ def patient_search_api(request):
 def client_list(request):
     """قائمة العملاء"""
     # تطبيق الفلاتر
-    clients = Client.objects.all().order_by('name')
+    clients = Client.objects.all()
+
+    # الترتيب الافتراضي
+    sort_by = request.GET.get('sort', 'name')
+    if sort_by not in ['name', '-name', 'created_at', '-created_at']:
+        sort_by = 'name'
+
+    clients = clients.order_by(sort_by)
 
     # فلتر الاسم
     name = request.GET.get('name')
@@ -610,7 +685,20 @@ def client_list(request):
     if email:
         clients = clients.filter(email__icontains=email)
 
-    return render(request, 'core/clients/list.html', {'clients': clients})
+    # الترقيم الصفحي
+    paginator = Paginator(clients, 10)  # 10 عملاء في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'clients': page_obj,
+        'sort': sort_by,
+        'name': name,
+        'phone': phone,
+        'email': email
+    }
+
+    return render(request, 'core/clients/list.html', context)
 
 
 @login_required
@@ -624,10 +712,18 @@ def client_detail(request, client_id):
     # الحصول على المدفوعات المرتبطة بالعميل
     payments = Payment.objects.filter(client=client).order_by('-payment_date')
 
+    # حساب إجمالي المبالغ
+    total_invoices_amount = invoices.aggregate(total=Sum('amount'))['total'] or 0
+    total_payments_amount = payments.aggregate(total=Sum('amount'))['total'] or 0
+    balance = total_invoices_amount - total_payments_amount
+
     context = {
         'client': client,
         'invoices': invoices,
-        'payments': payments
+        'payments': payments,
+        'total_invoices_amount': total_invoices_amount,
+        'total_payments_amount': total_payments_amount,
+        'balance': balance
     }
 
     return render(request, 'core/clients/detail.html', context)
@@ -675,8 +771,9 @@ def client_delete(request, client_id):
     payments_count = Payment.objects.filter(client=client).count()
 
     if request.method == 'POST':
+        client_name = client.name  # حفظ اسم العميل قبل الحذف
         client.delete()
-        messages.success(request, 'تم حذف العميل بنجاح')
+        messages.success(request, f'تم حذف العميل {client_name} بنجاح')
         return redirect('core:client_list')
 
     context = {
@@ -718,8 +815,46 @@ def client_search_api(request):
 @login_required
 def leave_price_list(request):
     """قائمة أسعار الإجازات"""
+    # تطبيق الفلاتر
     leave_prices = LeavePrice.objects.all()
-    return render(request, 'core/leave_prices/list.html', {'leave_prices': leave_prices})
+
+    # فلتر نوع الإجازة
+    leave_type = request.GET.get('leave_type')
+    if leave_type:
+        leave_prices = leave_prices.filter(leave_type=leave_type)
+
+    # فلتر المدة
+    duration_days = request.GET.get('duration_days')
+    if duration_days:
+        try:
+            duration_days = int(duration_days)
+            leave_prices = leave_prices.filter(duration_days=duration_days)
+        except ValueError:
+            pass
+
+    # فلتر الحالة
+    is_active = request.GET.get('is_active')
+    if is_active == 'true':
+        leave_prices = leave_prices.filter(is_active=True)
+    elif is_active == 'false':
+        leave_prices = leave_prices.filter(is_active=False)
+
+    # الترتيب
+    sort_by = request.GET.get('sort', 'duration_days')
+    if sort_by not in ['leave_type', '-leave_type', 'duration_days', '-duration_days', 'price', '-price', 'is_active', '-is_active']:
+        sort_by = 'duration_days'
+
+    leave_prices = leave_prices.order_by(sort_by)
+
+    context = {
+        'leave_prices': leave_prices,
+        'leave_type': leave_type,
+        'duration_days': duration_days,
+        'is_active': is_active,
+        'sort': sort_by
+    }
+
+    return render(request, 'core/leave_prices/list.html', context)
 
 
 @login_required
@@ -728,8 +863,9 @@ def leave_price_create(request):
     if request.method == 'POST':
         form = LeavePriceForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'تم إنشاء سعر الإجازة بنجاح')
+            leave_price = form.save()
+            leave_type_display = 'إجازة مرضية' if leave_price.leave_type == 'sick_leave' else 'إجازة مرافق'
+            messages.success(request, f'تم إنشاء سعر {leave_type_display} لمدة {leave_price.duration_days} يوم بمبلغ {leave_price.price} ريال بنجاح')
             return redirect('core:leave_price_list')
     else:
         form = LeavePriceForm()
@@ -745,8 +881,9 @@ def leave_price_edit(request, leave_price_id):
     if request.method == 'POST':
         form = LeavePriceForm(request.POST, instance=leave_price)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'تم تعديل سعر الإجازة بنجاح')
+            leave_price = form.save()
+            leave_type_display = 'إجازة مرضية' if leave_price.leave_type == 'sick_leave' else 'إجازة مرافق'
+            messages.success(request, f'تم تعديل سعر {leave_type_display} لمدة {leave_price.duration_days} يوم بمبلغ {leave_price.price} ريال بنجاح')
             return redirect('core:leave_price_list')
     else:
         form = LeavePriceForm(instance=leave_price)
@@ -766,8 +903,11 @@ def leave_price_delete(request, leave_price_id):
     ).count()
 
     if request.method == 'POST':
+        leave_type_display = 'إجازة مرضية' if leave_price.leave_type == 'sick_leave' else 'إجازة مرافق'
+        duration_days = leave_price.duration_days
+        price = leave_price.price
         leave_price.delete()
-        messages.success(request, 'تم حذف سعر الإجازة بنجاح')
+        messages.success(request, f'تم حذف سعر {leave_type_display} لمدة {duration_days} يوم بمبلغ {price} ريال بنجاح')
         return redirect('core:leave_price_list')
 
     context = {
@@ -789,18 +929,133 @@ def leave_price_api_get_price(request):
 
     price = LeavePrice.get_price(leave_type, duration_days)
 
+    # الحصول على معلومات إضافية
+    leave_type_display = 'إجازة مرضية' if leave_type == 'sick_leave' else 'إجازة مرافق'
+
+    # البحث عن سعر مطابق تمامًا
+    exact_price = LeavePrice.objects.filter(
+        leave_type=leave_type,
+        duration_days=duration_days,
+        is_active=True
+    ).first()
+
+    price_type = 'exact' if exact_price else 'calculated'
+
     return JsonResponse({
         'success': True,
-        'price': float(price)
+        'price': float(price),
+        'leave_type': leave_type,
+        'leave_type_display': leave_type_display,
+        'duration_days': duration_days,
+        'price_type': price_type,
+        'daily_price': float(price) / duration_days if duration_days > 0 else 0
     })
 
 
 # وظائف إدارة الإجازات المرضية
 @login_required
+def update_all_leaves_status(request):
+    """تحديث حالة جميع الإجازات"""
+    # تحديث حالة الإجازات المرضية
+    sick_leaves = SickLeave.objects.all()
+    sick_updated = 0
+    for leave in sick_leaves:
+        old_status = leave.status
+        leave.update_status()
+        if old_status != leave.status:
+            sick_updated += 1
+
+    # تحديث حالة إجازات المرافقين
+    companion_leaves = CompanionLeave.objects.all()
+    companion_updated = 0
+    for leave in companion_leaves:
+        old_status = leave.status
+        leave.update_status()
+        if old_status != leave.status:
+            companion_updated += 1
+
+    messages.success(request, f'تم تحديث حالة {sick_updated} إجازة مرضية و {companion_updated} إجازة مرافق')
+
+    # العودة إلى الصفحة السابقة
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
+    return redirect('core:dashboard')
+
+@login_required
 def sick_leave_list(request):
     """قائمة الإجازات المرضية"""
+    # تطبيق الفلاتر
     sick_leaves = SickLeave.objects.all()
-    return render(request, 'core/sick_leaves/list.html', {'sick_leaves': sick_leaves})
+
+    # فلتر رقم الإجازة
+    leave_id = request.GET.get('leave_id')
+    if leave_id:
+        sick_leaves = sick_leaves.filter(leave_id__icontains=leave_id)
+
+    # فلتر المريض
+    patient = request.GET.get('patient')
+    if patient:
+        sick_leaves = sick_leaves.filter(patient__name__icontains=patient)
+
+    # فلتر الطبيب
+    doctor = request.GET.get('doctor')
+    if doctor:
+        sick_leaves = sick_leaves.filter(doctor__name__icontains=doctor)
+
+    # فلتر الحالة
+    status = request.GET.get('status')
+    if status:
+        sick_leaves = sick_leaves.filter(status=status)
+
+    # فلتر تاريخ البداية (من)
+    start_date_from = request.GET.get('start_date_from')
+    if start_date_from:
+        sick_leaves = sick_leaves.filter(start_date__gte=start_date_from)
+
+    # فلتر تاريخ البداية (إلى)
+    start_date_to = request.GET.get('start_date_to')
+    if start_date_to:
+        sick_leaves = sick_leaves.filter(start_date__lte=start_date_to)
+
+    # فلتر تاريخ النهاية (من)
+    end_date_from = request.GET.get('end_date_from')
+    if end_date_from:
+        sick_leaves = sick_leaves.filter(end_date__gte=end_date_from)
+
+    # فلتر تاريخ النهاية (إلى)
+    end_date_to = request.GET.get('end_date_to')
+    if end_date_to:
+        sick_leaves = sick_leaves.filter(end_date__lte=end_date_to)
+
+    # الترتيب
+    sort_by = request.GET.get('sort', '-created_at')
+    if sort_by not in ['leave_id', '-leave_id', 'patient__name', '-patient__name', 'doctor__name', '-doctor__name',
+                      'start_date', '-start_date', 'end_date', '-end_date', 'duration_days', '-duration_days',
+                      'status', '-status', 'created_at', '-created_at']:
+        sort_by = '-created_at'
+
+    sick_leaves = sick_leaves.order_by(sort_by)
+
+    # الترقيم الصفحي
+    paginator = Paginator(sick_leaves, 10)  # 10 إجازات في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'sick_leaves': page_obj,
+        'leave_id': leave_id,
+        'patient': patient,
+        'doctor': doctor,
+        'status': status,
+        'start_date_from': start_date_from,
+        'start_date_to': start_date_to,
+        'end_date_from': end_date_from,
+        'end_date_to': end_date_to,
+        'sort': sort_by
+    }
+
+    return render(request, 'core/sick_leaves/list.html', context)
 
 
 @login_required
@@ -813,7 +1068,25 @@ def sick_leave_create(request):
             messages.success(request, f'تم إنشاء الإجازة المرضية رقم {sick_leave.leave_id} بنجاح')
             return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
     else:
-        form = SickLeaveForm()
+        # توليد رقم إجازة تلقائي
+        import datetime
+        import random
+        today = datetime.date.today()
+        date_string = today.strftime('%Y%m%d')
+        random_num = str(random.randint(100, 999))
+        leave_id = f'SL-{date_string}-{random_num}'
+
+        # التحقق من عدم وجود رقم إجازة مطابق
+        while SickLeave.objects.filter(leave_id=leave_id).exists():
+            random_num = str(random.randint(100, 999))
+            leave_id = f'SL-{date_string}-{random_num}'
+
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        initial_data = {
+            'leave_id': leave_id,
+            'issue_date': today
+        }
+        form = SickLeaveForm(initial=initial_data)
 
     return render(request, 'core/sick_leaves/create.html', {'form': form})
 
@@ -829,10 +1102,31 @@ def sick_leave_detail(request, sick_leave_id):
         leave_id=sick_leave.leave_id
     )
 
-    return render(request, 'core/sick_leaves/detail.html', {
+    # حساب إجمالي المبالغ للفواتير المرتبطة
+    from django.db.models import Sum
+    total_invoices_amount = related_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب إجمالي المبالغ المدفوعة
+    total_paid_amount = 0
+    for invoice in related_invoices:
+        total_paid_amount += invoice.get_total_paid()
+
+    # حساب المبلغ المتبقي
+    remaining_amount = total_invoices_amount - total_paid_amount
+
+    # الحصول على سعر الإجازة المرضية
+    leave_price = LeavePrice.get_price('sick_leave', sick_leave.duration_days)
+
+    context = {
         'sick_leave': sick_leave,
-        'related_invoices': related_invoices
-    })
+        'related_invoices': related_invoices,
+        'total_invoices_amount': total_invoices_amount,
+        'total_paid_amount': total_paid_amount,
+        'remaining_amount': remaining_amount,
+        'leave_price': leave_price
+    }
+
+    return render(request, 'core/sick_leaves/detail.html', context)
 
 
 @login_required
@@ -864,8 +1158,10 @@ def sick_leave_delete(request, sick_leave_id):
     )
 
     if request.method == 'POST':
+        leave_id = sick_leave.leave_id
+        patient_name = sick_leave.patient.name
         sick_leave.delete()
-        messages.success(request, 'تم حذف الإجازة المرضية بنجاح')
+        messages.success(request, f'تم حذف الإجازة المرضية رقم {leave_id} للمريض {patient_name} بنجاح')
         return redirect('core:sick_leave_list')
 
     return render(request, 'core/sick_leaves/delete.html', {
@@ -909,8 +1205,83 @@ def sick_leave_search_api(request):
 @login_required
 def companion_leave_list(request):
     """قائمة إجازات المرافقين"""
+    # تطبيق الفلاتر
     companion_leaves = CompanionLeave.objects.all()
-    return render(request, 'core/companion_leaves/list.html', {'companion_leaves': companion_leaves})
+
+    # فلتر رقم الإجازة
+    leave_id = request.GET.get('leave_id')
+    if leave_id:
+        companion_leaves = companion_leaves.filter(leave_id__icontains=leave_id)
+
+    # فلتر المريض
+    patient = request.GET.get('patient')
+    if patient:
+        companion_leaves = companion_leaves.filter(patient__name__icontains=patient)
+
+    # فلتر المرافق
+    companion = request.GET.get('companion')
+    if companion:
+        companion_leaves = companion_leaves.filter(companion__name__icontains=companion)
+
+    # فلتر الطبيب
+    doctor = request.GET.get('doctor')
+    if doctor:
+        companion_leaves = companion_leaves.filter(doctor__name__icontains=doctor)
+
+    # فلتر الحالة
+    status = request.GET.get('status')
+    if status:
+        companion_leaves = companion_leaves.filter(status=status)
+
+    # فلتر تاريخ البداية (من)
+    start_date_from = request.GET.get('start_date_from')
+    if start_date_from:
+        companion_leaves = companion_leaves.filter(start_date__gte=start_date_from)
+
+    # فلتر تاريخ البداية (إلى)
+    start_date_to = request.GET.get('start_date_to')
+    if start_date_to:
+        companion_leaves = companion_leaves.filter(start_date__lte=start_date_to)
+
+    # فلتر تاريخ النهاية (من)
+    end_date_from = request.GET.get('end_date_from')
+    if end_date_from:
+        companion_leaves = companion_leaves.filter(end_date__gte=end_date_from)
+
+    # فلتر تاريخ النهاية (إلى)
+    end_date_to = request.GET.get('end_date_to')
+    if end_date_to:
+        companion_leaves = companion_leaves.filter(end_date__lte=end_date_to)
+
+    # الترتيب
+    sort_by = request.GET.get('sort', '-created_at')
+    if sort_by not in ['leave_id', '-leave_id', 'patient__name', '-patient__name', 'companion__name', '-companion__name',
+                      'doctor__name', '-doctor__name', 'start_date', '-start_date', 'end_date', '-end_date',
+                      'duration_days', '-duration_days', 'status', '-status', 'created_at', '-created_at']:
+        sort_by = '-created_at'
+
+    companion_leaves = companion_leaves.order_by(sort_by)
+
+    # الترقيم الصفحي
+    paginator = Paginator(companion_leaves, 10)  # 10 إجازات في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'companion_leaves': page_obj,
+        'leave_id': leave_id,
+        'patient': patient,
+        'companion': companion,
+        'doctor': doctor,
+        'status': status,
+        'start_date_from': start_date_from,
+        'start_date_to': start_date_to,
+        'end_date_from': end_date_from,
+        'end_date_to': end_date_to,
+        'sort': sort_by
+    }
+
+    return render(request, 'core/companion_leaves/list.html', context)
 
 
 @login_required
@@ -923,7 +1294,25 @@ def companion_leave_create(request):
             messages.success(request, f'تم إنشاء إجازة المرافق رقم {companion_leave.leave_id} بنجاح')
             return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
     else:
-        form = CompanionLeaveForm()
+        # توليد رقم إجازة تلقائي
+        import datetime
+        import random
+        today = datetime.date.today()
+        date_string = today.strftime('%Y%m%d')
+        random_num = str(random.randint(100, 999))
+        leave_id = f'CL-{date_string}-{random_num}'
+
+        # التحقق من عدم وجود رقم إجازة مطابق
+        while CompanionLeave.objects.filter(leave_id=leave_id).exists():
+            random_num = str(random.randint(100, 999))
+            leave_id = f'CL-{date_string}-{random_num}'
+
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        initial_data = {
+            'leave_id': leave_id,
+            'issue_date': today
+        }
+        form = CompanionLeaveForm(initial=initial_data)
 
     return render(request, 'core/companion_leaves/create.html', {'form': form})
 
@@ -939,10 +1328,31 @@ def companion_leave_detail(request, companion_leave_id):
         leave_id=companion_leave.leave_id
     )
 
-    return render(request, 'core/companion_leaves/detail.html', {
+    # حساب إجمالي المبالغ للفواتير المرتبطة
+    from django.db.models import Sum
+    total_invoices_amount = related_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب إجمالي المبالغ المدفوعة
+    total_paid_amount = 0
+    for invoice in related_invoices:
+        total_paid_amount += invoice.get_total_paid()
+
+    # حساب المبلغ المتبقي
+    remaining_amount = total_invoices_amount - total_paid_amount
+
+    # الحصول على سعر إجازة المرافق
+    leave_price = LeavePrice.get_price('companion_leave', companion_leave.duration_days)
+
+    context = {
         'companion_leave': companion_leave,
-        'related_invoices': related_invoices
-    })
+        'related_invoices': related_invoices,
+        'total_invoices_amount': total_invoices_amount,
+        'total_paid_amount': total_paid_amount,
+        'remaining_amount': remaining_amount,
+        'leave_price': leave_price
+    }
+
+    return render(request, 'core/companion_leaves/detail.html', context)
 
 
 @login_required
@@ -974,8 +1384,11 @@ def companion_leave_delete(request, companion_leave_id):
     )
 
     if request.method == 'POST':
+        leave_id = companion_leave.leave_id
+        patient_name = companion_leave.patient.name
+        companion_name = companion_leave.companion.name
         companion_leave.delete()
-        messages.success(request, 'تم حذف إجازة المرافق بنجاح')
+        messages.success(request, f'تم حذف إجازة المرافق رقم {leave_id} للمريض {patient_name} والمرافق {companion_name} بنجاح')
         return redirect('core:companion_leave_list')
 
     return render(request, 'core/companion_leaves/delete.html', {
@@ -1022,8 +1435,122 @@ def companion_leave_search_api(request):
 @login_required
 def leave_invoice_list(request):
     """قائمة فواتير الإجازات"""
+    # تطبيق الفلاتر
     leave_invoices = LeaveInvoice.objects.all()
-    return render(request, 'core/leave_invoices/list.html', {'leave_invoices': leave_invoices})
+
+    # فلتر رقم الفاتورة
+    invoice_number = request.GET.get('invoice_number')
+    if invoice_number:
+        leave_invoices = leave_invoices.filter(invoice_number__icontains=invoice_number)
+
+    # فلتر العميل
+    client = request.GET.get('client')
+    if client:
+        leave_invoices = leave_invoices.filter(client__name__icontains=client)
+
+    # فلتر نوع الإجازة
+    leave_type = request.GET.get('leave_type')
+    if leave_type:
+        leave_invoices = leave_invoices.filter(leave_type=leave_type)
+
+    # فلتر رقم الإجازة
+    leave_id = request.GET.get('leave_id')
+    if leave_id:
+        leave_invoices = leave_invoices.filter(leave_id__icontains=leave_id)
+
+    # فلتر الحالة
+    status = request.GET.get('status')
+    if status:
+        leave_invoices = leave_invoices.filter(status=status)
+
+    # فلتر تاريخ الإصدار (من)
+    issue_date_from = request.GET.get('issue_date_from')
+    if issue_date_from:
+        leave_invoices = leave_invoices.filter(issue_date__gte=issue_date_from)
+
+    # فلتر تاريخ الإصدار (إلى)
+    issue_date_to = request.GET.get('issue_date_to')
+    if issue_date_to:
+        leave_invoices = leave_invoices.filter(issue_date__lte=issue_date_to)
+
+    # فلتر تاريخ الاستحقاق (من)
+    due_date_from = request.GET.get('due_date_from')
+    if due_date_from:
+        leave_invoices = leave_invoices.filter(due_date__gte=due_date_from)
+
+    # فلتر تاريخ الاستحقاق (إلى)
+    due_date_to = request.GET.get('due_date_to')
+    if due_date_to:
+        leave_invoices = leave_invoices.filter(due_date__lte=due_date_to)
+
+    # فلتر المبلغ (من)
+    amount_min = request.GET.get('amount_min')
+    if amount_min:
+        leave_invoices = leave_invoices.filter(amount__gte=amount_min)
+
+    # فلتر المبلغ (إلى)
+    amount_max = request.GET.get('amount_max')
+    if amount_max:
+        leave_invoices = leave_invoices.filter(amount__lte=amount_max)
+
+    # الترتيب
+    sort_by = request.GET.get('sort', '-created_at')
+    if sort_by not in ['invoice_number', '-invoice_number', 'client__name', '-client__name',
+                      'leave_type', '-leave_type', 'leave_id', '-leave_id', 'amount', '-amount',
+                      'status', '-status', 'issue_date', '-issue_date', 'due_date', '-due_date',
+                      'created_at', '-created_at']:
+        sort_by = '-created_at'
+
+    leave_invoices = leave_invoices.order_by(sort_by)
+
+    # الترقيم الصفحي
+    paginator = Paginator(leave_invoices, 10)  # 10 فواتير في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # إحصائيات سريعة
+    total_invoices = leave_invoices.count()
+    total_amount = leave_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب إجمالي المدفوعات
+    from django.db.models import DecimalField, ExpressionWrapper, F, Sum
+    from django.db.models.functions import Coalesce
+
+    # الحصول على إجمالي المدفوعات لكل فاتورة
+    payment_details = PaymentDetail.objects.filter(invoice__in=leave_invoices).values('invoice').annotate(
+        total_paid=Sum('amount')
+    )
+
+    # إنشاء قاموس للمدفوعات
+    payments_dict = {item['invoice']: item['total_paid'] for item in payment_details}
+
+    # حساب إجمالي المدفوعات
+    total_paid = sum(payments_dict.values()) if payments_dict else 0
+
+    # حساب المبلغ المتبقي
+    total_remaining = total_amount - total_paid
+
+    context = {
+        'leave_invoices': page_obj,
+        'invoice_number': invoice_number,
+        'client': client,
+        'leave_type': leave_type,
+        'leave_id': leave_id,
+        'status': status,
+        'issue_date_from': issue_date_from,
+        'issue_date_to': issue_date_to,
+        'due_date_from': due_date_from,
+        'due_date_to': due_date_to,
+        'amount_min': amount_min,
+        'amount_max': amount_max,
+        'sort': sort_by,
+        'total_invoices': total_invoices,
+        'total_amount': total_amount,
+        'total_paid': total_paid,
+        'total_remaining': total_remaining
+    }
+
+    return render(request, 'core/leave_invoices/list.html', context)
 
 
 @login_required
@@ -1033,11 +1560,35 @@ def leave_invoice_create(request):
         form = LeaveInvoiceForm(request.POST)
         if form.is_valid():
             invoice = form.save()
-            messages.success(request, f'تم إنشاء الفاتورة رقم {invoice.invoice_number} بنجاح')
+
+            # تحديث حالة الفاتورة بناءً على المدفوعات
+            invoice.update_status()
+            invoice.save()
+
+            messages.success(request, f'تم إنشاء الفاتورة رقم {invoice.invoice_number} بنجاح للعميل {invoice.client.name} بمبلغ {invoice.amount} ريال')
             return redirect('core:leave_invoice_detail', leave_invoice_id=invoice.id)
     else:
+        # توليد رقم فاتورة تلقائي
+        import datetime
+        import random
+        today = datetime.date.today()
+        date_string = today.strftime('%Y%m%d')
+        random_num = str(random.randint(100, 999))
+        invoice_number = f'INV-{date_string}-{random_num}'
+
+        # التحقق من عدم وجود رقم فاتورة مطابق
+        while LeaveInvoice.objects.filter(invoice_number=invoice_number).exists():
+            random_num = str(random.randint(100, 999))
+            invoice_number = f'INV-{date_string}-{random_num}'
+
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        initial_data = {
+            'invoice_number': invoice_number,
+            'issue_date': today,
+            'due_date': today + datetime.timedelta(days=30)  # تاريخ الاستحقاق بعد 30 يومًا
+        }
+
         # تعبئة البيانات من معلمات URL إذا كانت موجودة
-        initial_data = {}
         leave_type = request.GET.get('leave_type')
         leave_id = request.GET.get('leave_id')
 
@@ -1045,12 +1596,16 @@ def leave_invoice_create(request):
             initial_data['leave_type'] = leave_type
             initial_data['leave_id'] = leave_id
 
-            # البحث عن الإجازة وتعبئة بيانات العميل
+            # البحث عن الإجازة وتعبئة بيانات العميل والمبلغ
             if leave_type == 'sick_leave':
                 try:
                     sick_leave = SickLeave.objects.get(leave_id=leave_id)
                     if sick_leave.patient.employer:
                         initial_data['client'] = sick_leave.patient.employer.id
+
+                    # تعيين المبلغ بناءً على سعر الإجازة
+                    leave_price = LeavePrice.get_price('sick_leave', sick_leave.duration_days)
+                    initial_data['amount'] = leave_price
                 except SickLeave.DoesNotExist:
                     pass
             elif leave_type == 'companion_leave':
@@ -1058,6 +1613,10 @@ def leave_invoice_create(request):
                     companion_leave = CompanionLeave.objects.get(leave_id=leave_id)
                     if companion_leave.companion.employer:
                         initial_data['client'] = companion_leave.companion.employer.id
+
+                    # تعيين المبلغ بناءً على سعر الإجازة
+                    leave_price = LeavePrice.get_price('companion_leave', companion_leave.duration_days)
+                    initial_data['amount'] = leave_price
                 except CompanionLeave.DoesNotExist:
                     pass
 
@@ -1074,10 +1633,43 @@ def leave_invoice_detail(request, leave_invoice_id):
     # الحصول على تفاصيل المدفوعات المرتبطة بالفاتورة
     payment_details = PaymentDetail.objects.filter(invoice=leave_invoice).select_related('payment')
 
-    return render(request, 'core/leave_invoices/detail.html', {
+    # حساب إجمالي المدفوعات
+    total_paid = leave_invoice.get_total_paid()
+
+    # حساب المبلغ المتبقي
+    remaining_amount = leave_invoice.get_remaining()
+
+    # الحصول على معلومات الإجازة المرتبطة
+    leave_info = None
+    if leave_invoice.leave_type == 'sick_leave':
+        try:
+            leave_info = SickLeave.objects.get(leave_id=leave_invoice.leave_id)
+        except SickLeave.DoesNotExist:
+            pass
+    elif leave_invoice.leave_type == 'companion_leave':
+        try:
+            leave_info = CompanionLeave.objects.get(leave_id=leave_invoice.leave_id)
+        except CompanionLeave.DoesNotExist:
+            pass
+
+    # تحديث حالة الفاتورة
+    current_status = leave_invoice.status
+    updated_status = leave_invoice.update_status()
+
+    # حفظ الفاتورة إذا تغيرت الحالة
+    if current_status != updated_status:
+        leave_invoice.status = updated_status
+        leave_invoice.save()
+
+    context = {
         'leave_invoice': leave_invoice,
-        'payment_details': payment_details
-    })
+        'payment_details': payment_details,
+        'total_paid': total_paid,
+        'remaining_amount': remaining_amount,
+        'leave_info': leave_info
+    }
+
+    return render(request, 'core/leave_invoices/detail.html', context)
 
 
 @login_required
@@ -1085,18 +1677,55 @@ def leave_invoice_edit(request, leave_invoice_id):
     """تعديل فاتورة إجازة"""
     leave_invoice = get_object_or_404(LeaveInvoice, id=leave_invoice_id)
 
+    # الحصول على قيم قبل التعديل للمقارنة
+    old_amount = leave_invoice.amount
+    old_client_name = leave_invoice.client.name
+
     if request.method == 'POST':
         form = LeaveInvoiceForm(request.POST, instance=leave_invoice)
         if form.is_valid():
-            form.save()
-            messages.success(request, f'تم تعديل الفاتورة رقم {leave_invoice.invoice_number} بنجاح')
-            return redirect('core:leave_invoice_detail', leave_invoice_id=leave_invoice.id)
+            invoice = form.save(commit=False)
+
+            # تحديث حالة الفاتورة بناءً على المدفوعات
+            invoice.update_status()
+            invoice.save()
+
+            # إعداد رسالة النجاح مع تفاصيل التغييرات
+            success_message = f'تم تعديل الفاتورة رقم {invoice.invoice_number} بنجاح'
+
+            # إضافة تفاصيل التغييرات إذا تغيرت
+            changes = []
+            if old_amount != invoice.amount:
+                changes.append(f'تغيير المبلغ من {old_amount} إلى {invoice.amount} ريال')
+
+            if old_client_name != invoice.client.name:
+                changes.append(f'تغيير العميل من {old_client_name} إلى {invoice.client.name}')
+
+            if changes:
+                success_message += f' ({", ".join(changes)})'
+
+            messages.success(request, success_message)
+            return redirect('core:leave_invoice_detail', leave_invoice_id=invoice.id)
     else:
         form = LeaveInvoiceForm(instance=leave_invoice)
 
+    # الحصول على معلومات الإجازة المرتبطة
+    leave_info = None
+    if leave_invoice.leave_type == 'sick_leave':
+        try:
+            leave_info = SickLeave.objects.get(leave_id=leave_invoice.leave_id)
+        except SickLeave.DoesNotExist:
+            pass
+    elif leave_invoice.leave_type == 'companion_leave':
+        try:
+            leave_info = CompanionLeave.objects.get(leave_id=leave_invoice.leave_id)
+        except CompanionLeave.DoesNotExist:
+            pass
+
     return render(request, 'core/leave_invoices/edit.html', {
         'form': form,
-        'leave_invoice': leave_invoice
+        'leave_invoice': leave_invoice,
+        'leave_info': leave_info
     })
 
 
@@ -1109,12 +1738,27 @@ def leave_invoice_delete(request, leave_invoice_id):
     payment_details = PaymentDetail.objects.filter(invoice=leave_invoice).select_related('payment')
 
     if request.method == 'POST':
+        # حفظ معلومات الفاتورة قبل الحذف
+        invoice_number = leave_invoice.invoice_number
+        client_name = leave_invoice.client.name
+        leave_type_display = 'إجازة مرضية' if leave_invoice.leave_type == 'sick_leave' else 'إجازة مرافق'
+        leave_id = leave_invoice.leave_id
+        amount = leave_invoice.amount
+
         # حذف تفاصيل المدفوعات المرتبطة بالفاتورة أولاً
+        payment_details_count = payment_details.count()
         payment_details.delete()
 
         # ثم حذف الفاتورة
         leave_invoice.delete()
-        messages.success(request, 'تم حذف فاتورة الإجازة بنجاح')
+
+        # إعداد رسالة النجاح مع تفاصيل الفاتورة المحذوفة
+        success_message = f'تم حذف الفاتورة رقم {invoice_number} للعميل {client_name} ({leave_type_display} رقم {leave_id}) بمبلغ {amount} ريال بنجاح'
+
+        if payment_details_count > 0:
+            success_message += f' مع {payment_details_count} دفعة مرتبطة'
+
+        messages.success(request, success_message)
         return redirect('core:leave_invoice_list')
 
     return render(request, 'core/leave_invoices/delete.html', {
@@ -1128,7 +1772,7 @@ def leave_invoice_delete(request, leave_invoice_id):
 def payment_list(request):
     """قائمة المدفوعات"""
     # تطبيق الفلاتر
-    payments = Payment.objects.all().order_by('-payment_date')
+    payments = Payment.objects.all()
 
     # فلتر رقم الدفعة
     payment_number = request.GET.get('payment_number')
@@ -1170,7 +1814,64 @@ def payment_list(request):
     if amount_max:
         payments = payments.filter(amount__lte=amount_max)
 
-    return render(request, 'core/payments/list.html', {'payments': payments})
+    # الترتيب
+    sort_by = request.GET.get('sort', '-payment_date')
+    if sort_by not in ['payment_number', '-payment_number', 'client__name', '-client__name',
+                      'amount', '-amount', 'payment_method', '-payment_method',
+                      'payment_date', '-payment_date', 'reference_number', '-reference_number',
+                      'created_at', '-created_at']:
+        sort_by = '-payment_date'
+
+    payments = payments.order_by(sort_by)
+
+    # الترقيم الصفحي
+    paginator = Paginator(payments, 10)  # 10 دفعات في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # إحصائيات سريعة
+    total_payments = payments.count()
+    total_amount = payments.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # إحصائيات حسب طريقة الدفع
+    payment_methods_stats = payments.values('payment_method').annotate(
+        count=Count('id'),
+        total=Sum('amount')
+    ).order_by('payment_method')
+
+    # إحصائيات حسب الشهر (آخر 6 أشهر)
+    import datetime
+
+    from django.db.models.functions import TruncMonth
+
+    # الحصول على تاريخ قبل 6 أشهر
+    six_months_ago = timezone.now().date() - datetime.timedelta(days=180)
+
+    monthly_stats = payments.filter(payment_date__gte=six_months_ago).annotate(
+        month=TruncMonth('payment_date')
+    ).values('month').annotate(
+        count=Count('id'),
+        total=Sum('amount')
+    ).order_by('month')
+
+    context = {
+        'payments': page_obj,
+        'payment_number': payment_number,
+        'client': client,
+        'payment_method': payment_method,
+        'reference_number': reference_number,
+        'payment_date_from': payment_date_from,
+        'payment_date_to': payment_date_to,
+        'amount_min': amount_min,
+        'amount_max': amount_max,
+        'sort': sort_by,
+        'total_payments': total_payments,
+        'total_amount': total_amount,
+        'payment_methods_stats': payment_methods_stats,
+        'monthly_stats': monthly_stats
+    }
+
+    return render(request, 'core/payments/list.html', context)
 
 
 @login_required
@@ -1203,23 +1904,35 @@ def payment_create(request):
                         )
 
                         # تحديث حالة الفاتورة
-                        invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).aggregate(Sum('amount'))['amount__sum'] or 0
-
-                        if invoice_total_paid >= invoice.amount:
-                            invoice.status = 'paid'
-                        elif invoice_total_paid > 0:
-                            invoice.status = 'partially_paid'
-
+                        invoice.update_status()
                         invoice.save()
 
                         invoice_count += 1
                         total_amount += float(amount)
 
-            messages.success(request, f'تم إنشاء الدفعة رقم {payment.payment_number} بنجاح لعدد {invoice_count} فاتورة بإجمالي {total_amount} ريال')
+            messages.success(request, f'تم إنشاء الدفعة رقم {payment.payment_number} بنجاح لعدد {invoice_count} فاتورة بإجمالي {total_amount} ريال للعميل {payment.client.name}')
             return redirect('core:payment_detail', payment_id=payment.id)
     else:
+        # توليد رقم دفعة تلقائي
+        import datetime
+        import random
+        today = datetime.date.today()
+        date_string = today.strftime('%Y%m%d')
+        random_num = str(random.randint(100, 999))
+        payment_number = f'PAY-{date_string}-{random_num}'
+
+        # التحقق من عدم وجود رقم دفعة مطابق
+        while Payment.objects.filter(payment_number=payment_number).exists():
+            random_num = str(random.randint(100, 999))
+            payment_number = f'PAY-{date_string}-{random_num}'
+
+        # تعيين تاريخ اليوم كتاريخ افتراضي للدفع
+        initial_data = {
+            'payment_number': payment_number,
+            'payment_date': today
+        }
+
         # تعبئة البيانات من معلمات URL إذا كانت موجودة
-        initial_data = {}
         invoice_id = request.GET.get('invoice_id')
 
         if invoice_id:
@@ -1227,12 +1940,41 @@ def payment_create(request):
                 invoice = LeaveInvoice.objects.get(id=invoice_id)
                 initial_data['client'] = invoice.client.id
                 initial_data['amount'] = invoice.get_remaining()
+
+                # الحصول على الفواتير غير المدفوعة للعميل
+                unpaid_invoices = LeaveInvoice.objects.filter(
+                    client=invoice.client,
+                    status__in=['unpaid', 'partially_paid']
+                ).exclude(id=invoice.id)
+
             except LeaveInvoice.DoesNotExist:
                 pass
 
         form = PaymentForm(initial=initial_data)
 
-    return render(request, 'core/payments/create.html', {'form': form})
+        # الحصول على الفواتير غير المدفوعة للعرض في الصفحة
+        client_id = request.GET.get('client_id')
+        unpaid_invoices = []
+
+        if client_id:
+            try:
+                client = Client.objects.get(id=client_id)
+                unpaid_invoices = LeaveInvoice.objects.filter(
+                    client=client,
+                    status__in=['unpaid', 'partially_paid']
+                )
+
+                if not 'client' in initial_data:
+                    initial_data['client'] = client.id
+                    form = PaymentForm(initial=initial_data)
+
+            except Client.DoesNotExist:
+                pass
+
+    return render(request, 'core/payments/create.html', {
+        'form': form,
+        'unpaid_invoices': unpaid_invoices if 'unpaid_invoices' in locals() else []
+    })
 
 
 @login_required
@@ -1243,10 +1985,38 @@ def payment_detail(request, payment_id):
     # الحصول على تفاصيل الدفعة
     payment_details = PaymentDetail.objects.filter(payment=payment).select_related('invoice')
 
-    return render(request, 'core/payments/detail.html', {
+    # حساب إجمالي المبلغ المدفوع
+    total_paid = payment_details.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب المبلغ المتبقي
+    remaining_amount = payment.amount - total_paid
+
+    # الحصول على معلومات العميل
+    client_info = payment.client
+
+    # الحصول على الفواتير المرتبطة بالدفعة
+    invoices = [detail.invoice for detail in payment_details]
+
+    # الحصول على المدفوعات الأخرى للعميل
+    other_payments = Payment.objects.filter(client=payment.client).exclude(id=payment.id).order_by('-payment_date')[:5]
+
+    # الحصول على الفواتير غير المدفوعة للعميل
+    unpaid_invoices = LeaveInvoice.objects.filter(
+        client=payment.client,
+        status__in=['unpaid', 'partially_paid']
+    ).exclude(id__in=[invoice.id for invoice in invoices])
+
+    context = {
         'payment': payment,
-        'payment_details': payment_details
-    })
+        'payment_details': payment_details,
+        'total_paid': total_paid,
+        'remaining_amount': remaining_amount,
+        'client_info': client_info,
+        'other_payments': other_payments,
+        'unpaid_invoices': unpaid_invoices
+    }
+
+    return render(request, 'core/payments/detail.html', context)
 
 
 @login_required
@@ -1300,13 +2070,7 @@ def payment_edit(request, payment_id):
                         )
 
                         # تحديث حالة الفاتورة
-                        invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).aggregate(Sum('amount'))['amount__sum'] or 0
-
-                        if invoice_total_paid >= invoice.amount:
-                            invoice.status = 'paid'
-                        elif invoice_total_paid > 0:
-                            invoice.status = 'partially_paid'
-
+                        invoice.update_status()
                         invoice.save()
 
                         invoice_count += 1
@@ -1331,24 +2095,57 @@ def payment_delete(request, payment_id):
     payment_details = PaymentDetail.objects.filter(payment=payment).select_related('invoice')
 
     if request.method == 'POST':
+        # حفظ معلومات الدفعة قبل الحذف
+        payment_number = payment.payment_number
+        client_name = payment.client.name
+        payment_method_display = {
+            'cash': 'نقدًا',
+            'bank_transfer': 'تحويل بنكي',
+            'check': 'شيك',
+            'credit_card': 'بطاقة ائتمان'
+        }.get(payment.payment_method, payment.payment_method)
+        amount = payment.amount
+        payment_date = payment.payment_date
+
+        # حفظ عدد الفواتير المرتبطة
+        invoice_count = payment_details.count()
+
         # إعادة حالة الفواتير المرتبطة بالدفعة إلى حالتها الأصلية
+        affected_invoices = []
         for detail in payment_details:
             invoice = detail.invoice
+            old_status = invoice.status
+
+            # تحديث حالة الفاتورة بعد حذف الدفعة
             # حذف تفاصيل الدفعة الحالية من حساب المدفوعات
             invoice_total_paid = PaymentDetail.objects.filter(invoice=invoice).exclude(payment=payment).aggregate(Sum('amount'))['amount__sum'] or 0
 
+            # تحديث المبلغ المدفوع في الفاتورة
             if invoice_total_paid >= invoice.amount:
-                invoice.status = 'paid'
+                new_status = 'paid'
             elif invoice_total_paid > 0:
-                invoice.status = 'partially_paid'
+                new_status = 'partially_paid'
             else:
-                invoice.status = 'unpaid'
+                new_status = 'unpaid'
 
-            invoice.save()
+            if old_status != new_status:
+                invoice.status = new_status
+                invoice.save()
+                affected_invoices.append(invoice.invoice_number)
 
         # حذف الدفعة (سيتم حذف تفاصيل الدفعة تلقائيًا بسبب علاقة CASCADE)
         payment.delete()
-        messages.success(request, 'تم حذف الدفعة بنجاح')
+
+        # إعداد رسالة النجاح مع تفاصيل الدفعة المحذوفة
+        success_message = f'تم حذف الدفعة رقم {payment_number} للعميل {client_name} بمبلغ {amount} ريال ({payment_method_display}) بتاريخ {payment_date} بنجاح'
+
+        if invoice_count > 0:
+            success_message += f' مع {invoice_count} فاتورة مرتبطة'
+
+        if affected_invoices:
+            success_message += f'. تم تحديث حالة الفواتير التالية: {", ".join(affected_invoices)}'
+
+        messages.success(request, success_message)
         return redirect('core:payment_list')
 
     return render(request, 'core/payments/delete.html', {
@@ -1356,6 +2153,37 @@ def payment_delete(request, payment_id):
         'payment_details': payment_details
     })
 
+
+# وظائف API
+@login_required
+def api_client_unpaid_invoices(request, client_id):
+    """API لتحميل الفواتير غير المدفوعة للعميل"""
+    try:
+        client = Client.objects.get(id=client_id)
+        unpaid_invoices = LeaveInvoice.objects.filter(
+            client=client,
+            status__in=['unpaid', 'partially_paid']
+        ).order_by('-issue_date')
+
+        invoices_data = []
+        for invoice in unpaid_invoices:
+            invoices_data.append({
+                'id': invoice.id,
+                'invoice_number': invoice.invoice_number,
+                'amount': float(invoice.amount),
+                'remaining': float(invoice.get_remaining()),
+                'issue_date': invoice.issue_date.strftime('%Y-%m-%d'),
+                'due_date': invoice.due_date.strftime('%Y-%m-%d'),
+                'status': invoice.status,
+                'leave_type': invoice.leave_type,
+                'leave_id': invoice.leave_id
+            })
+
+        return JsonResponse(invoices_data, safe=False)
+    except Client.DoesNotExist:
+        return JsonResponse({'error': 'العميل غير موجود'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 # وظائف التقارير
 @login_required

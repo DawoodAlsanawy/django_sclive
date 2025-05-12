@@ -48,7 +48,12 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>الاسم</th>
+                        <th>
+                            <a href="?sort={% if sort == 'name' %}-name{% else %}name{% endif %}{% if name %}&name={{ name }}{% endif %}{% if phone %}&phone={{ phone }}{% endif %}{% if email %}&email={{ email }}{% endif %}">
+                                الاسم
+                                {% if sort == 'name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-name' %}<i class="fas fa-sort-down"></i>{% endif %}
+                            </a>
+                        </th>
                         <th>رقم الهاتف</th>
                         <th>البريد الإلكتروني</th>
                         <th>العنوان</th>
@@ -85,6 +90,51 @@
                     {% endfor %}
                 </tbody>
             </table>
+
+            <!-- الترقيم الصفحي -->
+            {% if clients.has_other_pages %}
+            <div class="pagination justify-content-center mt-4">
+                <ul class="pagination">
+                    {% if clients.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ clients.previous_page_number }}{% if name %}&name={{ name }}{% endif %}{% if phone %}&phone={{ phone }}{% endif %}{% if email %}&email={{ email }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="السابق">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="السابق">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for i in clients.paginator.page_range %}
+                        {% if clients.number == i %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                        {% elif i > clients.number|add:'-3' and i < clients.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}{% if name %}&name={{ name }}{% endif %}{% if phone %}&phone={{ phone }}{% endif %}{% if email %}&email={{ email }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ i }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if clients.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ clients.next_page_number }}{% if name %}&name={{ name }}{% endif %}{% if phone %}&phone={{ phone }}{% endif %}{% if email %}&email={{ email }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="التالي">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="التالي">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
