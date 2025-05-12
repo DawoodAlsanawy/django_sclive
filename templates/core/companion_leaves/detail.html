@@ -146,7 +146,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-4">
         <div class="card mb-4">
             <div class="card-header">
@@ -191,7 +191,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0">معلومات المرافق</h5>
@@ -235,7 +235,49 @@
                 </div>
             </div>
         </div>
-        
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">المعلومات المالية</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>سعر الإجازة:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ leave_price }} ريال
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>إجمالي الفواتير:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ total_invoices_amount }} ريال
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>إجمالي المدفوعات:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        {{ total_paid_amount }} ريال
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-5">
+                        <strong>المبلغ المتبقي:</strong>
+                    </div>
+                    <div class="col-md-7">
+                        <span class="{% if remaining_amount > 0 %}text-danger{% else %}text-success{% endif %}">
+                            {{ remaining_amount }} ريال
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">الفواتير المرتبطة</h5>

@@ -1205,8 +1205,83 @@ def sick_leave_search_api(request):
 @login_required
 def companion_leave_list(request):
     """قائمة إجازات المرافقين"""
+    # تطبيق الفلاتر
     companion_leaves = CompanionLeave.objects.all()
-    return render(request, 'core/companion_leaves/list.html', {'companion_leaves': companion_leaves})
+
+    # فلتر رقم الإجازة
+    leave_id = request.GET.get('leave_id')
+    if leave_id:
+        companion_leaves = companion_leaves.filter(leave_id__icontains=leave_id)
+
+    # فلتر المريض
+    patient = request.GET.get('patient')
+    if patient:
+        companion_leaves = companion_leaves.filter(patient__name__icontains=patient)
+
+    # فلتر المرافق
+    companion = request.GET.get('companion')
+    if companion:
+        companion_leaves = companion_leaves.filter(companion__name__icontains=companion)
+
+    # فلتر الطبيب
+    doctor = request.GET.get('doctor')
+    if doctor:
+        companion_leaves = companion_leaves.filter(doctor__name__icontains=doctor)
+
+    # فلتر الحالة
+    status = request.GET.get('status')
+    if status:
+        companion_leaves = companion_leaves.filter(status=status)
+
+    # فلتر تاريخ البداية (من)
+    start_date_from = request.GET.get('start_date_from')
+    if start_date_from:
+        companion_leaves = companion_leaves.filter(start_date__gte=start_date_from)
+
+    # فلتر تاريخ البداية (إلى)
+    start_date_to = request.GET.get('start_date_to')
+    if start_date_to:
+        companion_leaves = companion_leaves.filter(start_date__lte=start_date_to)
+
+    # فلتر تاريخ النهاية (من)
+    end_date_from = request.GET.get('end_date_from')
+    if end_date_from:
+        companion_leaves = companion_leaves.filter(end_date__gte=end_date_from)
+
+    # فلتر تاريخ النهاية (إلى)
+    end_date_to = request.GET.get('end_date_to')
+    if end_date_to:
+        companion_leaves = companion_leaves.filter(end_date__lte=end_date_to)
+
+    # الترتيب
+    sort_by = request.GET.get('sort', '-created_at')
+    if sort_by not in ['leave_id', '-leave_id', 'patient__name', '-patient__name', 'companion__name', '-companion__name',
+                      'doctor__name', '-doctor__name', 'start_date', '-start_date', 'end_date', '-end_date',
+                      'duration_days', '-duration_days', 'status', '-status', 'created_at', '-created_at']:
+        sort_by = '-created_at'
+
+    companion_leaves = companion_leaves.order_by(sort_by)
+
+    # الترقيم الصفحي
+    paginator = Paginator(companion_leaves, 10)  # 10 إجازات في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'companion_leaves': page_obj,
+        'leave_id': leave_id,
+        'patient': patient,
+        'companion': companion,
+        'doctor': doctor,
+        'status': status,
+        'start_date_from': start_date_from,
+        'start_date_to': start_date_to,
+        'end_date_from': end_date_from,
+        'end_date_to': end_date_to,
+        'sort': sort_by
+    }
+
+    return render(request, 'core/companion_leaves/list.html', context)
 
 
 @login_required
@@ -1219,7 +1294,25 @@ def companion_leave_create(request):
             messages.success(request, f'تم إنشاء إجازة المرافق رقم {companion_leave.leave_id} بنجاح')
             return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
     else:
-        form = CompanionLeaveForm()
+        # توليد رقم إجازة تلقائي
+        import datetime
+        import random
+        today = datetime.date.today()
+        date_string = today.strftime('%Y%m%d')
+        random_num = str(random.randint(100, 999))
+        leave_id = f'CL-{date_string}-{random_num}'
+
+        # التحقق من عدم وجود رقم إجازة مطابق
+        while CompanionLeave.objects.filter(leave_id=leave_id).exists():
+            random_num = str(random.randint(100, 999))
+            leave_id = f'CL-{date_string}-{random_num}'
+
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        initial_data = {
+            'leave_id': leave_id,
+            'issue_date': today
+        }
+        form = CompanionLeaveForm(initial=initial_data)
 
     return render(request, 'core/companion_leaves/create.html', {'form': form})
 
@@ -1235,10 +1328,31 @@ def companion_leave_detail(request, companion_leave_id):
         leave_id=companion_leave.leave_id
     )
 
-    return render(request, 'core/companion_leaves/detail.html', {
+    # حساب إجمالي المبالغ للفواتير المرتبطة
+    from django.db.models import Sum
+    total_invoices_amount = related_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب إجمالي المبالغ المدفوعة
+    total_paid_amount = 0
+    for invoice in related_invoices:
+        total_paid_amount += invoice.get_total_paid()
+
+    # حساب المبلغ المتبقي
+    remaining_amount = total_invoices_amount - total_paid_amount
+
+    # الحصول على سعر إجازة المرافق
+    leave_price = LeavePrice.get_price('companion_leave', companion_leave.duration_days)
+
+    context = {
         'companion_leave': companion_leave,
-        'related_invoices': related_invoices
-    })
+        'related_invoices': related_invoices,
+        'total_invoices_amount': total_invoices_amount,
+        'total_paid_amount': total_paid_amount,
+        'remaining_amount': remaining_amount,
+        'leave_price': leave_price
+    }
+
+    return render(request, 'core/companion_leaves/detail.html', context)
 
 
 @login_required
@@ -1270,8 +1384,11 @@ def companion_leave_delete(request, companion_leave_id):
     )
 
     if request.method == 'POST':
+        leave_id = companion_leave.leave_id
+        patient_name = companion_leave.patient.name
+        companion_name = companion_leave.companion.name
         companion_leave.delete()
-        messages.success(request, 'تم حذف إجازة المرافق بنجاح')
+        messages.success(request, f'تم حذف إجازة المرافق رقم {leave_id} للمريض {patient_name} والمرافق {companion_name} بنجاح')
         return redirect('core:companion_leave_list')
 
     return render(request, 'core/companion_leaves/delete.html', {
