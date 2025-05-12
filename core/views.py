@@ -247,7 +247,13 @@ def user_delete(request, user_id):
 @login_required
 def hospital_list(request):
     """قائمة المستشفيات"""
-    hospitals = Hospital.objects.all()
+    hospitals = Hospital.objects.all().order_by('name')
+
+    # تطبيق الفلاتر إذا تم إضافتها في المستقبل
+    name = request.GET.get('name')
+    if name:
+        hospitals = hospitals.filter(name__icontains=name)
+
     return render(request, 'core/hospitals/list.html', {'hospitals': hospitals})
 
 
@@ -287,10 +293,16 @@ def hospital_edit(request, hospital_id):
 def hospital_delete(request, hospital_id):
     """حذف مستشفى"""
     hospital = get_object_or_404(Hospital, id=hospital_id)
+
+    # التحقق من وجود أطباء مرتبطين بالمستشفى
+    doctors_count = hospital.doctors.count()
+
     if request.method == 'POST':
+        hospital_name = hospital.name  # حفظ اسم المستشفى قبل الحذف
         hospital.delete()
-        messages.success(request, 'تم حذف المستشفى بنجاح')
+        messages.success(request, f'تم حذف المستشفى {hospital_name} بنجاح')
         return redirect('core:hospital_list')
+
     return render(request, 'core/hospitals/delete.html', {'hospital': hospital})
 
 
@@ -298,8 +310,28 @@ def hospital_delete(request, hospital_id):
 @login_required
 def employer_list(request):
     """قائمة جهات العمل"""
-    employers = Employer.objects.all()
+    employers = Employer.objects.all().order_by('name')
+
+    # تطبيق الفلاتر
+    name = request.GET.get('name')
+    phone = request.GET.get('phone')
+    email = request.GET.get('email')
+
+    if name:
+        employers = employers.filter(name__icontains=name)
+    if phone:
+        employers = employers.filter(phone__icontains=phone)
+    if email:
+        employers = employers.filter(email__icontains=email)
+
     return render(request, 'core/employers/list.html', {'employers': employers})
+
+
+@login_required
+def employer_detail(request, employer_id):
+    """عرض تفاصيل جهة العمل"""
+    employer = get_object_or_404(Employer, id=employer_id)
+    return render(request, 'core/employers/detail.html', {'employer': employer})
 
 
 @login_required
@@ -327,7 +359,7 @@ def employer_edit(request, employer_id):
         if form.is_valid():
             form.save()
             messages.success(request, f'تم تعديل جهة العمل {employer.name} بنجاح')
-            return redirect('core:employer_list')
+            return redirect('core:employer_detail', employer_id=employer.id)
     else:
         form = EmployerForm(instance=employer)
 
@@ -338,10 +370,16 @@ def employer_edit(request, employer_id):
 def employer_delete(request, employer_id):
     """حذف جهة عمل"""
     employer = get_object_or_404(Employer, id=employer_id)
+
+    # التحقق من وجود موظفين مرتبطين بجهة العمل
+    patients_count = employer.patients.count()
+
     if request.method == 'POST':
+        employer_name = employer.name  # حفظ اسم جهة العمل قبل الحذف
         employer.delete()
-        messages.success(request, 'تم حذف جهة العمل بنجاح')
+        messages.success(request, f'تم حذف جهة العمل {employer_name} بنجاح')
         return redirect('core:employer_list')
+
     return render(request, 'core/employers/delete.html', {'employer': employer})
 
 
@@ -690,8 +728,8 @@ def leave_price_create(request):
     if request.method == 'POST':
         form = LeavePriceForm(request.POST)
         if form.is_valid():
-            leave_price = form.save()
-            messages.success(request, f'تم إنشاء سعر الإجازة بنجاح')
+            form.save()
+            messages.success(request, 'تم إنشاء سعر الإجازة بنجاح')
             return redirect('core:leave_price_list')
     else:
         form = LeavePriceForm()
