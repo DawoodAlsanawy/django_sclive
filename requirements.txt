@@ -1,6 +1,30 @@
-django==5.0.1
-mysqlclient==2.2.1
-django-crispy-forms==2.1
-django-filter==23.5
-django-bootstrap4==24.1
+# Django وملحقاته
+Django==5.0.1
+django-crispy-forms==2.4
+crispy-bootstrap4==2024.10
+django-filter==24.1
+
+# قاعدة البيانات
+mysqlclient==2.2.4
+
+# الأمان
+python-dotenv==1.0.1
+
+# خدمة الملفات الثابتة
+whitenoise==6.9.0
+
+# WSGI خادم
+gunicorn==22.0.0
+
+# أدوات الوسائط
 Pillow==11.2.1
+
+# أدوات التطوير (اختياري)
+django-debug-toolbar==4.3.0
+
+# أدوات الاختبار (اختياري)
+pytest==8.0.0
+pytest-django==4.8.0
+
+# أدوات الأداء (اختياري)
+django-cacheops==7.0.2

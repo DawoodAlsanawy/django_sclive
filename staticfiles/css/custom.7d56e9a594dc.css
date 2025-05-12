@@ -1,0 +1,67 @@
+/* ملف CSS مخصص للمشروع */
+
+body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: #f8f9fa;
+}
+
+.rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.card {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+/* تحسينات للأجهزة المحمولة */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+}
+
+/* تحسينات للطباعة */
+@media print {
+    .no-print {
+        display: none;
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    body {
+        font-size: 12pt;
+    }
+}
