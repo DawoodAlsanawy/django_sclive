@@ -1069,19 +1069,12 @@ def sick_leave_create(request):
             return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
     else:
         # توليد رقم إجازة تلقائي
-        import datetime
-        import random
-        today = datetime.date.today()
-        date_string = today.strftime('%Y%m%d')
-        random_num = str(random.randint(100, 999))
-        leave_id = f'SL-{date_string}-{random_num}'
-
-        # التحقق من عدم وجود رقم إجازة مطابق
-        while SickLeave.objects.filter(leave_id=leave_id).exists():
-            random_num = str(random.randint(100, 999))
-            leave_id = f'SL-{date_string}-{random_num}'
+        from core.utils import generate_unique_number
+        leave_id = generate_unique_number('SL', SickLeave)
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        import datetime
+        today = datetime.date.today()
         initial_data = {
             'leave_id': leave_id,
             'issue_date': today
@@ -1295,17 +1288,12 @@ def companion_leave_create(request):
             return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
     else:
         # توليد رقم إجازة تلقائي
-        import datetime
-        import random
-        today = datetime.date.today()
-        date_string = today.strftime('%Y%m%d')
-        random_num = str(random.randint(100, 999))
-        leave_id = f'CL-{date_string}-{random_num}'
+        from core.utils import generate_unique_number
+        leave_id = generate_unique_number('CL', CompanionLeave)
 
-        # التحقق من عدم وجود رقم إجازة مطابق
-        while CompanionLeave.objects.filter(leave_id=leave_id).exists():
-            random_num = str(random.randint(100, 999))
-            leave_id = f'CL-{date_string}-{random_num}'
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        import datetime
+        today = datetime.date.today()
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
         initial_data = {
@@ -1569,17 +1557,12 @@ def leave_invoice_create(request):
             return redirect('core:leave_invoice_detail', leave_invoice_id=invoice.id)
     else:
         # توليد رقم فاتورة تلقائي
-        import datetime
-        import random
-        today = datetime.date.today()
-        date_string = today.strftime('%Y%m%d')
-        random_num = str(random.randint(100, 999))
-        invoice_number = f'INV-{date_string}-{random_num}'
+        from core.utils import generate_unique_number
+        invoice_number = generate_unique_number('INV', LeaveInvoice)
 
-        # التحقق من عدم وجود رقم فاتورة مطابق
-        while LeaveInvoice.objects.filter(invoice_number=invoice_number).exists():
-            random_num = str(random.randint(100, 999))
-            invoice_number = f'INV-{date_string}-{random_num}'
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        import datetime
+        today = datetime.date.today()
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
         initial_data = {
@@ -1914,17 +1897,12 @@ def payment_create(request):
             return redirect('core:payment_detail', payment_id=payment.id)
     else:
         # توليد رقم دفعة تلقائي
-        import datetime
-        import random
-        today = datetime.date.today()
-        date_string = today.strftime('%Y%m%d')
-        random_num = str(random.randint(100, 999))
-        payment_number = f'PAY-{date_string}-{random_num}'
+        from core.utils import generate_unique_number
+        payment_number = generate_unique_number('PAY', Payment)
 
-        # التحقق من عدم وجود رقم دفعة مطابق
-        while Payment.objects.filter(payment_number=payment_number).exists():
-            random_num = str(random.randint(100, 999))
-            payment_number = f'PAY-{date_string}-{random_num}'
+        # تعيين تاريخ اليوم كتاريخ افتراضي للدفع
+        import datetime
+        today = datetime.date.today()
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للدفع
         initial_data = {
@@ -2167,13 +2145,18 @@ def api_client_unpaid_invoices(request, client_id):
 
         invoices_data = []
         for invoice in unpaid_invoices:
+            # التعامل مع تاريخ الاستحقاق الذي قد يكون فارغًا
+            due_date_str = ''
+            if invoice.due_date:
+                due_date_str = invoice.due_date.strftime('%Y-%m-%d')
+
             invoices_data.append({
                 'id': invoice.id,
                 'invoice_number': invoice.invoice_number,
                 'amount': float(invoice.amount),
                 'remaining': float(invoice.get_remaining()),
                 'issue_date': invoice.issue_date.strftime('%Y-%m-%d'),
-                'due_date': invoice.due_date.strftime('%Y-%m-%d'),
+                'due_date': due_date_str,
                 'status': invoice.status,
                 'leave_type': invoice.leave_type,
                 'leave_id': invoice.leave_id
