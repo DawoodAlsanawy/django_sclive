@@ -97,6 +97,8 @@ class Doctor(models.Model):
     name = models.CharField(max_length=100, verbose_name='اسم الطبيب')
     position = models.CharField(max_length=100, verbose_name='المنصب')
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', verbose_name='المستشفى')
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
+    email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
 
