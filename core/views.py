@@ -954,10 +954,108 @@ def leave_price_api_get_price(request):
 
 # وظائف إدارة الإجازات المرضية
 @login_required
+def update_all_leaves_status(request):
+    """تحديث حالة جميع الإجازات"""
+    # تحديث حالة الإجازات المرضية
+    sick_leaves = SickLeave.objects.all()
+    sick_updated = 0
+    for leave in sick_leaves:
+        old_status = leave.status
+        leave.update_status()
+        if old_status != leave.status:
+            sick_updated += 1
+
+    # تحديث حالة إجازات المرافقين
+    companion_leaves = CompanionLeave.objects.all()
+    companion_updated = 0
+    for leave in companion_leaves:
+        old_status = leave.status
+        leave.update_status()
+        if old_status != leave.status:
+            companion_updated += 1
+
+    messages.success(request, f'تم تحديث حالة {sick_updated} إجازة مرضية و {companion_updated} إجازة مرافق')
+
+    # العودة إلى الصفحة السابقة
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
+    return redirect('core:dashboard')
+
+@login_required
 def sick_leave_list(request):
     """قائمة الإجازات المرضية"""
+    # تطبيق الفلاتر
     sick_leaves = SickLeave.objects.all()
-    return render(request, 'core/sick_leaves/list.html', {'sick_leaves': sick_leaves})
+
+    # فلتر رقم الإجازة
+    leave_id = request.GET.get('leave_id')
+    if leave_id:
+        sick_leaves = sick_leaves.filter(leave_id__icontains=leave_id)
+
+    # فلتر المريض
+    patient = request.GET.get('patient')
+    if patient:
+        sick_leaves = sick_leaves.filter(patient__name__icontains=patient)
+
+    # فلتر الطبيب
+    doctor = request.GET.get('doctor')
+    if doctor:
+        sick_leaves = sick_leaves.filter(doctor__name__icontains=doctor)
+
+    # فلتر الحالة
+    status = request.GET.get('status')
+    if status:
+        sick_leaves = sick_leaves.filter(status=status)
+
+    # فلتر تاريخ البداية (من)
+    start_date_from = request.GET.get('start_date_from')
+    if start_date_from:
+        sick_leaves = sick_leaves.filter(start_date__gte=start_date_from)
+
+    # فلتر تاريخ البداية (إلى)
+    start_date_to = request.GET.get('start_date_to')
+    if start_date_to:
+        sick_leaves = sick_leaves.filter(start_date__lte=start_date_to)
+
+    # فلتر تاريخ النهاية (من)
+    end_date_from = request.GET.get('end_date_from')
+    if end_date_from:
+        sick_leaves = sick_leaves.filter(end_date__gte=end_date_from)
+
+    # فلتر تاريخ النهاية (إلى)
+    end_date_to = request.GET.get('end_date_to')
+    if end_date_to:
+        sick_leaves = sick_leaves.filter(end_date__lte=end_date_to)
+
+    # الترتيب
+    sort_by = request.GET.get('sort', '-created_at')
+    if sort_by not in ['leave_id', '-leave_id', 'patient__name', '-patient__name', 'doctor__name', '-doctor__name',
+                      'start_date', '-start_date', 'end_date', '-end_date', 'duration_days', '-duration_days',
+                      'status', '-status', 'created_at', '-created_at']:
+        sort_by = '-created_at'
+
+    sick_leaves = sick_leaves.order_by(sort_by)
+
+    # الترقيم الصفحي
+    paginator = Paginator(sick_leaves, 10)  # 10 إجازات في كل صفحة
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'sick_leaves': page_obj,
+        'leave_id': leave_id,
+        'patient': patient,
+        'doctor': doctor,
+        'status': status,
+        'start_date_from': start_date_from,
+        'start_date_to': start_date_to,
+        'end_date_from': end_date_from,
+        'end_date_to': end_date_to,
+        'sort': sort_by
+    }
+
+    return render(request, 'core/sick_leaves/list.html', context)
 
 
 @login_required
@@ -970,7 +1068,25 @@ def sick_leave_create(request):
             messages.success(request, f'تم إنشاء الإجازة المرضية رقم {sick_leave.leave_id} بنجاح')
             return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
     else:
-        form = SickLeaveForm()
+        # توليد رقم إجازة تلقائي
+        import datetime
+        import random
+        today = datetime.date.today()
+        date_string = today.strftime('%Y%m%d')
+        random_num = str(random.randint(100, 999))
+        leave_id = f'SL-{date_string}-{random_num}'
+
+        # التحقق من عدم وجود رقم إجازة مطابق
+        while SickLeave.objects.filter(leave_id=leave_id).exists():
+            random_num = str(random.randint(100, 999))
+            leave_id = f'SL-{date_string}-{random_num}'
+
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        initial_data = {
+            'leave_id': leave_id,
+            'issue_date': today
+        }
+        form = SickLeaveForm(initial=initial_data)
 
     return render(request, 'core/sick_leaves/create.html', {'form': form})
 
@@ -986,10 +1102,31 @@ def sick_leave_detail(request, sick_leave_id):
         leave_id=sick_leave.leave_id
     )
 
-    return render(request, 'core/sick_leaves/detail.html', {
+    # حساب إجمالي المبالغ للفواتير المرتبطة
+    from django.db.models import Sum
+    total_invoices_amount = related_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # حساب إجمالي المبالغ المدفوعة
+    total_paid_amount = 0
+    for invoice in related_invoices:
+        total_paid_amount += invoice.get_total_paid()
+
+    # حساب المبلغ المتبقي
+    remaining_amount = total_invoices_amount - total_paid_amount
+
+    # الحصول على سعر الإجازة المرضية
+    leave_price = LeavePrice.get_price('sick_leave', sick_leave.duration_days)
+
+    context = {
         'sick_leave': sick_leave,
-        'related_invoices': related_invoices
-    })
+        'related_invoices': related_invoices,
+        'total_invoices_amount': total_invoices_amount,
+        'total_paid_amount': total_paid_amount,
+        'remaining_amount': remaining_amount,
+        'leave_price': leave_price
+    }
+
+    return render(request, 'core/sick_leaves/detail.html', context)
 
 
 @login_required
@@ -1021,8 +1158,10 @@ def sick_leave_delete(request, sick_leave_id):
     )
 
     if request.method == 'POST':
+        leave_id = sick_leave.leave_id
+        patient_name = sick_leave.patient.name
         sick_leave.delete()
-        messages.success(request, 'تم حذف الإجازة المرضية بنجاح')
+        messages.success(request, f'تم حذف الإجازة المرضية رقم {leave_id} للمريض {patient_name} بنجاح')
         return redirect('core:sick_leave_list')
 
     return render(request, 'core/sick_leaves/delete.html', {

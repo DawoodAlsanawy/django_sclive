@@ -238,7 +238,30 @@ class SickLeave(models.Model):
         # حساب مدة الإجازة
         if self.start_date and self.end_date:
             self.duration_days = (self.end_date - self.start_date).days + 1
+
+        # تحديث حالة الإجازة بناءً على التواريخ
+        if self.status != 'cancelled':  # لا نقوم بتحديث الحالة إذا كانت الإجازة ملغية
+            today = timezone.now().date()
+            if self.end_date < today:
+                self.status = 'expired'
+            else:
+                self.status = 'active'
+
         super().save(*args, **kwargs)
+
+    def update_status(self):
+        """تحديث حالة الإجازة بناءً على التواريخ"""
+        if self.status != 'cancelled':  # لا نقوم بتحديث الحالة إذا كانت الإجازة ملغية
+            today = timezone.now().date()
+            old_status = self.status
+
+            if self.end_date < today:
+                self.status = 'expired'
+            else:
+                self.status = 'active'
+
+            if old_status != self.status:
+                self.save()
 
 
 class CompanionLeave(models.Model):
@@ -272,7 +295,30 @@ class CompanionLeave(models.Model):
         # حساب مدة الإجازة
         if self.start_date and self.end_date:
             self.duration_days = (self.end_date - self.start_date).days + 1
+
+        # تحديث حالة الإجازة بناءً على التواريخ
+        if self.status != 'cancelled':  # لا نقوم بتحديث الحالة إذا كانت الإجازة ملغية
+            today = timezone.now().date()
+            if self.end_date < today:
+                self.status = 'expired'
+            else:
+                self.status = 'active'
+
         super().save(*args, **kwargs)
+
+    def update_status(self):
+        """تحديث حالة الإجازة بناءً على التواريخ"""
+        if self.status != 'cancelled':  # لا نقوم بتحديث الحالة إذا كانت الإجازة ملغية
+            today = timezone.now().date()
+            old_status = self.status
+
+            if self.end_date < today:
+                self.status = 'expired'
+            else:
+                self.status = 'active'
+
+            if old_status != self.status:
+                self.save()
 
 
 class LeaveInvoice(models.Model):

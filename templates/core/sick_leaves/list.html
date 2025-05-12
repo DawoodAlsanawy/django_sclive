@@ -9,9 +9,14 @@
         <p class="text-muted">إدارة الإجازات المرضية في النظام</p>
     </div>
     <div class="col-md-6 text-md-end">
-        <a href="{% url 'core:sick_leave_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> إضافة إجازة مرضية جديدة
-        </a>
+        <div class="btn-group" role="group">
+            <a href="{% url 'core:sick_leave_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> إضافة إجازة مرضية جديدة
+            </a>
+            <a href="{% url 'core:update_all_leaves_status' %}" class="btn btn-success">
+                <i class="fas fa-sync"></i> تحديث حالة جميع الإجازات
+            </a>
+        </div>
     </div>
 </div>
 
@@ -73,13 +78,13 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>رقم الإجازة</th>
-                        <th>المريض</th>
-                        <th>الطبيب</th>
-                        <th>تاريخ البداية</th>
-                        <th>تاريخ النهاية</th>
-                        <th>المدة (أيام)</th>
-                        <th>الحالة</th>
+                        <th data-sort="leave_id" style="cursor: pointer;">رقم الإجازة {% if sort == 'leave_id' %}<i class="fas fa-sort-up"></i>{% elif sort == '-leave_id' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="patient__name" style="cursor: pointer;">المريض {% if sort == 'patient__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-patient__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="doctor__name" style="cursor: pointer;">الطبيب {% if sort == 'doctor__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-doctor__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="start_date" style="cursor: pointer;">تاريخ البداية {% if sort == 'start_date' %}<i class="fas fa-sort-up"></i>{% elif sort == '-start_date' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="end_date" style="cursor: pointer;">تاريخ النهاية {% if sort == 'end_date' %}<i class="fas fa-sort-up"></i>{% elif sort == '-end_date' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="duration_days" style="cursor: pointer;">المدة (أيام) {% if sort == 'duration_days' %}<i class="fas fa-sort-up"></i>{% elif sort == '-duration_days' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th data-sort="status" style="cursor: pointer;">الحالة {% if sort == 'status' %}<i class="fas fa-sort-up"></i>{% elif sort == '-status' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -123,6 +128,119 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- الترقيم الصفحي -->
+        {% if sick_leaves.has_other_pages %}
+        <div class="pagination justify-content-center mt-4">
+            <ul class="pagination">
+                {% if sick_leaves.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ sick_leaves.previous_page_number }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if doctor %}&doctor={{ doctor }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="السابق">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="السابق">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for i in sick_leaves.paginator.page_range %}
+                    {% if sick_leaves.number == i %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                    {% elif i > sick_leaves.number|add:'-3' and i < sick_leaves.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if doctor %}&doctor={{ doctor }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if sick_leaves.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ sick_leaves.next_page_number }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if doctor %}&doctor={{ doctor }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="التالي">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="التالي">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<!-- إحصائيات سريعة -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">إحصائيات سريعة</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">إجمالي الإجازات</h5>
+                        <p class="card-text display-6">{{ sick_leaves.paginator.count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">الإجازات النشطة</h5>
+                        <p class="card-text display-6">{{ sick_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status", "equalto", "active"|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">الإجازات الملغية</h5>
+                        <p class="card-text display-6">{{ sick_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status", "equalto", "cancelled"|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-secondary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">الإجازات المنتهية</h5>
+                        <p class="card-text display-6">{{ sick_leaves.paginator.object_list|dictsortreversed:"status"|selectattr:"status", "equalto", "expired"|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // إضافة دعم الترتيب
+        const tableHeaders = document.querySelectorAll('th[data-sort]');
+        tableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortField = this.dataset.sort;
+                const currentSort = new URLSearchParams(window.location.search).get('sort') || '';
+
+                let newSort = sortField;
+                if (currentSort === sortField) {
+                    newSort = '-' + sortField;
+                }
+
+                // إنشاء URL جديد مع معلمة الترتيب الجديدة
+                const url = new URL(window.location.href);
+                url.searchParams.set('sort', newSort);
+                window.location.href = url.toString();
+            });
+        });
+    });
+</script>
 {% endblock %}

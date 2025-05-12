@@ -61,6 +61,7 @@ urlpatterns = [
     path('leave-prices/api/get-price/', views.leave_price_api_get_price, name='leave_price_api_get_price'),
 
     # إدارة الإجازات المرضية
+    path('leaves/update-status/', views.update_all_leaves_status, name='update_all_leaves_status'),
     path('sick-leaves/', views.sick_leave_list, name='sick_leave_list'),
     path('sick-leaves/create/', views.sick_leave_create, name='sick_leave_create'),
     path('sick-leaves/<int:sick_leave_id>/', views.sick_leave_detail, name='sick_leave_detail'),
