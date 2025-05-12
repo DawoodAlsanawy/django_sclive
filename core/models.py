@@ -116,6 +116,9 @@ class Patient(models.Model):
     name = models.CharField(max_length=100, verbose_name='اسم المريض')
     nationality = models.CharField(max_length=50, verbose_name='الجنسية')
     employer = models.ForeignKey(Employer, on_delete=models.SET_NULL, null=True, blank=True, related_name='patients', verbose_name='جهة العمل')
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
+    email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
+    address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
 

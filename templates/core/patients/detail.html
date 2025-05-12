@@ -68,6 +68,42 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-4">
+                        <strong>رقم الهاتف:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if patient.phone %}
+                        {{ patient.phone }}
+                        {% else %}
+                        <span class="text-muted">غير محدد</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>البريد الإلكتروني:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if patient.email %}
+                        {{ patient.email }}
+                        {% else %}
+                        <span class="text-muted">غير محدد</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>العنوان:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if patient.address %}
+                        {{ patient.address }}
+                        {% else %}
+                        <span class="text-muted">غير محدد</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
                         <strong>تاريخ الإنشاء:</strong>
                     </div>
                     <div class="col-md-8">
@@ -85,7 +121,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">

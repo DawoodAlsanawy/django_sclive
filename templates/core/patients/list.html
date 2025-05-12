@@ -22,15 +22,19 @@
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="name" class="form-label">الاسم</label>
                 <input type="text" class="form-control" id="name" name="name" value="{{ request.GET.name }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="national_id" class="form-label">رقم الهوية</label>
                 <input type="text" class="form-control" id="national_id" name="national_id" value="{{ request.GET.national_id }}">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label for="phone" class="form-label">رقم الهاتف</label>
+                <input type="text" class="form-control" id="phone" name="phone" value="{{ request.GET.phone }}">
+            </div>
+            <div class="col-md-3">
                 <label for="employer" class="form-label">جهة العمل</label>
                 <select class="form-select" id="employer" name="employer">
                     <option value="">الكل</option>
@@ -57,7 +61,7 @@
                         <th>رقم الهوية</th>
                         <th>الجنسية</th>
                         <th>جهة العمل</th>
-                        <th>تاريخ الإنشاء</th>
+                        <th>رقم الهاتف</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -68,7 +72,7 @@
                         <td>{{ patient.national_id }}</td>
                         <td>{{ patient.nationality }}</td>
                         <td>{{ patient.employer.name|default:"-" }}</td>
-                        <td>{{ patient.created_at|date:"Y-m-d" }}</td>
+                        <td>{{ patient.phone|default:"-" }}</td>
                         <td>
                             <div class="btn-group" role="group">
                                 <a href="{% url 'core:patient_detail' patient.id %}" class="btn btn-sm btn-info">

@@ -112,12 +112,15 @@ class PatientForm(forms.ModelForm):
     """نموذج إنشاء وتعديل المريض"""
     class Meta:
         model = Patient
-        fields = ('national_id', 'name', 'nationality', 'employer')
+        fields = ('national_id', 'name', 'nationality', 'employer', 'phone', 'email', 'address')
         widgets = {
             'national_id': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'nationality': forms.TextInput(attrs={'class': 'form-control'}),
-            'employer': forms.Select(attrs={'class': 'form-control'})
+            'employer': forms.Select(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'address': forms.TextInput(attrs={'class': 'form-control'})
         }
 
 

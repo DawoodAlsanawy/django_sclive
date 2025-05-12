@@ -521,6 +521,7 @@ def patient_list(request):
     # تصفية البيانات حسب المعايير
     name = request.GET.get('name')
     national_id = request.GET.get('national_id')
+    phone = request.GET.get('phone')
     employer_id = request.GET.get('employer')
 
     patients = Patient.objects.all().order_by('name')
@@ -530,6 +531,9 @@ def patient_list(request):
 
     if national_id:
         patients = patients.filter(national_id__icontains=national_id)
+
+    if phone:
+        patients = patients.filter(phone__icontains=phone)
 
     if employer_id:
         patients = patients.filter(employer_id=employer_id)
@@ -605,8 +609,9 @@ def patient_delete(request, patient_id):
     companion_leaves = CompanionLeave.objects.filter(patient=patient).count()
 
     if request.method == 'POST':
+        patient_name = patient.name  # حفظ اسم المريض قبل الحذف
         patient.delete()
-        messages.success(request, 'تم حذف المريض بنجاح')
+        messages.success(request, f'تم حذف المريض {patient_name} بنجاح')
         return redirect('core:patient_list')
 
     context = {
@@ -626,7 +631,10 @@ def patient_search_api(request):
         return JsonResponse([], safe=False)
 
     patients = Patient.objects.filter(
-        Q(name__icontains=query) | Q(national_id__icontains=query)
+        Q(name__icontains=query) |
+        Q(national_id__icontains=query) |
+        Q(phone__icontains=query) |
+        Q(email__icontains=query)
     )[:10]
 
     results = []
@@ -638,7 +646,10 @@ def patient_search_api(request):
             'display': patient.name,
             'national_id': patient.national_id,
             'nationality': patient.nationality,
-            'employer': employer_name
+            'employer': employer_name,
+            'phone': patient.phone or '',
+            'email': patient.email or '',
+            'address': patient.address or ''
         })
 
     return JsonResponse(results, safe=False)
