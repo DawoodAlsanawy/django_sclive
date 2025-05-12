@@ -2154,6 +2154,37 @@ def payment_delete(request, payment_id):
     })
 
 
+# وظائف API
+@login_required
+def api_client_unpaid_invoices(request, client_id):
+    """API لتحميل الفواتير غير المدفوعة للعميل"""
+    try:
+        client = Client.objects.get(id=client_id)
+        unpaid_invoices = LeaveInvoice.objects.filter(
+            client=client,
+            status__in=['unpaid', 'partially_paid']
+        ).order_by('-issue_date')
+
+        invoices_data = []
+        for invoice in unpaid_invoices:
+            invoices_data.append({
+                'id': invoice.id,
+                'invoice_number': invoice.invoice_number,
+                'amount': float(invoice.amount),
+                'remaining': float(invoice.get_remaining()),
+                'issue_date': invoice.issue_date.strftime('%Y-%m-%d'),
+                'due_date': invoice.due_date.strftime('%Y-%m-%d'),
+                'status': invoice.status,
+                'leave_type': invoice.leave_type,
+                'leave_id': invoice.leave_id
+            })
+
+        return JsonResponse(invoices_data, safe=False)
+    except Client.DoesNotExist:
+        return JsonResponse({'error': 'العميل غير موجود'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 # وظائف التقارير
 @login_required
 def report_index(request):

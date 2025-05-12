@@ -91,6 +91,9 @@ urlpatterns = [
     path('payments/<int:payment_id>/edit/', views.payment_edit, name='payment_edit'),
     path('payments/<int:payment_id>/delete/', views.payment_delete, name='payment_delete'),
 
+    # مسارات API
+    path('api/client/<int:client_id>/unpaid-invoices/', views.api_client_unpaid_invoices, name='api_client_unpaid_invoices'),
+
     # التقارير
     path('reports/', views.report_index, name='report_index'),
     path('reports/sick-leaves/', views.report_sick_leaves, name='report_sick_leaves'),
