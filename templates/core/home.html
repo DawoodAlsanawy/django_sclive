@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3 mb-3">
         <div class="card text-white bg-success">
             <div class="card-body">
@@ -39,7 +39,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3 mb-3">
         <div class="card text-white bg-info">
             <div class="card-body">
@@ -53,7 +53,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-3 mb-3">
         <div class="card text-white bg-warning">
             <div class="card-body">
@@ -68,6 +68,132 @@
         </div>
     </div>
 </div>
+
+<!-- إحصائيات مالية -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">إجمالي الفواتير</h5>
+                        <h2 class="mb-0">{{ stats.total_invoices_amount|floatformat:2 }} ريال</h2>
+                    </div>
+                    <i class="fas fa-file-invoice fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">إجمالي المدفوعات</h5>
+                        <h2 class="mb-0">{{ stats.total_payments_amount|floatformat:2 }} ريال</h2>
+                    </div>
+                    <i class="fas fa-hand-holding-usd fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-white {% if stats.total_balance > 0 %}bg-danger{% else %}bg-success{% endif %}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">الرصيد المتبقي</h5>
+                        <h2 class="mb-0">{{ stats.total_balance|floatformat:2 }} ريال</h2>
+                    </div>
+                    <i class="fas fa-balance-scale fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- إحصائيات إضافية -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-secondary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">الأطباء</h5>
+                        <h2 class="mb-0">{{ stats.doctors_count }}</h2>
+                    </div>
+                    <i class="fas fa-user-md fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-secondary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">المرضى</h5>
+                        <h2 class="mb-0">{{ stats.patients_count }}</h2>
+                    </div>
+                    <i class="fas fa-user-injured fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-white bg-secondary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">العملاء</h5>
+                        <h2 class="mb-0">{{ stats.clients_count }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if request.user.is_doctor and stats.doctor_sick_leaves_count is not None %}
+<!-- إحصائيات خاصة بالطبيب -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h4>إحصائيات خاصة بك</h4>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">الإجازات المرضية الخاصة بك</h5>
+                        <h2 class="mb-0">{{ stats.doctor_sick_leaves_count }}</h2>
+                    </div>
+                    <i class="fas fa-procedures fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">إجازات المرافقين الخاصة بك</h5>
+                        <h2 class="mb-0">{{ stats.doctor_companion_leaves_count }}</h2>
+                    </div>
+                    <i class="fas fa-user-nurse fa-3x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <div class="row">
     <!-- آخر الإجازات المرضية -->
@@ -117,7 +243,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- آخر إجازات المرافقين -->
     <div class="col-md-6 mb-4">
         <div class="card">
@@ -217,7 +343,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- آخر المدفوعات -->
     <div class="col-md-6 mb-4">
         <div class="card">

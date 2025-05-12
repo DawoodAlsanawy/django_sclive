@@ -11,13 +11,28 @@
             </div>
             <div class="card-body">
                 <div class="text-center mb-4">
-                    <img src="/static/images/moh-logo.png" alt="وزارة الصحة" class="img-fluid" style="max-height: 150px;">
+                    {% load static %}
+                    {% if 'images/moh-logo.png'|static_exists %}
+                        <img src="{% static 'images/moh-logo.png' %}" alt="وزارة الصحة" class="img-fluid" style="max-height: 150px;">
+                    {% else %}
+                        <i class="fas fa-hospital fa-5x text-primary mb-3"></i>
+                        <h3 class="text-primary">نظام إدارة الإجازات المرضية</h3>
+                    {% endif %}
                 </div>
-                
+
                 <p class="lead text-center mb-4">
                     يمكنك التحقق من صحة الإجازة المرضية أو إجازة المرافقة من خلال إدخال رقم الإجازة أدناه
                 </p>
-                
+
+                <div class="alert alert-info text-center mb-4">
+                    <p class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        رقم الإجازة المرضية يبدأ بـ <strong>SL-</strong> متبوعًا بالسنة ورقم تسلسلي (مثال: SL-2023-001)
+                        <br>
+                        رقم إجازة المرافق يبدأ بـ <strong>CL-</strong> متبوعًا بالسنة ورقم تسلسلي (مثال: CL-2023-001)
+                    </p>
+                </div>
+
                 <form method="post" class="mb-4">
                     {% csrf_token %}
                     <div class="row justify-content-center">
@@ -29,7 +44,14 @@
                         </div>
                     </div>
                 </form>
-                
+
+                {% if error_message %}
+                <div class="alert alert-warning mt-4">
+                    <h4 class="alert-heading">تنبيه!</h4>
+                    <p>{{ error_message }}</p>
+                </div>
+                {% endif %}
+
                 {% if result %}
                 <div class="mt-4">
                     {% if result.is_valid %}
@@ -39,7 +61,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>رقم الإجازة:</strong> {{ result.leave_id }}</p>
-                                <p><strong>نوع الإجازة:</strong> 
+                                <p><strong>نوع الإجازة:</strong>
                                     {% if result.leave_type == 'sick_leave' %}
                                     إجازة مرضية
                                     {% elif result.leave_type == 'companion_leave' %}
@@ -50,6 +72,15 @@
                                 {% if result.leave_type == 'companion_leave' %}
                                 <p><strong>اسم المرافق:</strong> {{ result.companion_name }}</p>
                                 {% endif %}
+                                <p><strong>الحالة:</strong>
+                                    {% if result.status == 'active' %}
+                                    <span class="badge bg-success">نشطة</span>
+                                    {% elif result.status == 'cancelled' %}
+                                    <span class="badge bg-danger">ملغية</span>
+                                    {% elif result.status == 'expired' %}
+                                    <span class="badge bg-secondary">منتهية</span>
+                                    {% endif %}
+                                </p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>تاريخ البداية:</strong> {{ result.start_date }}</p>
@@ -62,12 +93,12 @@
                     {% else %}
                     <div class="alert alert-danger">
                         <h4 class="alert-heading">الإجازة غير صحيحة!</h4>
-                        <p>لم يتم العثور على إجازة بهذا الرقم في النظام. يرجى التأكد من رقم الإجازة والمحاولة مرة أخرى.</p>
+                        <p>لم يتم العثور على إجازة برقم <strong>{{ result.leave_id }}</strong> في النظام. يرجى التأكد من رقم الإجازة والمحاولة مرة أخرى.</p>
                     </div>
                     {% endif %}
                 </div>
                 {% endif %}
-                
+
                 <div class="text-center mt-4">
                     <a href="{% url 'core:home' %}" class="btn btn-outline-primary">العودة إلى الصفحة الرئيسية</a>
                 </div>
