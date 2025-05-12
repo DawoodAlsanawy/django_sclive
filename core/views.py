@@ -706,10 +706,10 @@ def client_detail(request, client_id):
     """تفاصيل العميل"""
     client = get_object_or_404(Client, id=client_id)
 
-    # الحصول على الفواتير المرتبطة بالعميل
+    # الحصول على الفواتير المرتبطة بالعميل مع تحسين الاستعلامات
     invoices = LeaveInvoice.objects.filter(client=client).order_by('-created_at')
 
-    # الحصول على المدفوعات المرتبطة بالعميل
+    # الحصول على المدفوعات المرتبطة بالعميل مع تحسين الاستعلامات
     payments = Payment.objects.filter(client=client).order_by('-payment_date')
 
     # حساب إجمالي المبالغ
@@ -985,8 +985,8 @@ def update_all_leaves_status(request):
 @login_required
 def sick_leave_list(request):
     """قائمة الإجازات المرضية"""
-    # تطبيق الفلاتر
-    sick_leaves = SickLeave.objects.all()
+    # تطبيق الفلاتر مع تحسين الاستعلامات باستخدام select_related
+    sick_leaves = SickLeave.objects.select_related('patient', 'doctor').all()
 
     # فلتر رقم الإجازة
     leave_id = request.GET.get('leave_id')
@@ -1198,8 +1198,8 @@ def sick_leave_search_api(request):
 @login_required
 def companion_leave_list(request):
     """قائمة إجازات المرافقين"""
-    # تطبيق الفلاتر
-    companion_leaves = CompanionLeave.objects.all()
+    # تطبيق الفلاتر مع تحسين الاستعلامات باستخدام select_related
+    companion_leaves = CompanionLeave.objects.select_related('patient', 'companion', 'doctor').all()
 
     # فلتر رقم الإجازة
     leave_id = request.GET.get('leave_id')
@@ -1423,8 +1423,8 @@ def companion_leave_search_api(request):
 @login_required
 def leave_invoice_list(request):
     """قائمة فواتير الإجازات"""
-    # تطبيق الفلاتر
-    leave_invoices = LeaveInvoice.objects.all()
+    # تطبيق الفلاتر مع تحسين الاستعلامات باستخدام select_related
+    leave_invoices = LeaveInvoice.objects.select_related('client').all()
 
     # فلتر رقم الفاتورة
     invoice_number = request.GET.get('invoice_number')
@@ -1754,8 +1754,8 @@ def leave_invoice_delete(request, leave_invoice_id):
 @login_required
 def payment_list(request):
     """قائمة المدفوعات"""
-    # تطبيق الفلاتر
-    payments = Payment.objects.all()
+    # تطبيق الفلاتر مع تحسين الاستعلامات باستخدام select_related
+    payments = Payment.objects.select_related('client').all()
 
     # فلتر رقم الدفعة
     payment_number = request.GET.get('payment_number')
