@@ -2337,7 +2337,9 @@ def report_invoices(request):
     total_paid = 0
     total_remaining = 0
 
-    for invoice in invoices:
+    # استخدام قائمة مؤقتة لتجنب تكرار الاستعلامات
+    invoice_list = list(invoices)
+    for invoice in invoice_list:
         total_paid += invoice.get_total_paid()
         total_remaining += invoice.get_remaining()
 
@@ -2356,13 +2358,14 @@ def report_invoices(request):
     }
 
     # توزيع الفواتير حسب العملاء (أعلى 5 عملاء)
-    top_clients = Client.objects.annotate(
-        invoice_count=Count('leave_invoices', filter=Q(leave_invoices__in=invoices))
-    ).filter(invoice_count__gt=0).order_by('-invoice_count')[:5]
+    # استخدام values و annotate لتحسين الأداء
+    client_invoice_counts = invoices.values('client__name').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
 
     client_counts = {}
-    for client in top_clients:
-        client_counts[client.name] = client.invoice_count
+    for item in client_invoice_counts:
+        client_counts[item['client__name']] = item['count']
 
     context = {
         'invoices': invoices,
@@ -2439,13 +2442,14 @@ def report_payments(request):
         monthly_payments[month] = month_payments
 
     # توزيع المدفوعات حسب العملاء (أعلى 5 عملاء)
-    top_clients = Client.objects.annotate(
-        payment_count=Count('payments', filter=Q(payments__in=payments))
-    ).filter(payment_count__gt=0).order_by('-payment_count')[:5]
+    # استخدام values و annotate لتحسين الأداء
+    client_payment_counts = payments.values('client__name').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
 
     client_counts = {}
-    for client in top_clients:
-        client_counts[client.name] = client.payment_count
+    for item in client_payment_counts:
+        client_counts[item['client__name']] = item['count']
 
     context = {
         'payments': payments,
@@ -2459,7 +2463,8 @@ def report_payments(request):
         'payment_method_amounts': payment_method_amounts,
         'monthly_payments': monthly_payments,
         'client_counts': client_counts,
-        'clients': Client.objects.all()
+        'clients': Client.objects.all(),
+        'current_year': current_year
     }
 
     return render(request, 'core/reports/payments.html', context)
@@ -2483,7 +2488,12 @@ def report_clients(request):
 
     # حساب إجمالي الفواتير والمدفوعات لكل عميل
     client_data = []
-    for client in clients:
+
+    # استخدام قائمة مؤقتة لتجنب تكرار الاستعلامات
+    client_list = list(clients.prefetch_related('leave_invoices', 'payments'))
+
+    for client in client_list:
+        # حساب إجمالي الفواتير والمدفوعات
         total_invoices = client.leave_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
         total_payments = client.payments.aggregate(Sum('amount'))['amount__sum'] or 0
         balance = total_invoices - total_payments
@@ -2500,10 +2510,22 @@ def report_clients(request):
         invoices_count = client.leave_invoices.count()
         payments_count = client.payments.count()
 
-        # حالة الفواتير
-        unpaid_invoices = client.leave_invoices.filter(status='unpaid').count()
-        partially_paid_invoices = client.leave_invoices.filter(status='partially_paid').count()
-        paid_invoices = client.leave_invoices.filter(status='paid').count()
+        # حالة الفواتير (استخدام استعلام واحد مع annotate)
+        invoice_statuses = client.leave_invoices.values('status').annotate(count=Count('id'))
+
+        # تهيئة العدادات
+        unpaid_invoices = 0
+        partially_paid_invoices = 0
+        paid_invoices = 0
+
+        # تعبئة العدادات من نتائج الاستعلام
+        for status_data in invoice_statuses:
+            if status_data['status'] == 'unpaid':
+                unpaid_invoices = status_data['count']
+            elif status_data['status'] == 'partially_paid':
+                partially_paid_invoices = status_data['count']
+            elif status_data['status'] == 'paid':
+                paid_invoices = status_data['count']
 
         client_data.append({
             'client': client,
