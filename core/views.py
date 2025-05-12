@@ -1,6 +1,7 @@
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,7 +10,7 @@ from django.utils import timezone
 from .forms import (ClientForm, CompanionLeaveForm, DoctorForm, EmployerForm,
                     HospitalForm, LeaveInvoiceForm, LeavePriceForm,
                     PatientForm, PaymentDetailForm, PaymentForm, RegisterForm,
-                    SickLeaveForm, UserForm)
+                    SickLeaveForm, UserCreateForm, UserEditForm)
 from .models import (Client, CompanionLeave, Doctor, Employer, Hospital,
                      LeaveInvoice, LeavePrice, Patient, Payment, PaymentDetail,
                      SickLeave, User)
@@ -30,6 +31,13 @@ def home(request):
             'doctors_count': Doctor.objects.count(),
         }
 
+        # إحصائيات مالية
+        total_invoices_amount = LeaveInvoice.objects.filter(status__in=['unpaid', 'partially_paid', 'paid']).aggregate(total=models.Sum('amount'))['total'] or 0
+        total_payments_amount = Payment.objects.aggregate(total=models.Sum('amount'))['total'] or 0
+        stats['total_invoices_amount'] = total_invoices_amount
+        stats['total_payments_amount'] = total_payments_amount
+        stats['total_balance'] = total_invoices_amount - total_payments_amount
+
         # آخر الإجازات المرضية
         recent_sick_leaves = SickLeave.objects.order_by('-created_at')[:5]
 
@@ -41,6 +49,17 @@ def home(request):
 
         # آخر المدفوعات
         recent_payments = Payment.objects.order_by('-created_at')[:5]
+
+        # إحصائيات خاصة بالطبيب
+        if hasattr(request.user, 'is_doctor') and request.user.is_doctor():
+            doctor = Doctor.objects.filter(name__icontains=request.user.username).first()
+            if doctor:
+                doctor_sick_leaves = SickLeave.objects.filter(doctor=doctor)
+                doctor_companion_leaves = CompanionLeave.objects.filter(doctor=doctor)
+                stats['doctor_sick_leaves_count'] = doctor_sick_leaves.count()
+                stats['doctor_companion_leaves_count'] = doctor_companion_leaves.count()
+                stats['doctor_recent_sick_leaves'] = doctor_sick_leaves.order_by('-created_at')[:5]
+                stats['doctor_recent_companion_leaves'] = doctor_companion_leaves.order_by('-created_at')[:5]
 
         context = {
             'stats': stats,
@@ -80,49 +99,77 @@ def register(request):
     return render(request, 'core/auth/register.html', {'form': form})
 
 
+@login_required
+def password_change(request):
+    """تغيير كلمة المرور"""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # تحديث جلسة المستخدم لمنع تسجيل الخروج
+            update_session_auth_hash(request, user)
+            messages.success(request, 'تم تغيير كلمة المرور بنجاح')
+            return redirect('password_change_done')
+    else:
+        form = PasswordChangeForm(request.user)
+
+    return render(request, 'core/auth/password_change.html', {'form': form})
+
+
 def verify(request):
     """التحقق من صحة الإجازة"""
     result = None
+    error_message = None
 
     if request.method == 'POST':
-        leave_id = request.POST.get('leave_id')
+        leave_id = request.POST.get('leave_id', '').strip()
 
-        # البحث عن الإجازة المرضية
-        sick_leave = SickLeave.objects.filter(leave_id=leave_id).first()
-
-        if sick_leave:
-            result = {
-                'is_valid': True,
-                'leave_id': sick_leave.leave_id,
-                'leave_type': 'sick_leave',
-                'patient_name': sick_leave.patient.name,
-                'start_date': sick_leave.start_date,
-                'end_date': sick_leave.end_date,
-                'duration_days': sick_leave.duration_days,
-                'doctor_name': sick_leave.doctor.name
-            }
+        if not leave_id:
+            error_message = "الرجاء إدخال رقم الإجازة"
         else:
-            # البحث عن إجازة المرافق
-            companion_leave = CompanionLeave.objects.filter(leave_id=leave_id).first()
+            # البحث عن الإجازة المرضية
+            sick_leave = SickLeave.objects.filter(leave_id=leave_id).first()
 
-            if companion_leave:
+            if sick_leave:
                 result = {
                     'is_valid': True,
-                    'leave_id': companion_leave.leave_id,
-                    'leave_type': 'companion_leave',
-                    'patient_name': companion_leave.patient.name,
-                    'companion_name': companion_leave.companion.name,
-                    'start_date': companion_leave.start_date,
-                    'end_date': companion_leave.end_date,
-                    'duration_days': companion_leave.duration_days,
-                    'doctor_name': companion_leave.doctor.name
+                    'leave_id': sick_leave.leave_id,
+                    'leave_type': 'sick_leave',
+                    'patient_name': sick_leave.patient.name,
+                    'start_date': sick_leave.start_date,
+                    'end_date': sick_leave.end_date,
+                    'duration_days': sick_leave.duration_days,
+                    'doctor_name': sick_leave.doctor.name,
+                    'status': sick_leave.status
                 }
             else:
-                result = {
-                    'is_valid': False
-                }
+                # البحث عن إجازة المرافق
+                companion_leave = CompanionLeave.objects.filter(leave_id=leave_id).first()
 
-    return render(request, 'core/verify.html', {'result': result})
+                if companion_leave:
+                    result = {
+                        'is_valid': True,
+                        'leave_id': companion_leave.leave_id,
+                        'leave_type': 'companion_leave',
+                        'patient_name': companion_leave.patient.name,
+                        'companion_name': companion_leave.companion.name,
+                        'start_date': companion_leave.start_date,
+                        'end_date': companion_leave.end_date,
+                        'duration_days': companion_leave.duration_days,
+                        'doctor_name': companion_leave.doctor.name,
+                        'status': companion_leave.status
+                    }
+                else:
+                    result = {
+                        'is_valid': False,
+                        'leave_id': leave_id
+                    }
+
+    context = {
+        'result': result,
+        'error_message': error_message
+    }
+    return render(request, 'core/verify.html', context)
 
 
 # وظائف إدارة المستخدمين
@@ -141,13 +188,13 @@ def user_create(request):
         return redirect('core:home')
 
     if request.method == 'POST':
-        form = UserForm(request.POST)
+        form = UserCreateForm(request.POST)
         if form.is_valid():
             user = form.save()
             messages.success(request, f'تم إنشاء المستخدم {user.username} بنجاح')
             return redirect('core:user_list')
     else:
-        form = UserForm()
+        form = UserCreateForm()
 
     return render(request, 'core/users/create.html', {'form': form})
 
@@ -162,13 +209,13 @@ def user_edit(request, user_id):
     user = get_object_or_404(User, id=user_id)
 
     if request.method == 'POST':
-        form = UserForm(request.POST, instance=user)
+        form = UserEditForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
             messages.success(request, f'تم تعديل المستخدم {user.username} بنجاح')
             return redirect('core:user_list')
     else:
-        form = UserForm(instance=user)
+        form = UserEditForm(instance=user)
 
     return render(request, 'core/users/edit.html', {'form': form, 'user': user})
 
@@ -176,11 +223,23 @@ def user_edit(request, user_id):
 @login_required
 def user_delete(request, user_id):
     """حذف مستخدم"""
-    user = get_object_or_404(User, id=user_id)
-    if request.method == 'POST':
-        user.delete()
-        messages.success(request, 'تم حذف المستخدم بنجاح')
+    if not request.user.is_admin():
+        messages.error(request, 'ليس لديك صلاحية للوصول إلى هذه الصفحة')
+        return redirect('core:home')
+
+    # منع حذف المستخدم لنفسه
+    if request.user.id == int(user_id):
+        messages.error(request, 'لا يمكنك حذف حسابك الخاص')
         return redirect('core:user_list')
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        username = user.username  # حفظ اسم المستخدم قبل الحذف
+        user.delete()
+        messages.success(request, f'تم حذف المستخدم {username} بنجاح')
+        return redirect('core:user_list')
+
     return render(request, 'core/users/delete.html', {'user': user})
 
 
@@ -188,7 +247,13 @@ def user_delete(request, user_id):
 @login_required
 def hospital_list(request):
     """قائمة المستشفيات"""
-    hospitals = Hospital.objects.all()
+    hospitals = Hospital.objects.all().order_by('name')
+
+    # تطبيق الفلاتر إذا تم إضافتها في المستقبل
+    name = request.GET.get('name')
+    if name:
+        hospitals = hospitals.filter(name__icontains=name)
+
     return render(request, 'core/hospitals/list.html', {'hospitals': hospitals})
 
 
@@ -228,10 +293,16 @@ def hospital_edit(request, hospital_id):
 def hospital_delete(request, hospital_id):
     """حذف مستشفى"""
     hospital = get_object_or_404(Hospital, id=hospital_id)
+
+    # التحقق من وجود أطباء مرتبطين بالمستشفى
+    doctors_count = hospital.doctors.count()
+
     if request.method == 'POST':
+        hospital_name = hospital.name  # حفظ اسم المستشفى قبل الحذف
         hospital.delete()
-        messages.success(request, 'تم حذف المستشفى بنجاح')
+        messages.success(request, f'تم حذف المستشفى {hospital_name} بنجاح')
         return redirect('core:hospital_list')
+
     return render(request, 'core/hospitals/delete.html', {'hospital': hospital})
 
 
@@ -239,8 +310,28 @@ def hospital_delete(request, hospital_id):
 @login_required
 def employer_list(request):
     """قائمة جهات العمل"""
-    employers = Employer.objects.all()
+    employers = Employer.objects.all().order_by('name')
+
+    # تطبيق الفلاتر
+    name = request.GET.get('name')
+    phone = request.GET.get('phone')
+    email = request.GET.get('email')
+
+    if name:
+        employers = employers.filter(name__icontains=name)
+    if phone:
+        employers = employers.filter(phone__icontains=phone)
+    if email:
+        employers = employers.filter(email__icontains=email)
+
     return render(request, 'core/employers/list.html', {'employers': employers})
+
+
+@login_required
+def employer_detail(request, employer_id):
+    """عرض تفاصيل جهة العمل"""
+    employer = get_object_or_404(Employer, id=employer_id)
+    return render(request, 'core/employers/detail.html', {'employer': employer})
 
 
 @login_required
@@ -268,7 +359,7 @@ def employer_edit(request, employer_id):
         if form.is_valid():
             form.save()
             messages.success(request, f'تم تعديل جهة العمل {employer.name} بنجاح')
-            return redirect('core:employer_list')
+            return redirect('core:employer_detail', employer_id=employer.id)
     else:
         form = EmployerForm(instance=employer)
 
@@ -279,10 +370,16 @@ def employer_edit(request, employer_id):
 def employer_delete(request, employer_id):
     """حذف جهة عمل"""
     employer = get_object_or_404(Employer, id=employer_id)
+
+    # التحقق من وجود موظفين مرتبطين بجهة العمل
+    patients_count = employer.patients.count()
+
     if request.method == 'POST':
+        employer_name = employer.name  # حفظ اسم جهة العمل قبل الحذف
         employer.delete()
-        messages.success(request, 'تم حذف جهة العمل بنجاح')
+        messages.success(request, f'تم حذف جهة العمل {employer_name} بنجاح')
         return redirect('core:employer_list')
+
     return render(request, 'core/employers/delete.html', {'employer': employer})
 
 
@@ -342,7 +439,7 @@ def doctor_search_api(request):
     """واجهة برمجة تطبيقات للبحث عن الأطباء"""
     query = request.GET.get('q', '')
     if not query:
-        return JsonResponse([])
+        return JsonResponse([], safe=False)
 
     doctors = Doctor.objects.filter(
         Q(name__icontains=query) | Q(national_id__icontains=query)
@@ -631,8 +728,8 @@ def leave_price_create(request):
     if request.method == 'POST':
         form = LeavePriceForm(request.POST)
         if form.is_valid():
-            leave_price = form.save()
-            messages.success(request, f'تم إنشاء سعر الإجازة بنجاح')
+            form.save()
+            messages.success(request, 'تم إنشاء سعر الإجازة بنجاح')
             return redirect('core:leave_price_list')
     else:
         form = LeavePriceForm()

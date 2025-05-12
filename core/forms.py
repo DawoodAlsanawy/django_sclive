@@ -43,11 +43,24 @@ class RegisterForm(UserCreationForm):
         fields = ('username', 'email', 'password1', 'password2')
 
 
-class UserForm(UserCreationForm):
-    """نموذج إنشاء وتعديل المستخدم"""
+class UserCreateForm(UserCreationForm):
+    """نموذج إنشاء مستخدم جديد"""
     class Meta:
         model = User
         fields = ('username', 'email', 'role', 'is_active', 'password1', 'password2')
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'role': forms.Select(attrs={'class': 'form-control'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'})
+        }
+
+
+class UserEditForm(forms.ModelForm):
+    """نموذج تعديل المستخدم"""
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'role', 'is_active')
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
