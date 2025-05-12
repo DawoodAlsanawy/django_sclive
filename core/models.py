@@ -151,8 +151,8 @@ class Client(models.Model):
         """حساب رصيد العميل"""
         from django.db.models import Sum
 
-        # إجمالي الفواتير
-        total_invoices = self.leave_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+        # إجمالي الفواتير (استثناء الفواتير الملغية)
+        total_invoices = self.leave_invoices.filter(status__in=['unpaid', 'partially_paid', 'paid']).aggregate(Sum('amount'))['amount__sum'] or 0
 
         # إجمالي المدفوعات
         total_payments = self.payments.aggregate(Sum('amount'))['amount__sum'] or 0
@@ -378,6 +378,7 @@ class LeaveInvoice(models.Model):
         # تحديث الحالة فقط إذا تغيرت
         if old_status != new_status:
             self.status = new_status
+            self.save()
 
         return self.status
 

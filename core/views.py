@@ -1069,19 +1069,12 @@ def sick_leave_create(request):
             return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
     else:
         # توليد رقم إجازة تلقائي
-        import datetime
-        import random
-        today = datetime.date.today()
-        date_string = today.strftime('%Y%m%d')
-        random_num = str(random.randint(100, 999))
-        leave_id = f'SL-{date_string}-{random_num}'
-
-        # التحقق من عدم وجود رقم إجازة مطابق
-        while SickLeave.objects.filter(leave_id=leave_id).exists():
-            random_num = str(random.randint(100, 999))
-            leave_id = f'SL-{date_string}-{random_num}'
+        from core.utils import generate_unique_number
+        leave_id = generate_unique_number('SL', SickLeave)
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        import datetime
+        today = datetime.date.today()
         initial_data = {
             'leave_id': leave_id,
             'issue_date': today
@@ -1295,17 +1288,12 @@ def companion_leave_create(request):
             return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
     else:
         # توليد رقم إجازة تلقائي
-        import datetime
-        import random
-        today = datetime.date.today()
-        date_string = today.strftime('%Y%m%d')
-        random_num = str(random.randint(100, 999))
-        leave_id = f'CL-{date_string}-{random_num}'
+        from core.utils import generate_unique_number
+        leave_id = generate_unique_number('CL', CompanionLeave)
 
-        # التحقق من عدم وجود رقم إجازة مطابق
-        while CompanionLeave.objects.filter(leave_id=leave_id).exists():
-            random_num = str(random.randint(100, 999))
-            leave_id = f'CL-{date_string}-{random_num}'
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        import datetime
+        today = datetime.date.today()
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
         initial_data = {
@@ -1569,17 +1557,12 @@ def leave_invoice_create(request):
             return redirect('core:leave_invoice_detail', leave_invoice_id=invoice.id)
     else:
         # توليد رقم فاتورة تلقائي
-        import datetime
-        import random
-        today = datetime.date.today()
-        date_string = today.strftime('%Y%m%d')
-        random_num = str(random.randint(100, 999))
-        invoice_number = f'INV-{date_string}-{random_num}'
+        from core.utils import generate_unique_number
+        invoice_number = generate_unique_number('INV', LeaveInvoice)
 
-        # التحقق من عدم وجود رقم فاتورة مطابق
-        while LeaveInvoice.objects.filter(invoice_number=invoice_number).exists():
-            random_num = str(random.randint(100, 999))
-            invoice_number = f'INV-{date_string}-{random_num}'
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        import datetime
+        today = datetime.date.today()
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
         initial_data = {
@@ -1914,17 +1897,12 @@ def payment_create(request):
             return redirect('core:payment_detail', payment_id=payment.id)
     else:
         # توليد رقم دفعة تلقائي
-        import datetime
-        import random
-        today = datetime.date.today()
-        date_string = today.strftime('%Y%m%d')
-        random_num = str(random.randint(100, 999))
-        payment_number = f'PAY-{date_string}-{random_num}'
+        from core.utils import generate_unique_number
+        payment_number = generate_unique_number('PAY', Payment)
 
-        # التحقق من عدم وجود رقم دفعة مطابق
-        while Payment.objects.filter(payment_number=payment_number).exists():
-            random_num = str(random.randint(100, 999))
-            payment_number = f'PAY-{date_string}-{random_num}'
+        # تعيين تاريخ اليوم كتاريخ افتراضي للدفع
+        import datetime
+        today = datetime.date.today()
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للدفع
         initial_data = {
@@ -2167,13 +2145,18 @@ def api_client_unpaid_invoices(request, client_id):
 
         invoices_data = []
         for invoice in unpaid_invoices:
+            # التعامل مع تاريخ الاستحقاق الذي قد يكون فارغًا
+            due_date_str = ''
+            if invoice.due_date:
+                due_date_str = invoice.due_date.strftime('%Y-%m-%d')
+
             invoices_data.append({
                 'id': invoice.id,
                 'invoice_number': invoice.invoice_number,
                 'amount': float(invoice.amount),
                 'remaining': float(invoice.get_remaining()),
                 'issue_date': invoice.issue_date.strftime('%Y-%m-%d'),
-                'due_date': invoice.due_date.strftime('%Y-%m-%d'),
+                'due_date': due_date_str,
                 'status': invoice.status,
                 'leave_type': invoice.leave_type,
                 'leave_id': invoice.leave_id
@@ -2337,7 +2320,9 @@ def report_invoices(request):
     total_paid = 0
     total_remaining = 0
 
-    for invoice in invoices:
+    # استخدام قائمة مؤقتة لتجنب تكرار الاستعلامات
+    invoice_list = list(invoices)
+    for invoice in invoice_list:
         total_paid += invoice.get_total_paid()
         total_remaining += invoice.get_remaining()
 
@@ -2356,13 +2341,14 @@ def report_invoices(request):
     }
 
     # توزيع الفواتير حسب العملاء (أعلى 5 عملاء)
-    top_clients = Client.objects.annotate(
-        invoice_count=Count('leave_invoices', filter=Q(leave_invoices__in=invoices))
-    ).filter(invoice_count__gt=0).order_by('-invoice_count')[:5]
+    # استخدام values و annotate لتحسين الأداء
+    client_invoice_counts = invoices.values('client__name').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
 
     client_counts = {}
-    for client in top_clients:
-        client_counts[client.name] = client.invoice_count
+    for item in client_invoice_counts:
+        client_counts[item['client__name']] = item['count']
 
     context = {
         'invoices': invoices,
@@ -2439,13 +2425,14 @@ def report_payments(request):
         monthly_payments[month] = month_payments
 
     # توزيع المدفوعات حسب العملاء (أعلى 5 عملاء)
-    top_clients = Client.objects.annotate(
-        payment_count=Count('payments', filter=Q(payments__in=payments))
-    ).filter(payment_count__gt=0).order_by('-payment_count')[:5]
+    # استخدام values و annotate لتحسين الأداء
+    client_payment_counts = payments.values('client__name').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
 
     client_counts = {}
-    for client in top_clients:
-        client_counts[client.name] = client.payment_count
+    for item in client_payment_counts:
+        client_counts[item['client__name']] = item['count']
 
     context = {
         'payments': payments,
@@ -2459,7 +2446,8 @@ def report_payments(request):
         'payment_method_amounts': payment_method_amounts,
         'monthly_payments': monthly_payments,
         'client_counts': client_counts,
-        'clients': Client.objects.all()
+        'clients': Client.objects.all(),
+        'current_year': current_year
     }
 
     return render(request, 'core/reports/payments.html', context)
@@ -2483,7 +2471,12 @@ def report_clients(request):
 
     # حساب إجمالي الفواتير والمدفوعات لكل عميل
     client_data = []
-    for client in clients:
+
+    # استخدام قائمة مؤقتة لتجنب تكرار الاستعلامات
+    client_list = list(clients.prefetch_related('leave_invoices', 'payments'))
+
+    for client in client_list:
+        # حساب إجمالي الفواتير والمدفوعات
         total_invoices = client.leave_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
         total_payments = client.payments.aggregate(Sum('amount'))['amount__sum'] or 0
         balance = total_invoices - total_payments
@@ -2500,10 +2493,22 @@ def report_clients(request):
         invoices_count = client.leave_invoices.count()
         payments_count = client.payments.count()
 
-        # حالة الفواتير
-        unpaid_invoices = client.leave_invoices.filter(status='unpaid').count()
-        partially_paid_invoices = client.leave_invoices.filter(status='partially_paid').count()
-        paid_invoices = client.leave_invoices.filter(status='paid').count()
+        # حالة الفواتير (استخدام استعلام واحد مع annotate)
+        invoice_statuses = client.leave_invoices.values('status').annotate(count=Count('id'))
+
+        # تهيئة العدادات
+        unpaid_invoices = 0
+        partially_paid_invoices = 0
+        paid_invoices = 0
+
+        # تعبئة العدادات من نتائج الاستعلام
+        for status_data in invoice_statuses:
+            if status_data['status'] == 'unpaid':
+                unpaid_invoices = status_data['count']
+            elif status_data['status'] == 'partially_paid':
+                partially_paid_invoices = status_data['count']
+            elif status_data['status'] == 'paid':
+                paid_invoices = status_data['count']
 
         client_data.append({
             'client': client,
