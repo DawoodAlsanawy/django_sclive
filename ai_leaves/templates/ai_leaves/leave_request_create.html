@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}إنشاء طلب إجازة جديد - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">إنشاء طلب إجازة جديد باستخدام الذكاء الاصطناعي</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            أدخل نص طلب الإجازة وسيقوم النظام باستخدام الذكاء الاصطناعي لتحليل الطلب واستخراج المعلومات منه وإنشاء الإجازة المناسبة تلقائيًا.
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.leave_type.id_for_label }}">{{ form.leave_type.label }}</label>
+                            {{ form.leave_type }}
+                            {% if form.leave_type.errors %}
+                                <div class="text-danger">{{ form.leave_type.errors }}</div>
+                            {% endif %}
+                            {% if form.leave_type.help_text %}
+                                <small class="form-text text-muted">{{ form.leave_type.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.request_text.id_for_label }}">{{ form.request_text.label }}</label>
+                            {{ form.request_text }}
+                            {% if form.request_text.errors %}
+                                <div class="text-danger">{{ form.request_text.errors }}</div>
+                            {% endif %}
+                            {% if form.request_text.help_text %}
+                                <small class="form-text text-muted">{{ form.request_text.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>ملاحظة:</strong> يجب أن يحتوي النص على المعلومات التالية:
+                            <ul>
+                                <li>اسم المريض</li>
+                                <li>رقم الهوية</li>
+                                <li>جهة العمل</li>
+                                <li>الجنسية</li>
+                                <li>تاريخ الإجازة</li>
+                                <li>اسم المستشفى</li>
+                            </ul>
+                            <strong>مثال:</strong>
+                            <pre>
+الاسم: أحمد محمد علي
+رقم الهوية: 1234567890
+جهة العمل: شركة الأمل
+الوظيفة: مهندس
+الجنسية: سعودي
+المدينه: الرياض
+تاريخ الاجازة: 15/05/2023
+مستشفى الملك فهد</pre>
+                        </div>
+                        
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> حفظ ومعالجة
+                            </button>
+                            <a href="{% url 'ai_leaves:leave_request_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

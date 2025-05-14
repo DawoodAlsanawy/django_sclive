@@ -1,11 +1,10 @@
+from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
-from django.contrib.auth.hashers import make_password
 
-from core.models import (
-    User, Hospital, Employer, Doctor, Patient, Client, LeavePrice
-)
+from core.models import (Client, Doctor, Employer, Hospital, LeavePrice,
+                         Patient, User)
 
 
 class Command(BaseCommand):
@@ -20,34 +19,34 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         force = options['force']
-        
+
         self.stdout.write(self.style.SUCCESS('بدء تعبئة البيانات الأساسية للمشروع...'))
-        
+
         try:
             with transaction.atomic():
                 # إنشاء المستخدمين الأساسيين
                 self.create_basic_users(force)
-                
+
                 # إنشاء المستشفيات الأساسية
                 self.create_basic_hospitals(force)
-                
+
                 # إنشاء جهات العمل الأساسية
                 self.create_basic_employers(force)
-                
+
                 # إنشاء الأطباء الأساسيين
                 self.create_basic_doctors(force)
-                
+
                 # إنشاء العملاء الأساسيين
                 self.create_basic_clients(force)
-                
+
                 # إنشاء أسعار الإجازات
                 self.create_leave_prices(force)
-                
+
             self.stdout.write(self.style.SUCCESS('تم تعبئة البيانات الأساسية للمشروع بنجاح!'))
-        
+
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'حدث خطأ أثناء تعبئة البيانات: {str(e)}'))
-    
+
     def create_basic_users(self, force):
         """إنشاء المستخدمين الأساسيين"""
         users_data = [
@@ -72,9 +71,9 @@ class Command(BaseCommand):
                 'role': 'staff'
             }
         ]
-        
+
         for user_data in users_data:
-            if force or not User.objects.filter(username=user_data['username']).exists():
+            if not User.objects.filter(username=user_data['username']).exists():
                 User.objects.create(
                     username=user_data['username'],
                     email=user_data['email'],
@@ -84,7 +83,9 @@ class Command(BaseCommand):
                     is_superuser=user_data.get('is_superuser', False)
                 )
                 self.stdout.write(self.style.SUCCESS(f"تم إنشاء المستخدم {user_data['username']}"))
-    
+            else:
+                self.stdout.write(self.style.WARNING(f"المستخدم {user_data['username']} موجود بالفعل"))
+
     def create_basic_hospitals(self, force):
         """إنشاء المستشفيات الأساسية"""
         hospitals_data = [
@@ -95,7 +96,7 @@ class Command(BaseCommand):
             },
             {
                 'name': 'مستشفى الملك فهد التخصصي',
-                'address': 'الدمام، المملكة العربية السعودية',
+                'address': 'الدمام، المملكة رطالعربية السعودية',
                 'contact_info': '013-8912345'
             },
             {
@@ -104,12 +105,12 @@ class Command(BaseCommand):
                 'contact_info': '012-6789012'
             }
         ]
-        
+
         for hospital_data in hospitals_data:
             if force or not Hospital.objects.filter(name=hospital_data['name']).exists():
                 Hospital.objects.create(**hospital_data)
                 self.stdout.write(self.style.SUCCESS(f"تم إنشاء المستشفى {hospital_data['name']}"))
-    
+
     def create_basic_employers(self, force):
         """إنشاء جهات العمل الأساسية"""
         employers_data = [
@@ -139,12 +140,12 @@ class Command(BaseCommand):
                 'contact_info': '011-4567890'
             }
         ]
-        
+
         for employer_data in employers_data:
             if force or not Employer.objects.filter(name=employer_data['name']).exists():
                 Employer.objects.create(**employer_data)
                 self.stdout.write(self.style.SUCCESS(f"تم إنشاء جهة العمل {employer_data['name']}"))
-    
+
     def create_basic_doctors(self, force):
         """إنشاء الأطباء الأساسيين"""
         # التأكد من وجود مستشفيات
@@ -152,7 +153,7 @@ class Command(BaseCommand):
         if not hospitals.exists():
             self.stdout.write(self.style.WARNING('لا توجد مستشفيات لإضافة الأطباء إليها'))
             return
-        
+
         doctors_data = [
             {
                 'national_id': '1000000001',
@@ -195,12 +196,12 @@ class Command(BaseCommand):
                 'email': 'mohammed@example.com'
             }
         ]
-        
+
         for doctor_data in doctors_data:
             if force or not Doctor.objects.filter(national_id=doctor_data['national_id']).exists():
                 Doctor.objects.create(**doctor_data)
                 self.stdout.write(self.style.SUCCESS(f"تم إنشاء الطبيب {doctor_data['name']}"))
-    
+
     def create_basic_clients(self, force):
         """إنشاء العملاء الأساسيين"""
         clients_data = [
@@ -223,42 +224,72 @@ class Command(BaseCommand):
                 'address': 'الخبر، المملكة العربية السعودية'
             }
         ]
-        
+
         for client_data in clients_data:
             if force or not Client.objects.filter(phone=client_data['phone']).exists():
                 Client.objects.create(**client_data)
                 self.stdout.write(self.style.SUCCESS(f"تم إنشاء العميل {client_data['name']}"))
-    
+
     def create_leave_prices(self, force):
         """إنشاء أسعار الإجازات"""
-        leave_prices = [
+        # أسعار الإجازات المرضية اليومية
+        per_day_prices = [
             # أسعار الإجازات المرضية
-            {'leave_type': 'sick_leave', 'duration_days': 1, 'price': 100},
-            {'leave_type': 'sick_leave', 'duration_days': 2, 'price': 180},
-            {'leave_type': 'sick_leave', 'duration_days': 3, 'price': 250},
-            {'leave_type': 'sick_leave', 'duration_days': 5, 'price': 400},
-            {'leave_type': 'sick_leave', 'duration_days': 7, 'price': 550},
-            {'leave_type': 'sick_leave', 'duration_days': 10, 'price': 750},
-            {'leave_type': 'sick_leave', 'duration_days': 14, 'price': 1000},
-            {'leave_type': 'sick_leave', 'duration_days': 30, 'price': 2000},
-            
+            {'leave_type': 'sick_leave', 'duration_days': 1, 'price': 100, 'pricing_type': 'per_day'},
+            {'leave_type': 'sick_leave', 'duration_days': 2, 'price': 180, 'pricing_type': 'per_day'},
+            {'leave_type': 'sick_leave', 'duration_days': 3, 'price': 250, 'pricing_type': 'per_day'},
+            {'leave_type': 'sick_leave', 'duration_days': 5, 'price': 400, 'pricing_type': 'per_day'},
+            {'leave_type': 'sick_leave', 'duration_days': 7, 'price': 550, 'pricing_type': 'per_day'},
+            {'leave_type': 'sick_leave', 'duration_days': 10, 'price': 750, 'pricing_type': 'per_day'},
+            {'leave_type': 'sick_leave', 'duration_days': 14, 'price': 1000, 'pricing_type': 'per_day'},
+            {'leave_type': 'sick_leave', 'duration_days': 30, 'price': 2000, 'pricing_type': 'per_day'},
+
             # أسعار إجازات المرافقة
-            {'leave_type': 'companion_leave', 'duration_days': 1, 'price': 150},
-            {'leave_type': 'companion_leave', 'duration_days': 2, 'price': 280},
-            {'leave_type': 'companion_leave', 'duration_days': 3, 'price': 400},
-            {'leave_type': 'companion_leave', 'duration_days': 5, 'price': 650},
-            {'leave_type': 'companion_leave', 'duration_days': 7, 'price': 900},
-            {'leave_type': 'companion_leave', 'duration_days': 10, 'price': 1200},
-            {'leave_type': 'companion_leave', 'duration_days': 14, 'price': 1600},
-            {'leave_type': 'companion_leave', 'duration_days': 30, 'price': 3000}
+            {'leave_type': 'companion_leave', 'duration_days': 1, 'price': 150, 'pricing_type': 'per_day'},
+            {'leave_type': 'companion_leave', 'duration_days': 2, 'price': 280, 'pricing_type': 'per_day'},
+            {'leave_type': 'companion_leave', 'duration_days': 3, 'price': 400, 'pricing_type': 'per_day'},
+            {'leave_type': 'companion_leave', 'duration_days': 5, 'price': 650, 'pricing_type': 'per_day'},
+            {'leave_type': 'companion_leave', 'duration_days': 7, 'price': 900, 'pricing_type': 'per_day'},
+            {'leave_type': 'companion_leave', 'duration_days': 10, 'price': 1200, 'pricing_type': 'per_day'},
+            {'leave_type': 'companion_leave', 'duration_days': 14, 'price': 1600, 'pricing_type': 'per_day'},
+            {'leave_type': 'companion_leave', 'duration_days': 30, 'price': 3000, 'pricing_type': 'per_day'}
         ]
-        
-        for price_data in leave_prices:
+
+        # أسعار الإجازات الثابتة
+        fixed_prices = [
+            # أسعار ثابتة للإجازات المرضية
+            {'leave_type': 'sick_leave', 'duration_days': 1, 'price': 150, 'pricing_type': 'fixed'},
+            {'leave_type': 'sick_leave', 'duration_days': 1, 'price': 500, 'pricing_type': 'fixed', 'client': Client.objects.filter(name='شركة التأمين الوطنية').first()},
+            {'leave_type': 'sick_leave', 'duration_days': 1, 'price': 450, 'pricing_type': 'fixed', 'client': Client.objects.filter(name='شركة التأمين التعاوني').first()},
+
+            # أسعار ثابتة لإجازات المرافقة
+            {'leave_type': 'companion_leave', 'duration_days': 1, 'price': 200, 'pricing_type': 'fixed'},
+            {'leave_type': 'companion_leave', 'duration_days': 1, 'price': 600, 'pricing_type': 'fixed', 'client': Client.objects.filter(name='شركة التأمين الوطنية').first()},
+            {'leave_type': 'companion_leave', 'duration_days': 1, 'price': 550, 'pricing_type': 'fixed', 'client': Client.objects.filter(name='شركة بوبا العربية للتأمين').first()}
+        ]
+
+        # إنشاء الأسعار اليومية
+        for price_data in per_day_prices:
             if force or not LeavePrice.objects.filter(
                 leave_type=price_data['leave_type'],
-                duration_days=price_data['duration_days']
+                duration_days=price_data['duration_days'],
+                pricing_type='per_day',
+                client__isnull=True
             ).exists():
                 LeavePrice.objects.create(**price_data)
                 self.stdout.write(self.style.SUCCESS(
-                    f"تم إنشاء سعر إجازة {price_data['leave_type']} لمدة {price_data['duration_days']} يوم"
+                    f"تم إنشاء سعر يومي لإجازة {price_data['leave_type']} لمدة {price_data['duration_days']} يوم"
+                ))
+
+        # إنشاء الأسعار الثابتة
+        for price_data in fixed_prices:
+            client_name = price_data['client'].name if 'client' in price_data and price_data['client'] else 'عام'
+            if force or not LeavePrice.objects.filter(
+                leave_type=price_data['leave_type'],
+                pricing_type='fixed',
+                client=price_data.get('client')
+            ).exists():
+                LeavePrice.objects.create(**price_data)
+                self.stdout.write(self.style.SUCCESS(
+                    f"تم إنشاء سعر ثابت لإجازة {price_data['leave_type']} للعميل {client_name}"
                 ))

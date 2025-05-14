@@ -1,3 +1,7 @@
+import json
+import re
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
                                         PermissionsMixin)
 from django.db import models
@@ -32,11 +36,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     """نموذج المستخدم في النظام"""
     username = models.CharField(max_length=64, unique=True, verbose_name='اسم المستخدم')
     email = models.EmailField(max_length=120, unique=True, verbose_name='البريد الإلكتروني')
-    role = models.CharField(max_length=20, default='staff', verbose_name='الدور')  # admin, doctor, staff
-    is_active = models.BooleanField(default=True, verbose_name='نشط')
-    is_staff = models.BooleanField(default=False, verbose_name='مسؤول')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    role = models.CharField(max_length=20, default='staff', blank=True, null=True, verbose_name='الدور')  # admin, doctor, staff
+    is_active = models.BooleanField(default=True, blank=True, null=True, verbose_name='نشط')
+    is_staff = models.BooleanField(default=False, blank=True, null=True, verbose_name='مسؤول')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     objects = UserManager()
 
@@ -64,8 +68,9 @@ class Hospital(models.Model):
     name = models.CharField(max_length=100, verbose_name='اسم المستشفى')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     contact_info = models.CharField(max_length=100, blank=True, null=True, verbose_name='معلومات الاتصال')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    logo = models.ImageField(upload_to='hospitals/logos/', blank=True, null=True, verbose_name='شعار المستشفى')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'مستشفى'
@@ -74,14 +79,28 @@ class Hospital(models.Model):
     def __str__(self):
         return self.name
 
+    def get_doctors_count(self):
+        """الحصول على عدد الأطباء المرتبطين بالمستشفى"""
+        return self.doctors.count()
+
+    def delete(self, *args, **kwargs):
+        """حذف المستشفى وملف الشعار المرتبط به"""
+        # حذف ملف الشعار إذا كان موجودًا
+        if self.logo:
+            if self.logo.storage.exists(self.logo.name):
+                self.logo.delete()
+
+        # حذف المستشفى
+        super().delete(*args, **kwargs)
+
 
 class Employer(models.Model):
     """نموذج جهة العمل"""
     name = models.CharField(max_length=100, verbose_name='اسم جهة العمل')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     contact_info = models.CharField(max_length=100, blank=True, null=True, verbose_name='معلومات الاتصال')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'جهة عمل'
@@ -95,12 +114,12 @@ class Doctor(models.Model):
     """نموذج الطبيب"""
     national_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم الطبيب')
-    position = models.CharField(max_length=100, verbose_name='المنصب')
+    position = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب')
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', verbose_name='المستشفى')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'طبيب'
@@ -114,13 +133,13 @@ class Patient(models.Model):
     """نموذج المريض"""
     national_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم المريض')
-    nationality = models.CharField(max_length=50, verbose_name='الجنسية')
-    employer = models.ForeignKey(Employer, on_delete=models.SET_NULL, null=True, blank=True, related_name='patients', verbose_name='جهة العمل')
+    nationality = models.CharField(max_length=50, blank=True, null=True, verbose_name='الجنسية')
+    employer_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='جهة العمل')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'مريض'
@@ -137,8 +156,8 @@ class Client(models.Model):
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     notes = models.TextField(blank=True, null=True, verbose_name='ملاحظات')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'عميل'
@@ -163,45 +182,180 @@ class Client(models.Model):
 
 class LeavePrice(models.Model):
     """نموذج سعر الإجازة"""
+    PRICING_TYPE_CHOICES = [
+        ('per_day', 'سعر يومي'),
+        ('fixed', 'سعر ثابت للإجازة')
+    ]
     leave_type = models.CharField(max_length=20, choices=[('sick_leave', 'إجازة مرضية'), ('companion_leave', 'إجازة مرافق')], verbose_name='نوع الإجازة')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='السعر')
-    is_active = models.BooleanField(default=True, verbose_name='نشط')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    pricing_type = models.CharField(max_length=10, choices=PRICING_TYPE_CHOICES, default='per_day', blank=True, null=True, verbose_name='طريقة التسعير')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='leave_prices', null=True, blank=True, verbose_name='العميل')
+    is_active = models.BooleanField(default=True, blank=True, null=True, verbose_name='نشط')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
+
+    @staticmethod
+    def get_price(leave_type, duration_days, client=None):
+        """
+        حساب سعر الإجازة بناءً على نوعها ومدتها والعميل
+        """
+        from decimal import Decimal
+
+        # البحث عن سعر محدد للعميل والمدة
+        if client:
+            client_price = LeavePrice.objects.filter(
+                leave_type=leave_type,
+                duration_days=duration_days,
+                client=client,
+                is_active=True
+            ).first()
+
+            if client_price:
+                if client_price.pricing_type == 'fixed':
+                    return client_price.price
+                else:  # per_day
+                    return client_price.price * duration_days
+
+        # البحث عن سعر عام للمدة (بدون تحديد عميل)
+        general_price = LeavePrice.objects.filter(
+            leave_type=leave_type,
+            duration_days=duration_days,
+            client__isnull=True,
+            is_active=True
+        ).first()
+
+        if general_price:
+            if general_price.pricing_type == 'fixed':
+                return general_price.price
+            else:  # per_day
+                return general_price.price * duration_days
+
+        # إذا لم يتم العثور على سعر محدد، استخدم السعر الافتراضي
+        default_price = Decimal('5.00')  # سعر افتراضي لليوم الواحد
+        return default_price * duration_days
 
     class Meta:
         verbose_name = 'سعر الإجازة'
         verbose_name_plural = 'أسعار الإجازات'
-        unique_together = ['leave_type', 'duration_days']
+        unique_together = ['leave_type', 'duration_days', 'client', 'pricing_type']
 
     def __str__(self):
         leave_type_display = dict([('sick_leave', 'إجازة مرضية'), ('companion_leave', 'إجازة مرافق')])
-        return f"{leave_type_display[self.leave_type]} - {self.duration_days} يوم - {self.price} ريال"
+        pricing_type_display = dict([('per_day', 'سعر يومي'), ('fixed', 'سعر ثابت')])
+        client_name = f" - {self.client.name}" if self.client else " - سعر عام"
+        return f"{leave_type_display[self.leave_type]} - {self.duration_days} يوم - {pricing_type_display[self.pricing_type]}{client_name} - {self.price} ريال"
 
     def get_daily_price(self):
         """حساب السعر اليومي"""
-        if self.duration_days > 0:
+        if self.pricing_type == 'fixed':
+            return self.price  # للسعر الثابت، السعر اليومي هو نفس السعر الإجمالي
+        elif self.duration_days > 0:
             return self.price / self.duration_days
         return 0
 
     @classmethod
-    def get_price(cls, leave_type, duration_days):
-        """الحصول على سعر الإجازة بناءً على النوع والمدة"""
-        # البحث عن سعر مطابق تمامًا
-        price = cls.objects.filter(leave_type=leave_type, duration_days=duration_days, is_active=True).first()
+    def get_price(cls, leave_type, duration_days, client=None):
+        """
+        الحصول على سعر الإجازة بناءً على النوع والمدة والعميل
+
+        المعلمات:
+        - leave_type: نوع الإجازة (sick_leave أو companion_leave)
+        - duration_days: مدة الإجازة بالأيام
+        - client: العميل (اختياري)
+
+        يعيد:
+        - سعر الإجازة
+        """
+        # 1. البحث عن سعر ثابت مخصص للعميل
+        if client:
+            # البحث عن سعر ثابت للإجازة مخصص للعميل
+            fixed_price = cls.objects.filter(
+                leave_type=leave_type,
+                client=client,
+                pricing_type='fixed',
+                is_active=True
+            ).first()
+            if fixed_price:
+                return fixed_price.price
+
+            # 2. البحث عن سعر يومي مخصص للعميل بمدة مطابقة تمامًا
+            price = cls.objects.filter(
+                leave_type=leave_type,
+                duration_days=duration_days,
+                client=client,
+                pricing_type='per_day',
+                is_active=True
+            ).first()
+            if price:
+                return price.price
+
+            # 3. البحث عن أقرب سعر يومي مخصص للعميل (أقل مدة أكبر من المدة المطلوبة)
+            price = cls.objects.filter(
+                leave_type=leave_type,
+                duration_days__lt=duration_days,
+                client=client,
+                pricing_type='per_day',
+                is_active=True
+            ).order_by('-duration_days').first()
+            if price:
+                # حساب السعر بناءً على السعر اليومي
+                daily_price = price.price / price.duration_days
+                return daily_price * duration_days
+
+            # 4. البحث عن أقرب سعر يومي مخصص للعميل (أكبر مدة أقل من المدة المطلوبة)
+            price = cls.objects.filter(
+                leave_type=leave_type,
+                duration_days__gt=duration_days,
+                client=client,
+                pricing_type='per_day',
+                is_active=True
+            ).order_by('duration_days').first()
+            if price:
+                return price.price
+
+        # 5. البحث عن سعر ثابت عام
+        fixed_price = cls.objects.filter(
+            leave_type=leave_type,
+            client__isnull=True,
+            pricing_type='fixed',
+            is_active=True
+        ).first()
+        if fixed_price:
+            return fixed_price.price
+
+        # 6. البحث عن سعر يومي عام بمدة مطابقة تمامًا
+        price = cls.objects.filter(
+            leave_type=leave_type,
+            duration_days=duration_days,
+            client__isnull=True,
+            pricing_type='per_day',
+            is_active=True
+        ).first()
         if price:
             return price.price
 
-        # البحث عن أقرب سعر (أقل مدة أكبر من المدة المطلوبة)
-        price = cls.objects.filter(leave_type=leave_type, duration_days__lt=duration_days, is_active=True).order_by('-duration_days').first()
+        # 7. البحث عن أقرب سعر يومي عام (أقل مدة أكبر من المدة المطلوبة)
+        price = cls.objects.filter(
+            leave_type=leave_type,
+            duration_days__lt=duration_days,
+            client__isnull=True,
+            pricing_type='per_day',
+            is_active=True
+        ).order_by('-duration_days').first()
         if price:
             # حساب السعر بناءً على السعر اليومي
             daily_price = price.price / price.duration_days
             return daily_price * duration_days
 
-        # البحث عن أقرب سعر (أكبر مدة أقل من المدة المطلوبة)
-        price = cls.objects.filter(leave_type=leave_type, duration_days__gt=duration_days, is_active=True).order_by('duration_days').first()
+        # 8. البحث عن أقرب سعر يومي عام (أكبر مدة أقل من المدة المطلوبة)
+        price = cls.objects.filter(
+            leave_type=leave_type,
+            duration_days__gt=duration_days,
+            client__isnull=True,
+            pricing_type='per_day',
+            is_active=True
+        ).order_by('duration_days').first()
         if price:
             return price.price
 
@@ -216,16 +370,16 @@ class SickLeave(models.Model):
     start_date = models.DateField(verbose_name='تاريخ البداية')
     end_date = models.DateField(verbose_name='تاريخ النهاية')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
-    admission_date = models.DateField(verbose_name='تاريخ الدخول')
-    discharge_date = models.DateField(verbose_name='تاريخ الخروج')
+    admission_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الدخول')
+    discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
     status = models.CharField(max_length=20, choices=[
         ('active', 'نشطة'),
         ('cancelled', 'ملغية'),
         ('expired', 'منتهية')
-    ], default='active', verbose_name='الحالة')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    ], default='active', blank=True, null=True, verbose_name='الحالة')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'إجازة مرضية'
@@ -273,16 +427,16 @@ class CompanionLeave(models.Model):
     start_date = models.DateField(verbose_name='تاريخ البداية')
     end_date = models.DateField(verbose_name='تاريخ النهاية')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
-    admission_date = models.DateField(verbose_name='تاريخ الدخول')
-    discharge_date = models.DateField(verbose_name='تاريخ الخروج')
+    admission_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الدخول')
+    discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
     status = models.CharField(max_length=20, choices=[
         ('active', 'نشطة'),
         ('cancelled', 'ملغية'),
         ('expired', 'منتهية')
-    ], default='active', verbose_name='الحالة')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    ], default='active', blank=True, null=True, verbose_name='الحالة')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'إجازة مرافق'
@@ -321,6 +475,9 @@ class CompanionLeave(models.Model):
                 self.save()
 
 
+
+
+
 class LeaveInvoice(models.Model):
     """نموذج فاتورة الإجازة"""
     invoice_number = models.CharField(max_length=20, unique=True, verbose_name='رقم الفاتورة')
@@ -336,12 +493,12 @@ class LeaveInvoice(models.Model):
         ('partially_paid', 'مدفوعة جزئيًا'),
         ('paid', 'مدفوعة بالكامل'),
         ('cancelled', 'ملغية')
-    ], default='unpaid', verbose_name='الحالة')
-    issue_date = models.DateField(default=timezone.now, verbose_name='تاريخ الإصدار')
+    ], default='unpaid', blank=True, null=True, verbose_name='الحالة')
+    issue_date = models.DateField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإصدار')
     due_date = models.DateField(null=True, blank=True, verbose_name='تاريخ الاستحقاق')
     notes = models.TextField(blank=True, null=True, verbose_name='ملاحظات')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'فاتورة إجازة'
@@ -393,12 +550,12 @@ class Payment(models.Model):
         ('bank_transfer', 'تحويل بنكي'),
         ('check', 'شيك'),
         ('credit_card', 'بطاقة ائتمان')
-    ], verbose_name='طريقة الدفع')
-    payment_date = models.DateField(default=timezone.now, verbose_name='تاريخ الدفع')
+    ], blank=True, null=True, verbose_name='طريقة الدفع')
+    payment_date = models.DateField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الدفع')
     reference_number = models.CharField(max_length=50, blank=True, null=True, verbose_name='رقم المرجع')
     notes = models.TextField(blank=True, null=True, verbose_name='ملاحظات')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='تاريخ التحديث')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
+    updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
     class Meta:
         verbose_name = 'دفعة'
@@ -413,7 +570,7 @@ class PaymentDetail(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='payment_details', verbose_name='الدفعة')
     invoice = models.ForeignKey(LeaveInvoice, on_delete=models.CASCADE, related_name='payment_details', verbose_name='الفاتورة')
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='المبلغ')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='تاريخ الإنشاء')
+    created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
 
     class Meta:
         verbose_name = 'تفاصيل الدفعة'

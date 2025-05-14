@@ -182,8 +182,8 @@
                         <strong>جهة العمل:</strong>
                     </div>
                     <div class="col-md-7">
-                        {% if companion_leave.patient.employer %}
-                        {{ companion_leave.patient.employer.name }}
+                        {% if companion_leave.patient.employer_name %}
+                        {{ companion_leave.patient.employer_name }}
                         {% else %}
                         <span class="text-muted">غير محدد</span>
                         {% endif %}
@@ -226,8 +226,8 @@
                         <strong>جهة العمل:</strong>
                     </div>
                     <div class="col-md-7">
-                        {% if companion_leave.companion.employer %}
-                        {{ companion_leave.companion.employer.name }}
+                        {% if companion_leave.companion.employer_name %}
+                        {{ companion_leave.companion.employer_name }}
                         {% else %}
                         <span class="text-muted">غير محدد</span>
                         {% endif %}

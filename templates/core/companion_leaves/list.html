@@ -11,10 +11,13 @@
     <div class="col-md-6 text-md-end">
         <div class="btn-group" role="group">
             <a href="{% url 'core:companion_leave_create' %}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> إضافة إجازة مرافق جديدة
+                <i class="fas fa-plus"></i> إضافة إجازة مرافق
+            </a>
+            <a href="{% url 'core:companion_leave_create_with_invoice' %}" class="btn btn-info">
+                <i class="fas fa-plus-circle"></i> إضافة إجازة مع فاتورة
             </a>
             <a href="{% url 'core:update_all_leaves_status' %}" class="btn btn-success">
-                <i class="fas fa-sync"></i> تحديث حالة جميع الإجازات
+                <i class="fas fa-sync"></i> تحديث حالة الإجازات
             </a>
         </div>
     </div>

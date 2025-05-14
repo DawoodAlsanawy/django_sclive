@@ -1,0 +1,297 @@
+{% load crispy_forms_tags %}
+
+<!-- Modal para agregar paciente -->
+<!-- Modal para agregar acompañante -->
+<div class="modal fade" id="companionModal" tabindex="-1" aria-labelledby="companionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="companionModalLabel">إضافة مرافق جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-companion"></div>
+                <form id="companion-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_companion_national_id">رقم الهوية</label>
+                                <input type="text" class="form-control" id="new_companion_national_id" name="national_id" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_companion_name">اسم المرافق</label>
+                                <input type="text" class="form-control" id="new_companion_name" name="name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_companion_phone">رقم الهاتف</label>
+                                <input type="text" class="form-control" id="new_companion_phone" name="phone">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_companion_relation">صلة القرابة</label>
+                                <input type="text" class="form-control" id="new_companion_relation" name="relation">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_companion_employer_name">جهة العمل</label>
+                                <input type="text" class="form-control" id="new_companion_employer_name" name="employer_name">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_companion_address">العنوان</label>
+                                <input type="text" class="form-control" id="new_companion_address" name="address">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="save-companion-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar paciente -->
+<div class="modal fade" id="patientModal" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="patientModalLabel">إضافة مريض جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-patient"></div>
+                <form id="patient-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_patient_national_id">رقم الهوية</label>
+                                <input type="text" class="form-control" id="new_patient_national_id" name="national_id" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_patient_name">اسم المريض</label>
+                                <input type="text" class="form-control" id="new_patient_name" name="name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_patient_phone">رقم الهاتف</label>
+                                <input type="text" class="form-control" id="new_patient_phone" name="phone">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_patient_nationality">الجنسية</label>
+                                <input type="text" class="form-control" id="new_patient_nationality" name="nationality">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_patient_employer_name">جهة العمل</label>
+                                <input type="text" class="form-control" id="new_patient_employer_name" name="employer_name">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_patient_address">العنوان</label>
+                                <input type="text" class="form-control" id="new_patient_address" name="address">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="save-patient-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar doctor -->
+<div class="modal fade" id="doctorModal" tabindex="-1" aria-labelledby="doctorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="doctorModalLabel">إضافة طبيب جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-doctor"></div>
+                <form id="doctor-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_doctor_national_id">رقم الهوية</label>
+                                <input type="text" class="form-control" id="new_doctor_national_id" name="national_id" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_doctor_name">اسم الطبيب</label>
+                                <input type="text" class="form-control" id="new_doctor_name" name="name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_doctor_position">التخصص</label>
+                                <input type="text" class="form-control" id="new_doctor_position" name="position">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_doctor_hospital">المستشفى</label>
+                                <select class="form-control" id="new_doctor_hospital" name="hospital">
+                                    <option value="">اختر المستشفى</option>
+                                    {% for hospital in hospitals %}
+                                    <option value="{{ hospital.id }}">{{ hospital.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="add-hospital-modal-btn">
+                                    <i class="fas fa-plus-circle"></i> إضافة مستشفى جديد
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="new_doctor_phone">رقم الهاتف</label>
+                                <input type="text" class="form-control" id="new_doctor_phone" name="phone">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="save-doctor-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar hospital -->
+<div class="modal fade" id="hospitalModal" tabindex="-1" aria-labelledby="hospitalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="hospitalModalLabel">إضافة مستشفى جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-hospital"></div>
+                <form id="hospital-form">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="new_hospital_name">اسم المستشفى</label>
+                        <input type="text" class="form-control" id="new_hospital_name" name="name" required>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="new_hospital_address">العنوان</label>
+                        <input type="text" class="form-control" id="new_hospital_address" name="address">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="new_hospital_contact_info">معلومات الاتصال</label>
+                        <input type="text" class="form-control" id="new_hospital_contact_info" name="contact_info">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="save-hospital-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar cliente -->
+<div class="modal fade" id="clientModal" tabindex="-1" aria-labelledby="clientModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientModalLabel">إضافة عميل جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-client"></div>
+                <form id="client-form">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="new_client_name">اسم العميل</label>
+                        <input type="text" class="form-control" id="new_client_name" name="name" required>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="new_client_phone">رقم الهاتف</label>
+                        <input type="text" class="form-control" id="new_client_phone" name="phone">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="new_client_email">البريد الإلكتروني</label>
+                        <input type="email" class="form-control" id="new_client_email" name="email">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="new_client_address">العنوان</label>
+                        <input type="text" class="form-control" id="new_client_address" name="address">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="save-client-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenedor para alertas -->
+<div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>

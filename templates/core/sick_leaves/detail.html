@@ -173,8 +173,8 @@
                         <strong>جهة العمل:</strong>
                     </div>
                     <div class="col-md-7">
-                        {% if sick_leave.patient.employer %}
-                        {{ sick_leave.patient.employer.name }}
+                        {% if sick_leave.patient.employer_name %}
+                        {{ sick_leave.patient.employer_name }}
                         {% else %}
                         <span class="text-muted">غير محدد</span>
                         {% endif %}

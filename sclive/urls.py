@@ -13,6 +13,7 @@ from core.views import password_change, register
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
+    path('ai-leaves/', include('ai_leaves.urls')),  # مسارات طلبات الإجازات الذكية
 
     # مسارات المصادقة
     path('login/', auth_views.LoginView.as_view(

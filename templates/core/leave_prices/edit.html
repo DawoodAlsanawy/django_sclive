@@ -17,14 +17,23 @@
             {% csrf_token %}
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     {{ form.leave_type|as_crispy_field }}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    {{ form.pricing_type|as_crispy_field }}
+                </div>
+                <div class="col-md-3" id="duration_days_container">
                     {{ form.duration_days|as_crispy_field }}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     {{ form.price|as_crispy_field }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    {{ form.client|as_crispy_field }}
                 </div>
             </div>
 
@@ -46,4 +55,27 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // تنفيذ الدالة عند تحميل الصفحة لتطبيق الحالة الأولية
+        toggleDurationField($('#id_pricing_type').val());
+    });
+
+    // دالة لإخفاء/إظهار حقل المدة بالأيام حسب طريقة التسعير
+    function toggleDurationField(pricingType) {
+        if (pricingType === 'fixed') {
+            // إذا كان السعر ثابت، نخفي حقل المدة ونضع قيمة افتراضية (1)
+            $('#duration_days_container').hide();
+            if ($('#id_duration_days').val() === '') {
+                $('#id_duration_days').val(1);
+            }
+        } else {
+            // إذا كان السعر يومي، نظهر حقل المدة
+            $('#duration_days_container').show();
+        }
+    }
+</script>
 {% endblock %}

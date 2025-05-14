@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'ai_leaves.apps.AiLeavesConfig',  # تطبيق طلبات الإجازات الذكية
     'crispy_forms',
     'crispy_bootstrap4',
     'django_filters',
