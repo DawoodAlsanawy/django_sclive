@@ -31,7 +31,7 @@
     <div class="card-body">
         <form method="post" id="companion-leave-form">
             {% csrf_token %}
-            
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.leave_id|as_crispy_field }}
@@ -40,25 +40,75 @@
                     {{ form.issue_date|as_crispy_field }}
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.patient|as_crispy_field }}
+
+                    <!-- حقول إضافة مريض جديد -->
+                    <div class="card mt-2 mb-3 new-patient-fields" style="display: none;">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">إضافة مريض جديد</h6>
+                        </div>
+                        <div class="card-body">
+                            {{ form.new_patient_national_id|as_crispy_field }}
+                            {{ form.new_patient_name|as_crispy_field }}
+                            {{ form.new_patient_phone|as_crispy_field }}
+                            {{ form.new_patient_employer_name|as_crispy_field }}
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     {{ form.companion|as_crispy_field }}
+
+                    <!-- حقول إضافة مرافق جديد -->
+                    <div class="card mt-2 mb-3 new-companion-fields" style="display: none;">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">إضافة مرافق جديد</h6>
+                        </div>
+                        <div class="card-body">
+                            {{ form.new_companion_national_id|as_crispy_field }}
+                            {{ form.new_companion_name|as_crispy_field }}
+                            {{ form.new_companion_phone|as_crispy_field }}
+                            {{ form.new_companion_employer_name|as_crispy_field }}
+                        </div>
+                    </div>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.doctor|as_crispy_field }}
+
+                    <!-- حقول إضافة طبيب جديد -->
+                    <div class="card mt-2 mb-3 new-doctor-fields" style="display: none;">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">إضافة طبيب جديد</h6>
+                        </div>
+                        <div class="card-body">
+                            {{ form.new_doctor_national_id|as_crispy_field }}
+                            {{ form.new_doctor_name|as_crispy_field }}
+                            {{ form.new_doctor_position|as_crispy_field }}
+                            {{ form.new_doctor_hospital|as_crispy_field }}
+
+                            <!-- حقول إضافة مستشفى جديد -->
+                            <div class="card mt-2 new-hospital-fields" style="display: none;">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">إضافة مستشفى جديد</h6>
+                                </div>
+                                <div class="card-body">
+                                    {{ form.new_hospital_name|as_crispy_field }}
+                                    {{ form.new_hospital_address|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     {{ form.status|as_crispy_field }}
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.start_date|as_crispy_field }}
@@ -67,7 +117,7 @@
                     {{ form.end_date|as_crispy_field }}
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.admission_date|as_crispy_field }}
@@ -76,17 +126,27 @@
                     {{ form.discharge_date|as_crispy_field }}
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="duration_days">المدة (أيام)</label>
                         <input type="text" class="form-control" id="duration_days" value="{{ companion_leave.duration_days }}" readonly>
-                        <small class="form-text text-muted">سيتم حساب المدة تلقائيًا بناءً على تاريخ البداية والنهاية</small>
+                        <small class="form-text text-muted">
+                            سيتم حساب المدة تلقائيًا بناءً على تاريخ البداية والنهاية.
+                            إذا كان تاريخ البداية والنهاية في نفس اليوم، فالإجازة تعتبر ليوم واحد.
+                            إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين.
+                        </small>
                     </div>
                 </div>
             </div>
-            
+
+            <div class="row">
+                <div class="col-md-6">
+                    {{ form.client|as_crispy_field }}
+                </div>
+            </div>
+
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
                 <a href="{% url 'core:companion_leave_detail' companion_leave.id %}" class="btn btn-secondary">إلغاء</a>
@@ -105,33 +165,90 @@
             placeholder: 'اختر المريض',
             allowClear: true
         });
-        
+
         $('#id_companion').select2({
             placeholder: 'اختر المرافق',
             allowClear: true
         });
-        
+
         $('#id_doctor').select2({
             placeholder: 'اختر الطبيب',
             allowClear: true
         });
-        
+
         // حساب المدة تلقائيًا
         function calculateDuration() {
             var startDate = $('#id_start_date').val();
             var endDate = $('#id_end_date').val();
-            
+
             if (startDate && endDate) {
                 var start = new Date(startDate);
                 var end = new Date(endDate);
                 var diffTime = Math.abs(end - start);
-                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 لأن اليوم الأخير محسوب
-                
+                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                // +1 لأن اليوم الأخير محسوب
+                // إذا كان تاريخ البداية والنهاية في نفس اليوم، فالإجازة تعتبر ليوم واحد
+                // إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين
+                // وهكذا، كل فرق بين التاريخين يضيف يومًا إضافيًا للإجازة
+
                 $('#duration_days').val(diffDays);
             }
         }
-        
+
         $('#id_start_date, #id_end_date').change(calculateDuration);
+
+        // إظهار/إخفاء حقول إضافة مريض جديد
+        $('#id_patient').change(function() {
+            if ($(this).val() === '') {
+                $('.new-patient-fields').slideDown();
+            } else {
+                $('.new-patient-fields').slideUp();
+            }
+        });
+
+        // إظهار/إخفاء حقول إضافة مرافق جديد
+        $('#id_companion').change(function() {
+            if ($(this).val() === '') {
+                $('.new-companion-fields').slideDown();
+            } else {
+                $('.new-companion-fields').slideUp();
+            }
+        });
+
+        // إظهار/إخفاء حقول إضافة طبيب جديد
+        $('#id_doctor').change(function() {
+            if ($(this).val() === '') {
+                $('.new-doctor-fields').slideDown();
+            } else {
+                $('.new-doctor-fields').slideUp();
+            }
+        });
+
+        // إظهار/إخفاء حقول إضافة مستشفى جديد
+        $('#id_new_doctor_hospital').change(function() {
+            if ($(this).val() === '') {
+                $('.new-hospital-fields').slideDown();
+            } else {
+                $('.new-hospital-fields').slideUp();
+            }
+        });
+
+        // التحقق من القيم الأولية
+        if ($('#id_patient').val() === '') {
+            $('.new-patient-fields').show();
+        }
+
+        if ($('#id_companion').val() === '') {
+            $('.new-companion-fields').show();
+        }
+
+        if ($('#id_doctor').val() === '') {
+            $('.new-doctor-fields').show();
+        }
+
+        if ($('#id_new_doctor_hospital').val() === '') {
+            $('.new-hospital-fields').show();
+        }
     });
 </script>
 {% endblock %}

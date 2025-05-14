@@ -4602,3 +4602,169 @@ crispy_forms.exceptions.CrispyError: |as_crispy_field got passed an invalid or i
 [2025-05-14 20:14:31] INFO django.server: "GET /static/js/modal_forms.js HTTP/1.1" 304 0
 [2025-05-14 20:18:03] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\sclive\urls.py changed, reloading.
 [2025-05-14 20:21:20] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:25:17] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\sick_leave_views.py changed, reloading.
+[2025-05-14 20:25:26] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:25:39] INFO django.server: "GET /sick-leaves/create/ HTTP/1.1" 200 6721
+[2025-05-14 20:25:40] INFO django.server: "GET /static/js/modal_forms.js HTTP/1.1" 200 8392
+[2025-05-14 20:25:40] INFO django.server: - Broken pipe from ('127.0.0.1', 48680)
+[2025-05-14 20:25:46] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\sick_leave_views.py changed, reloading.
+[2025-05-14 20:25:49] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:25:50] INFO django.server: "POST /doctors/create-ajax/ HTTP/1.1" 200 186
+[2025-05-14 20:26:17] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\companion_leave_views.py changed, reloading.
+[2025-05-14 20:26:19] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:26:32] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\companion_leave_views.py changed, reloading.
+[2025-05-14 20:26:36] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:26:59] INFO django.server: "POST /sick-leaves/create/ HTTP/1.1" 302 0
+[2025-05-14 20:26:59] INFO django.server: "GET /sick-leaves/51/ HTTP/1.1" 200 2675
+[2025-05-14 20:36:39] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\forms.py changed, reloading.
+[2025-05-14 20:36:45] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:37:05] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\forms.py changed, reloading.
+[2025-05-14 20:37:14] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:37:48] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\sick_leave_views.py changed, reloading.
+[2025-05-14 20:37:51] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:38:16] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\companion_leave_views.py changed, reloading.
+[2025-05-14 20:38:20] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:38:43] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\sick_leave_views.py changed, reloading.
+[2025-05-14 20:38:46] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:39:09] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\companion_leave_views.py changed, reloading.
+[2025-05-14 20:39:15] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 20:40:10] INFO django.server: "GET /sick-leaves/ HTTP/1.1" 200 3914
+[2025-05-14 20:40:12] INFO django.server: "GET /sick-leaves/create-with-invoice/ HTTP/1.1" 200 4055
+[2025-05-14 20:51:32] INFO django.server: "GET /sick-leaves/ HTTP/1.1" 200 3926
+[2025-05-14 20:51:34] INFO django.server: "GET /sick-leaves/create/ HTTP/1.1" 200 6705
+[2025-05-14 20:51:35] INFO django.server: "GET /static/js/modal_forms.js HTTP/1.1" 200 8392
+[2025-05-14 20:52:02] INFO django.server: "POST /patients/create-ajax/ HTTP/1.1" 200 198
+[2025-05-14 20:52:37] INFO django.server: "POST /doctors/create-ajax/ HTTP/1.1" 200 227
+[2025-05-14 20:52:53] INFO django.server: "POST /doctors/create-ajax/ HTTP/1.1" 200 190
+[2025-05-14 20:53:24] INFO django.server: "GET /sick-leaves/create/ HTTP/1.1" 200 6779
+[2025-05-14 20:54:35] INFO django.server: "GET /sick-leaves/create/ HTTP/1.1" 200 6701
+[2025-05-14 20:54:35] INFO django.server: "GET /static/js/modal_forms.js HTTP/1.1" 304 0
+[2025-05-14 20:56:02] INFO django.server: "GET /sick-leaves/create/ HTTP/1.1" 200 6605
+[2025-05-14 20:56:07] INFO django.server: "POST /sick-leaves/create/ HTTP/1.1" 302 0
+[2025-05-14 20:56:07] INFO django.server: "GET /sick-leaves/52/ HTTP/1.1" 200 2701
+[2025-05-14 20:56:20] INFO django.server: "GET /sick-leaves/52/ HTTP/1.1" 200 2511
+[2025-05-14 20:56:22] INFO django.server: "GET /leave-invoices/create/?leave_type=sick_leave&leave_id=SL-20250514-16184 HTTP/1.1" 200 3746
+[2025-05-14 20:56:22] INFO django.server: "GET /leave-prices/api/get-price/?leave_type=sick_leave&duration_days=0&client_id= HTTP/1.1" 200 119
+[2025-05-14 20:57:14] INFO django.server: "GET /leave-invoices/ HTTP/1.1" 200 3090
+[2025-05-14 20:57:16] INFO django.server: "GET /leave-invoices/ HTTP/1.1" 200 3059
+[2025-05-14 20:57:28] INFO django.server: "GET /leave-invoices/?invoice_number=&client=&leave_type=&leave_id=&status=unpaid&issue_date_from=&issue_date_to=&due_date_from=&due_date_to= HTTP/1.1" 200 3060
+[2025-05-14 21:00:47] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\leave_invoice_views.py changed, reloading.
+[2025-05-14 21:01:01] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:01:15] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\leave_invoice_views.py changed, reloading.
+[2025-05-14 21:01:26] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:01:27] INFO django.server: "GET /leave-invoices/?invoice_number=&client=&leave_type=&leave_id=&status=unpaid&issue_date_from=&issue_date_to=&due_date_from=&due_date_to= HTTP/1.1" 200 3043
+[2025-05-14 21:01:42] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\leave_invoice_views.py changed, reloading.
+[2025-05-14 21:01:49] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:01:54] INFO django.server: "GET /leave-invoices/?invoice_number=&client=&leave_type=&leave_id=&status=unpaid&issue_date_from=&issue_date_to=&due_date_from=&due_date_to= HTTP/1.1" 200 3096
+[2025-05-14 21:02:05] INFO django.server: "GET /leave-invoices/?invoice_number=&client=&leave_type=&leave_id=&status=&issue_date_from=2025-05-14&issue_date_to=&due_date_from=&due_date_to= HTTP/1.1" 200 3069
+[2025-05-14 21:02:08] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\leave_invoice_views.py changed, reloading.
+[2025-05-14 21:02:15] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:02:17] INFO django.server: "GET /payments/ HTTP/1.1" 200 3913
+[2025-05-14 21:02:26] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\leave_invoice_views.py changed, reloading.
+[2025-05-14 21:02:33] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:03:05] INFO django.server: "GET /payments/?sort=payment_date HTTP/1.1" 200 3841
+[2025-05-14 21:03:08] INFO django.server: "GET /payments/?sort=-payment_date HTTP/1.1" 200 3901
+[2025-05-14 21:03:12] INFO django.server: "GET /payments/?sort=payment_date HTTP/1.1" 200 3909
+[2025-05-14 21:03:16] INFO django.server: "GET /payments/?sort=payment_method HTTP/1.1" 200 3914
+[2025-05-14 21:03:19] INFO django.server: "GET /payments/?sort=amount HTTP/1.1" 200 3880
+[2025-05-14 21:03:24] INFO django.server: "GET /payments/?sort=client__name HTTP/1.1" 200 3798
+[2025-05-14 21:03:33] INFO django.server: "GET /payments/?page=3&sort=client__name HTTP/1.1" 200 3845
+[2025-05-14 21:03:35] INFO django.server: "GET /payments/?page=3&sort=payment_method HTTP/1.1" 200 3845
+[2025-05-14 21:03:38] INFO django.server: "GET /payments/?page=3&sort=payment_date HTTP/1.1" 200 3788
+[2025-05-14 21:03:48] INFO django.server: "GET /payments/?payment_number=%D8%B1%D8%A7%D8%AC%D8%AD&client=&payment_method=&reference_number=&payment_date_from=&payment_date_to=&amount_min=&amount_max= HTTP/1.1" 200 2994
+[2025-05-14 21:03:58] INFO django.server: "GET /payments/?payment_number=%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%84%D9%87+%D8%B1%D8%A7%D8%AC%D8%AD&client=&payment_method=&reference_number=&payment_date_from=&payment_date_to=&amount_min=&amount_max= HTTP/1.1" 200 3062
+[2025-05-14 21:04:05] INFO django.server: "GET /payments/?payment_number=&client=%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%84%D9%87+%D8%B1%D8%A7%D8%AC%D8%AD&payment_method=&reference_number=&payment_date_from=&payment_date_to=&amount_min=&amount_max= HTTP/1.1" 200 3392
+[2025-05-14 21:04:18] INFO django.server: "GET /leave-invoices/ HTTP/1.1" 200 3119
+[2025-05-14 21:04:21] INFO django.server: "GET /leave-invoices/ HTTP/1.1" 200 3063
+[2025-05-14 21:08:04] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\leave_invoice_views.py changed, reloading.
+[2025-05-14 21:08:08] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:08:24] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\leave_invoice_views.py changed, reloading.
+[2025-05-14 21:08:30] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:09:05] INFO django.server: "GET /leave-invoices/ HTTP/1.1" 200 4075
+[2025-05-14 21:09:23] INFO django.server: "GET /leave-invoices/?invoice_number=&client=&leave_type=&leave_id=&status=unpaid&issue_date_from=&issue_date_to=&due_date_from=&due_date_to= HTTP/1.1" 200 3989
+[2025-05-14 21:09:48] INFO django.server: "GET /sick-leaves/52/ HTTP/1.1" 200 2595
+[2025-05-14 21:09:50] INFO django.server: "GET /sick-leaves/52/ HTTP/1.1" 200 2521
+[2025-05-14 21:10:07] INFO django.server: "GET /sick-leaves/52/ HTTP/1.1" 200 2524
+[2025-05-14 21:10:10] INFO django.server: "GET /leave-invoices/ HTTP/1.1" 200 4081
+[2025-05-14 21:10:14] INFO django.server: "GET /leave-invoices/?sort=issue_date HTTP/1.1" 200 4061
+[2025-05-14 21:10:19] INFO django.server: "GET /leave-invoices/?sort=-issue_date HTTP/1.1" 200 4059
+[2025-05-14 21:10:39] INFO django.server: "GET /sick-leaves/create/ HTTP/1.1" 200 6681
+[2025-05-14 21:10:39] INFO django.server: - Broken pipe from ('127.0.0.1', 49922)
+[2025-05-14 21:11:14] INFO django.server: "POST /sick-leaves/create/ HTTP/1.1" 200 6723
+[2025-05-14 21:11:14] INFO django.server: "GET /static/js/modal_forms.js HTTP/1.1" 304 0
+[2025-05-14 21:11:58] INFO django.server: "POST /doctors/create-ajax/ HTTP/1.1" 200 193
+[2025-05-14 21:12:02] INFO django.server: "POST /doctors/create-ajax/ HTTP/1.1" 200 158
+[2025-05-14 21:12:40] INFO django.server: "POST /sick-leaves/create/ HTTP/1.1" 302 0
+[2025-05-14 21:12:40] INFO django.server: "GET /sick-leaves/53/ HTTP/1.1" 200 2728
+[2025-05-14 21:12:52] INFO django.server: "GET /leave-invoices/?sort=-issue_date HTTP/1.1" 200 3991
+[2025-05-14 21:12:56] INFO django.server: "GET /leave-invoices/?sort=issue_date HTTP/1.1" 200 4156
+[2025-05-14 21:12:58] INFO django.server: "GET /leave-invoices/?sort=-issue_date HTTP/1.1" 200 4020
+[2025-05-14 21:13:38] INFO django.server: "GET /leave-invoices/?sort=leave_id HTTP/1.1" 200 4088
+[2025-05-14 21:13:41] INFO django.server: "GET /leave-invoices/8/ HTTP/1.1" 200 3013
+[2025-05-14 21:13:45] INFO django.server: "GET /companion-leaves/7/ HTTP/1.1" 200 2680
+[2025-05-14 21:20:55] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\models.py changed, reloading.
+[2025-05-14 21:21:03] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:21:17] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\models.py changed, reloading.
+[2025-05-14 21:21:23] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:22:31] INFO django.server: "GET /sick-leaves/53/edit/ HTTP/1.1" 200 3870
+[2025-05-14 21:22:39] INFO django.server: "POST /sick-leaves/53/edit/ HTTP/1.1" 200 3796
+[2025-05-14 21:22:42] INFO django.server: "POST /sick-leaves/53/edit/ HTTP/1.1" 200 3807
+[2025-05-14 21:23:01] INFO django.server: "POST /sick-leaves/53/edit/ HTTP/1.1" 200 3816
+[2025-05-14 21:23:09] INFO django.server: "POST /sick-leaves/53/edit/ HTTP/1.1" 200 3840
+[2025-05-14 21:24:14] INFO django.server: "POST /sick-leaves/53/edit/ HTTP/1.1" 200 3868
+[2025-05-14 21:24:45] INFO django.server: "GET /sick-leaves/ HTTP/1.1" 200 3895
+[2025-05-14 21:24:47] INFO django.server: "GET /sick-leaves/create/ HTTP/1.1" 200 6804
+[2025-05-14 21:24:47] INFO django.server: "GET /static/js/modal_forms.js HTTP/1.1" 304 0
+[2025-05-14 21:25:13] INFO django.server: "POST /sick-leaves/create/ HTTP/1.1" 302 0
+[2025-05-14 21:25:13] INFO django.server: "GET /sick-leaves/54/ HTTP/1.1" 200 2797
+[2025-05-14 21:25:19] INFO django.server: "GET /companion-leaves/ HTTP/1.1" 200 4036
+[2025-05-14 21:25:21] INFO django.server: "GET /leave-invoices/ HTTP/1.1" 200 4008
+[2025-05-14 21:25:23] INFO django.server: "GET /companion-leaves/ HTTP/1.1" 200 4025
+[2025-05-14 21:25:23] INFO django.server: "GET /sick-leaves/ HTTP/1.1" 200 3920
+[2025-05-14 21:25:40] INFO django.server: "GET /sick-leaves/54/edit/ HTTP/1.1" 200 3802
+[2025-05-14 21:25:43] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 200 3800
+[2025-05-14 21:28:27] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 200 3833
+[2025-05-14 21:28:28] INFO django.server: "GET /sick-leaves/54/edit/ HTTP/1.1" 200 3831
+[2025-05-14 21:28:55] INFO django.server: "GET /companion-leaves/ HTTP/1.1" 200 3958
+[2025-05-14 21:28:59] INFO django.server: "GET /companion-leaves/24/edit/ HTTP/1.1" 200 3963
+[2025-05-14 21:29:21] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\sick_leave_views.py changed, reloading.
+[2025-05-14 21:29:24] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:29:43] INFO django.server: "GET /sick-leaves/54/edit/ HTTP/1.1" 200 3844
+[2025-05-14 21:29:46] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 200 3893
+[2025-05-14 21:29:49] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 200 3882
+[2025-05-14 21:29:52] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 200 3902
+[2025-05-14 21:30:00] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\sick_leave_views.py changed, reloading.
+[2025-05-14 21:30:05] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:30:46] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\sick_leave_views.py changed, reloading.
+[2025-05-14 21:30:48] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:31:25] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\companion_leave_views.py changed, reloading.
+[2025-05-14 21:31:33] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:31:50] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\companion_leave_views.py changed, reloading.
+[2025-05-14 21:31:54] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:32:37] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\views\companion_leave_views.py changed, reloading.
+[2025-05-14 21:32:42] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-14 21:33:40] INFO django.server: "GET /companion-leaves/ HTTP/1.1" 200 3987
+[2025-05-14 21:33:53] INFO django.server: "GET /sick-leaves/54/edit/ HTTP/1.1" 200 3865
+[2025-05-14 21:33:57] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 200 3850
+[2025-05-14 21:35:23] INFO django.server: "GET /sick-leaves/ HTTP/1.1" 200 3876
+[2025-05-14 21:35:25] INFO django.server: "GET /sick-leaves/54/ HTTP/1.1" 200 2686
+[2025-05-14 21:35:43] INFO django.server: "GET /leave-invoices/69/ HTTP/1.1" 200 2707
+[2025-05-14 21:35:47] INFO django.server: "GET /payments/create/?invoice_id=69 HTTP/1.1" 200 5330
+[2025-05-14 21:36:30] INFO django.server: "GET /api/client/4/unpaid-invoices/ HTTP/1.1" 200 641
+[2025-05-14 21:47:00] INFO django.server: "GET /leave-invoices/8/ HTTP/1.1" 200 3021
+[2025-05-14 21:47:07] INFO django.server: "GET /leave-invoices/8/edit/ HTTP/1.1" 200 3007
+[2025-05-14 21:47:13] INFO django.server: "GET /sick-leaves/ HTTP/1.1" 200 3906
+[2025-05-14 21:47:15] INFO django.server: "GET /sick-leaves/54/ HTTP/1.1" 200 2608
+[2025-05-14 21:47:20] INFO django.server: "GET /sick-leaves/54/edit/ HTTP/1.1" 200 4856
+[2025-05-14 21:47:26] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 302 0
+[2025-05-14 21:47:26] INFO django.server: "GET /sick-leaves/54/ HTTP/1.1" 200 2714
+[2025-05-14 21:47:38] INFO django.server: "GET /sick-leaves/54/edit/ HTTP/1.1" 200 4856
+[2025-05-14 21:47:42] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 302 0
+[2025-05-14 21:47:42] INFO django.server: "GET /sick-leaves/54/ HTTP/1.1" 200 2775
+[2025-05-14 21:47:57] INFO django.server: "GET /leave-invoices/69/ HTTP/1.1" 200 2705
+[2025-05-14 21:48:06] INFO django.server: "GET /sick-leaves/54/edit/ HTTP/1.1" 200 4876
+[2025-05-14 21:48:10] INFO django.server: "POST /sick-leaves/54/edit/ HTTP/1.1" 302 0
+[2025-05-14 21:48:10] INFO django.server: "GET /sick-leaves/54/ HTTP/1.1" 200 2799
+[2025-05-14 21:48:12] INFO django.server: "GET /leave-invoices/69/ HTTP/1.1" 200 2646
+[2025-05-14 21:48:20] INFO django.server: "GET /leave-invoices/69/ HTTP/1.1" 200 2721
+[2025-05-14 21:48:21] INFO django.server: "GET /leave-invoices/69/edit/ HTTP/1.1" 200 3060

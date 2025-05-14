@@ -251,12 +251,12 @@ class SickLeaveForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المستشفى الجديد'})
     )
 
-    # حقل إضافة فاتورة
+    # حقل إضافة فاتورة - مخفي ومحدد افتراضياً
     create_invoice = forms.BooleanField(
         label='إنشاء فاتورة',
         required=False,
         initial=True,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+        widget=forms.HiddenInput()  # جعل الحقل مخفياً
     )
     client = forms.ModelChoiceField(
         label='العميل',
@@ -537,12 +537,12 @@ class CompanionLeaveForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المستشفى الجديد'})
     )
 
-    # حقل إضافة فاتورة
+    # حقل إضافة فاتورة - مخفي ومحدد افتراضياً
     create_invoice = forms.BooleanField(
         label='إنشاء فاتورة',
         required=False,
         initial=True,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+        widget=forms.HiddenInput()  # جعل الحقل مخفياً
     )
     client = forms.ModelChoiceField(
         label='العميل',

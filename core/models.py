@@ -390,6 +390,9 @@ class SickLeave(models.Model):
 
     def save(self, *args, **kwargs):
         # حساب مدة الإجازة
+        # إذا كان تاريخ البداية والنهاية في نفس اليوم، فالإجازة تعتبر ليوم واحد
+        # إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين
+        # وهكذا، كل فرق بين التاريخين يضيف يومًا إضافيًا للإجازة
         if self.start_date and self.end_date:
             self.duration_days = (self.end_date - self.start_date).days + 1
 
@@ -447,6 +450,9 @@ class CompanionLeave(models.Model):
 
     def save(self, *args, **kwargs):
         # حساب مدة الإجازة
+        # إذا كان تاريخ البداية والنهاية في نفس اليوم، فالإجازة تعتبر ليوم واحد
+        # إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين
+        # وهكذا، كل فرق بين التاريخين يضيف يومًا إضافيًا للإجازة
         if self.start_date and self.end_date:
             self.duration_days = (self.end_date - self.start_date).days + 1
 
