@@ -353,6 +353,7 @@ class SickLeaveWithInvoiceForm(forms.Form):
         label='رقم هوية المريض',
         max_length=20,
         widget=forms.TextInput(attrs={'class': 'form-control'})
+        
     )
     patient_name = forms.CharField(
         label='اسم المريض',
@@ -364,6 +365,7 @@ class SickLeaveWithInvoiceForm(forms.Form):
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'})
+       
     )
 
     # حقول الطبيب

@@ -370,8 +370,60 @@
 
         // ملء البيانات من معلمات URL إذا كانت موجودة
         var urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('invoice_id')) {
-            // هنا يمكن إضافة طلب AJAX لتحميل بيانات الفاتورة وملء النموذج
+        if (urlParams.has('invoice_id') && urlParams.has('client_id')) {
+            var invoiceId = urlParams.get('invoice_id');
+            var clientId = urlParams.get('client_id');
+
+            // تحميل الفواتير للعميل
+            $.ajax({
+                url: '/api/client/' + clientId + '/unpaid-invoices/',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var selectElement = $('#invoice-1');
+                    selectElement.empty().append('<option value="">اختر الفاتورة</option>');
+
+                    // إضافة الفواتير غير المدفوعة
+                    $.each(data, function(index, invoice) {
+                        var status = '';
+                        if (invoice.status === 'unpaid') {
+                            status = 'غير مدفوعة';
+                        } else if (invoice.status === 'partially_paid') {
+                            status = 'مدفوعة جزئيًا';
+                        }
+
+                        var option = $('<option></option>')
+                            .attr('value', invoice.id)
+                            .text(invoice.invoice_number + ' - ' + invoice.amount + ' ريال (' + status + ')')
+                            .data('total', invoice.amount)
+                            .data('remaining', invoice.remaining);
+
+                        selectElement.append(option);
+
+                        // إذا كانت هذه الفاتورة المطلوبة، قم بتحديدها
+                        if (invoice.id == invoiceId) {
+                            selectElement.val(invoice.id);
+
+                            // تحديث حقول المبلغ الكلي والمتبقي
+                            $('#total-amount-1').val(invoice.amount + ' ريال');
+                            $('#remaining-amount-1').val(invoice.remaining + ' ريال');
+
+                            // تعيين المبلغ المتبقي كقيمة افتراضية للدفع
+                            $('#amount-1').val(invoice.remaining);
+
+                            // إعادة حساب الإجماليات
+                            calculateTotals();
+                        }
+                    });
+
+                    // تحديث Select2
+                    selectElement.trigger('change');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error loading invoices:', error);
+                    alert('حدث خطأ أثناء تحميل الفواتير. يرجى المحاولة مرة أخرى.');
+                }
+            });
         }
     });
 

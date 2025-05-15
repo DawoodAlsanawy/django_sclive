@@ -101,6 +101,123 @@ def companion_leave_create(request):
     if request.method == 'POST':
         form = CompanionLeaveForm(request.POST)
         if form.is_valid():
+            # معالجة إضافة مريض جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_patient_name') and form.cleaned_data.get('new_patient_national_id'):
+                # التحقق مما إذا كان المريض موجودًا بالفعل
+                try:
+                    patient = Patient.objects.get(national_id=form.cleaned_data['new_patient_national_id'])
+                    # تحديث بيانات المريض إذا تغيرت
+                    if patient.name != form.cleaned_data['new_patient_name']:
+                        patient.name = form.cleaned_data['new_patient_name']
+                    if form.cleaned_data.get('new_patient_phone'):
+                        patient.phone = form.cleaned_data['new_patient_phone']
+                    if form.cleaned_data.get('new_patient_employer_name'):
+                        patient.employer_name = form.cleaned_data['new_patient_employer_name']
+
+                    patient.save()
+                except Patient.DoesNotExist:
+                    # إنشاء مريض جديد
+                    patient = Patient.objects.create(
+                        national_id=form.cleaned_data['new_patient_national_id'],
+                        name=form.cleaned_data['new_patient_name'],
+                        phone=form.cleaned_data.get('new_patient_phone', ''),
+                        employer_name=form.cleaned_data.get('new_patient_employer_name', '')
+                    )
+
+                # تعيين المريض الجديد في النموذج
+                form.instance.patient = patient
+            elif not form.cleaned_data.get('patient'):
+                # إذا لم يتم تحديد مريض ولم يتم إدخال بيانات مريض جديد
+                form.add_error('patient', 'يجب اختيار مريض موجود أو إدخال بيانات مريض جديد')
+                return render(request, 'core/companion_leaves/create.html', {'form': form, 'hospitals': Hospital.objects.all().order_by('name')})
+
+            # معالجة إضافة مرافق جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_companion_name') and form.cleaned_data.get('new_companion_national_id'):
+                # التحقق مما إذا كان المرافق موجودًا بالفعل
+                try:
+                    companion = Patient.objects.get(national_id=form.cleaned_data['new_companion_national_id'])
+                    # تحديث بيانات المرافق إذا تغيرت
+                    if companion.name != form.cleaned_data['new_companion_name']:
+                        companion.name = form.cleaned_data['new_companion_name']
+                    if form.cleaned_data.get('new_companion_phone'):
+                        companion.phone = form.cleaned_data['new_companion_phone']
+                    if form.cleaned_data.get('new_companion_employer_name'):
+                        companion.employer_name = form.cleaned_data['new_companion_employer_name']
+
+                    companion.save()
+                except Patient.DoesNotExist:
+                    # إنشاء مرافق جديد
+                    companion = Patient.objects.create(
+                        national_id=form.cleaned_data['new_companion_national_id'],
+                        name=form.cleaned_data['new_companion_name'],
+                        phone=form.cleaned_data.get('new_companion_phone', ''),
+                        employer_name=form.cleaned_data.get('new_companion_employer_name', '')
+                    )
+
+                # تعيين المرافق الجديد في النموذج
+                form.instance.companion = companion
+            elif not form.cleaned_data.get('companion'):
+                # إذا لم يتم تحديد مرافق ولم يتم إدخال بيانات مرافق جديد
+                form.add_error('companion', 'يجب اختيار مرافق موجود أو إدخال بيانات مرافق جديد')
+                return render(request, 'core/companion_leaves/create.html', {'form': form, 'hospitals': Hospital.objects.all().order_by('name')})
+
+            # معالجة إضافة طبيب جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_doctor_name') and form.cleaned_data.get('new_doctor_national_id'):
+                # التحقق مما إذا كان الطبيب موجودًا بالفعل
+                try:
+                    doctor = Doctor.objects.get(national_id=form.cleaned_data['new_doctor_national_id'])
+                    # تحديث بيانات الطبيب إذا تغيرت
+                    if doctor.name != form.cleaned_data['new_doctor_name']:
+                        doctor.name = form.cleaned_data['new_doctor_name']
+                    if form.cleaned_data.get('new_doctor_position'):
+                        doctor.position = form.cleaned_data['new_doctor_position']
+
+                    # معالجة إضافة مستشفى جديد إذا تم إدخال بياناته
+                    if form.cleaned_data.get('new_hospital_name'):
+                        # التحقق مما إذا كان المستشفى موجودًا بالفعل
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                        doctor.hospital = hospital
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+
+                    doctor.save()
+                except Doctor.DoesNotExist:
+                    # إنشاء مستشفى جديد إذا تم إدخال بياناته
+                    hospital = None
+                    if form.cleaned_data.get('new_hospital_name'):
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        hospital = form.cleaned_data['new_doctor_hospital']
+
+                    if not hospital:
+                        form.add_error('new_doctor_hospital', 'يجب اختيار مستشفى موجود أو إدخال بيانات مستشفى جديد للطبيب الجديد')
+                        return render(request, 'core/companion_leaves/create.html', {'form': form, 'hospitals': Hospital.objects.all().order_by('name')})
+
+                    # إنشاء طبيب جديد
+                    doctor = Doctor.objects.create(
+                        national_id=form.cleaned_data['new_doctor_national_id'],
+                        name=form.cleaned_data['new_doctor_name'],
+                        position=form.cleaned_data.get('new_doctor_position', ''),
+                        hospital=hospital
+                    )
+
+                # تعيين الطبيب الجديد في النموذج
+                form.instance.doctor = doctor
+            elif not form.cleaned_data.get('doctor'):
+                # إذا لم يتم تحديد طبيب ولم يتم إدخال بيانات طبيب جديد
+                form.add_error('doctor', 'يجب اختيار طبيب موجود أو إدخال بيانات طبيب جديد')
+                return render(request, 'core/companion_leaves/create.html', {'form': form, 'hospitals': Hospital.objects.all().order_by('name')})
+
             companion_leave = form.save()
 
             # إنشاء فاتورة تلقائياً دائماً
@@ -371,21 +488,66 @@ def companion_leave_edit(request, companion_leave_id):
                 form.add_error('doctor', 'يجب اختيار طبيب موجود أو إدخال بيانات طبيب جديد')
                 return render(request, 'core/companion_leaves/edit.html', {'form': form, 'companion_leave': companion_leave})
 
+            # الحصول على العميل الجديد من النموذج
+            new_client = form.cleaned_data.get('client')
+
             # حفظ التغييرات
             updated_companion_leave = form.save()
 
-            # تحديث الفواتير المرتبطة إذا تغيرت مدة الإجازة
-            if 'duration_days' in form.changed_data:
-                # الحصول على الفواتير المرتبطة بالإجازة
+            # الحصول على الفواتير المرتبطة بالإجازة
+            invoices = LeaveInvoice.objects.filter(leave_type='companion_leave', leave_id=updated_companion_leave.leave_id)
+
+            # إذا لم تكن هناك فواتير مرتبطة بالإجازة وتم تحديد عميل، نقوم بإنشاء فاتورة جديدة
+            if not invoices.exists() and new_client:
+                # حساب سعر الإجازة
+                price = LeavePrice.get_price('companion_leave', updated_companion_leave.duration_days, new_client)
+
+                # إنشاء رقم فاتورة جديد
+                from core.utils import generate_unique_number
+                invoice_number = generate_unique_number('INV', LeaveInvoice)
+
+                # إنشاء فاتورة جديدة
+                invoice = LeaveInvoice.objects.create(
+                    invoice_number=invoice_number,
+                    client=new_client,
+                    leave_type='companion_leave',
+                    leave_id=updated_companion_leave.leave_id,
+                    amount=price,
+                    issue_date=updated_companion_leave.issue_date,
+                    due_date=updated_companion_leave.end_date,  # تاريخ الاستحقاق هو تاريخ نهاية الإجازة
+                    notes=f'فاتورة إجازة مرافق رقم {updated_companion_leave.leave_id}'
+                )
+
+                # إضافة رسالة نجاح
+                messages.success(request, f'تم إنشاء فاتورة جديدة برقم {invoice.invoice_number}')
+
+                # تحديث قائمة الفواتير
                 invoices = LeaveInvoice.objects.filter(leave_type='companion_leave', leave_id=updated_companion_leave.leave_id)
+
+            # تحديث الفواتير المرتبطة إذا تغيرت مدة الإجازة أو العميل
+            if invoices.exists() and ('duration_days' in form.changed_data or 'client' in form.changed_data):
                 for invoice in invoices:
-                    # تحديث المبلغ بناءً على المدة الجديدة إذا كان العميل محددًا
+                    # تحديث العميل في الفاتورة إذا تغير
+                    if 'client' in form.changed_data and new_client:
+                        # إذا كان هناك عميل جديد، نقوم بتحديث العميل في الفاتورة
+                        invoice.client = new_client
+
+                    # تحديث المبلغ بناءً على المدة الجديدة والعميل
                     if invoice.client:
                         new_price = LeavePrice.get_price('companion_leave', updated_companion_leave.duration_days, invoice.client)
                         if new_price != invoice.amount:
+                            # إضافة ملاحظة بتغيير السعر
+                            old_amount = invoice.amount
                             invoice.amount = new_price
-                            invoice.save()
-                            invoice.update_status()  # تحديث حالة الفاتورة بعد تغيير المبلغ
+
+                            # إضافة ملاحظة بتغيير السعر
+                            if not invoice.notes:
+                                invoice.notes = ''
+                            invoice.notes += f'\nتم تغيير المبلغ من {old_amount} إلى {new_price} بتاريخ {timezone.now().date()}'
+
+                    # حفظ التغييرات وتحديث حالة الفاتورة
+                    invoice.save()
+                    invoice.update_status()  # تحديث حالة الفاتورة بعد تغيير المبلغ أو العميل
 
             messages.success(request, f'تم تعديل إجازة المرافق رقم {updated_companion_leave.leave_id} بنجاح')
             return redirect('core:companion_leave_detail', companion_leave_id=updated_companion_leave.id)

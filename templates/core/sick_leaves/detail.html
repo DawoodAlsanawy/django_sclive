@@ -256,7 +256,7 @@
                 {% else %}
                 <p class="text-center text-muted">لا توجد فواتير مرتبطة بهذه الإجازة</p>
                 <div class="d-grid gap-2">
-                    <a href="{% url 'core:leave_invoice_create' %}?leave_type=sick_leave&leave_id={{ sick_leave.leave_id }}" class="btn btn-primary">
+                    <a href="{% url 'core:leave_invoice_create' %}?leave_type=sick_leave&leave_id={{ sick_leave.leave_id }}{% if sick_leave.patient.employer_name %}&client_name={{ sick_leave.patient.employer_name }}{% endif %}{% if leave_price %}&amount={{ leave_price }}{% endif %}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> إنشاء فاتورة
                     </a>
                 </div>

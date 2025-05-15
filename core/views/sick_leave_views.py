@@ -500,21 +500,66 @@ def sick_leave_edit(request, sick_leave_id):
                 form.add_error('doctor', 'يجب اختيار طبيب موجود أو إدخال بيانات طبيب جديد')
                 return render(request, 'core/sick_leaves/edit.html', {'form': form, 'sick_leave': sick_leave})
 
+            # الحصول على العميل الجديد من النموذج
+            new_client = form.cleaned_data.get('client')
+
             # حفظ التغييرات
             updated_sick_leave = form.save()
 
-            # تحديث الفواتير المرتبطة إذا تغيرت مدة الإجازة
-            if 'duration_days' in form.changed_data:
-                # الحصول على الفواتير المرتبطة بالإجازة
+            # الحصول على الفواتير المرتبطة بالإجازة
+            invoices = LeaveInvoice.objects.filter(leave_type='sick_leave', leave_id=updated_sick_leave.leave_id)
+
+            # إذا لم تكن هناك فواتير مرتبطة بالإجازة وتم تحديد عميل، نقوم بإنشاء فاتورة جديدة
+            if not invoices.exists() and new_client:
+                # حساب سعر الإجازة
+                price = LeavePrice.get_price('sick_leave', updated_sick_leave.duration_days, new_client)
+
+                # إنشاء رقم فاتورة جديد
+                from core.utils import generate_unique_number
+                invoice_number = generate_unique_number('INV', LeaveInvoice)
+
+                # إنشاء فاتورة جديدة
+                invoice = LeaveInvoice.objects.create(
+                    invoice_number=invoice_number,
+                    client=new_client,
+                    leave_type='sick_leave',
+                    leave_id=updated_sick_leave.leave_id,
+                    amount=price,
+                    issue_date=updated_sick_leave.issue_date,
+                    due_date=updated_sick_leave.end_date,  # تاريخ الاستحقاق هو تاريخ نهاية الإجازة
+                    notes=f'فاتورة إجازة مرضية رقم {updated_sick_leave.leave_id}'
+                )
+
+                # إضافة رسالة نجاح
+                messages.success(request, f'تم إنشاء فاتورة جديدة برقم {invoice.invoice_number}')
+
+                # تحديث قائمة الفواتير
                 invoices = LeaveInvoice.objects.filter(leave_type='sick_leave', leave_id=updated_sick_leave.leave_id)
+
+            # تحديث الفواتير المرتبطة إذا تغيرت مدة الإجازة أو العميل
+            if invoices.exists() and ('duration_days' in form.changed_data or 'client' in form.changed_data):
                 for invoice in invoices:
-                    # تحديث المبلغ بناءً على المدة الجديدة إذا كان العميل محددًا
+                    # تحديث العميل في الفاتورة إذا تغير
+                    if 'client' in form.changed_data and new_client:
+                        # إذا كان هناك عميل جديد، نقوم بتحديث العميل في الفاتورة
+                        invoice.client = new_client
+
+                    # تحديث المبلغ بناءً على المدة الجديدة والعميل
                     if invoice.client:
                         new_price = LeavePrice.get_price('sick_leave', updated_sick_leave.duration_days, invoice.client)
                         if new_price != invoice.amount:
+                            # إضافة ملاحظة بتغيير السعر
+                            old_amount = invoice.amount
                             invoice.amount = new_price
-                            invoice.save()
-                            invoice.update_status()  # تحديث حالة الفاتورة بعد تغيير المبلغ
+
+                            # إضافة ملاحظة بتغيير السعر
+                            if not invoice.notes:
+                                invoice.notes = ''
+                            invoice.notes += f'\nتم تغيير المبلغ من {old_amount} إلى {new_price} بتاريخ {timezone.now().date()}'
+
+                    # حفظ التغييرات وتحديث حالة الفاتورة
+                    invoice.save()
+                    invoice.update_status()  # تحديث حالة الفاتورة بعد تغيير المبلغ أو العميل
 
             messages.success(request, f'تم تعديل الإجازة المرضية رقم {updated_sick_leave.leave_id} بنجاح')
             return redirect('core:sick_leave_detail', sick_leave_id=updated_sick_leave.id)

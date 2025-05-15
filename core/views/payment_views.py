@@ -1,12 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
-from django.core.paginator import Paginator
 from django.utils import timezone
 
-from core.forms import PaymentForm, PaymentDetailForm
-from core.models import Payment, PaymentDetail, Client, LeaveInvoice
+from core.forms import PaymentDetailForm, PaymentForm
+from core.models import Client, LeaveInvoice, Payment, PaymentDetail
 from core.utils import generate_unique_number
 
 
@@ -90,18 +90,18 @@ def payment_create(request):
                 for invoice in invoices:
                     # حساب المبلغ المتبقي للفاتورة
                     remaining_amount = invoice.get_remaining_amount()
-                    
+
                     # إذا كان المبلغ المتبقي أكبر من الصفر، قم بإنشاء تفصيل دفع
                     if remaining_amount > 0:
                         # إذا كان المبلغ المتبقي أكبر من مبلغ الدفع، استخدم مبلغ الدفع
                         amount = min(remaining_amount, payment.amount)
-                        
+
                         PaymentDetail.objects.create(
                             payment=payment,
                             invoice=invoice,
                             amount=amount
                         )
-                        
+
                         # تحديث حالة الفاتورة
                         invoice.update_status()
 
@@ -114,12 +114,12 @@ def payment_create(request):
         # تعيين تاريخ اليوم كتاريخ افتراضي للدفع
         import datetime
         today = datetime.date.today()
-        
+
         initial_data = {
             'payment_number': payment_number,
             'payment_date': today
         }
-        
+
         # إذا تم تحديد عميل في الاستعلام، قم بتعيينه
         client_id = request.GET.get('client_id')
         if client_id:
@@ -128,8 +128,27 @@ def payment_create(request):
                 initial_data['client'] = client
             except Client.DoesNotExist:
                 pass
-        
+
+        # إذا تم تحديد مبلغ في الاستعلام، قم بتعيينه
+        amount = request.GET.get('amount')
+        if amount:
+            try:
+                initial_data['amount'] = float(amount)
+            except (ValueError, TypeError):
+                pass
+
+        # إنشاء النموذج مع البيانات الأولية
         form = PaymentForm(initial=initial_data)
+
+        # إذا تم تحديد فاتورة في الاستعلام، قم بتحميلها
+        invoice_id = request.GET.get('invoice_id')
+        if invoice_id and client_id:
+            try:
+                invoice = LeaveInvoice.objects.get(id=invoice_id, client_id=client_id)
+                # سنستخدم هذه المعلومات في القالب
+                form.invoice_to_prefill = invoice
+            except LeaveInvoice.DoesNotExist:
+                pass
 
     return render(request, 'core/payments/create.html', {'form': form})
 
@@ -138,21 +157,21 @@ def payment_create(request):
 def payment_detail(request, payment_id):
     """تفاصيل مدفوعة"""
     payment = get_object_or_404(Payment, id=payment_id)
-    
+
     # الحصول على تفاصيل الدفع
     payment_details = payment.payment_details.select_related('invoice').all()
-    
+
     # إذا كان هناك تفاصيل دفع، احسب المبلغ المخصص
     allocated_amount = sum(detail.amount for detail in payment_details)
     unallocated_amount = payment.amount - allocated_amount
-    
+
     # إذا تم إرسال نموذج إضافة تفصيل دفع
     if request.method == 'POST':
         detail_form = PaymentDetailForm(request.POST)
         if detail_form.is_valid():
             invoice = detail_form.cleaned_data['invoice']
             amount = detail_form.cleaned_data['amount']
-            
+
             # التحقق من أن المبلغ لا يتجاوز المبلغ غير المخصص
             if amount <= unallocated_amount:
                 # التحقق من أن المبلغ لا يتجاوز المبلغ المتبقي للفاتورة
@@ -164,10 +183,10 @@ def payment_detail(request, payment_id):
                         invoice=invoice,
                         amount=amount
                     )
-                    
+
                     # تحديث حالة الفاتورة
                     invoice.update_status()
-                    
+
                     messages.success(request, f'تم إضافة تفصيل الدفع بنجاح')
                     return redirect('core:payment_detail', payment_id=payment.id)
                 else:
@@ -177,14 +196,14 @@ def payment_detail(request, payment_id):
     else:
         # إذا كان هناك مبلغ غير مخصص، قم بإنشاء نموذج لإضافة تفصيل دفع
         detail_form = PaymentDetailForm(initial={'payment': payment})
-        
+
         # تقييد الفواتير المتاحة للعميل وغير المدفوعة بالكامل
         if payment.client:
             detail_form.fields['invoice'].queryset = LeaveInvoice.objects.filter(
                 client=payment.client,
                 status__in=['unpaid', 'partially_paid']
             )
-    
+
     context = {
         'payment': payment,
         'payment_details': payment_details,
@@ -192,7 +211,7 @@ def payment_detail(request, payment_id):
         'unallocated_amount': unallocated_amount,
         'detail_form': detail_form if unallocated_amount > 0 else None
     }
-    
+
     return render(request, 'core/payments/detail.html', context)
 
 
@@ -200,10 +219,10 @@ def payment_detail(request, payment_id):
 def payment_edit(request, payment_id):
     """تعديل مدفوعة"""
     payment = get_object_or_404(Payment, id=payment_id)
-    
+
     # التحقق من وجود تفاصيل دفع
     has_details = payment.payment_details.exists()
-    
+
     if request.method == 'POST':
         form = PaymentForm(request.POST, instance=payment)
         if form.is_valid():
@@ -212,17 +231,17 @@ def payment_edit(request, payment_id):
                 if form.cleaned_data['amount'] != payment.amount:
                     form.add_error('amount', 'لا يمكن تغيير المبلغ لأن هناك تفاصيل دفع مرتبطة')
                     return render(request, 'core/payments/edit.html', {'form': form, 'payment': payment, 'has_details': has_details})
-                
+
                 if form.cleaned_data['client'] != payment.client:
                     form.add_error('client', 'لا يمكن تغيير العميل لأن هناك تفاصيل دفع مرتبطة')
                     return render(request, 'core/payments/edit.html', {'form': form, 'payment': payment, 'has_details': has_details})
-            
+
             form.save()
             messages.success(request, f'تم تعديل المدفوعة رقم {payment.payment_number} بنجاح')
             return redirect('core:payment_detail', payment_id=payment.id)
     else:
         form = PaymentForm(instance=payment)
-    
+
     return render(request, 'core/payments/edit.html', {'form': form, 'payment': payment, 'has_details': has_details})
 
 
@@ -230,27 +249,50 @@ def payment_edit(request, payment_id):
 def payment_delete(request, payment_id):
     """حذف مدفوعة"""
     payment = get_object_or_404(Payment, id=payment_id)
-    
+
     # التحقق من وجود تفاصيل دفع
     payment_details = payment.payment_details.all()
-    
+
     if request.method == 'POST':
         # حفظ الفواتير المرتبطة لتحديث حالتها بعد الحذف
         invoices = [detail.invoice for detail in payment_details]
-        
+
         payment_number = payment.payment_number  # حفظ رقم المدفوعة قبل الحذف
         payment.delete()
-        
+
         # تحديث حالة الفواتير
         for invoice in invoices:
             invoice.update_status()
-        
+
         messages.success(request, f'تم حذف المدفوعة رقم {payment_number} بنجاح')
         return redirect('core:payment_list')
-    
+
     context = {
         'payment': payment,
         'payment_details': payment_details
     }
-    
+
     return render(request, 'core/payments/delete.html', context)
+
+
+@login_required
+def payment_print(request, payment_id):
+    """طباعة إيصال الدفع"""
+    payment = get_object_or_404(Payment, id=payment_id)
+
+    # الحصول على تفاصيل الدفع
+    payment_details = payment.payment_details.select_related('invoice').all()
+
+    # حساب المبلغ المخصص وغير المخصص
+    allocated_amount = sum(detail.amount for detail in payment_details)
+    unallocated_amount = payment.amount - allocated_amount
+
+    context = {
+        'payment': payment,
+        'payment_details': payment_details,
+        'allocated_amount': allocated_amount,
+        'unallocated_amount': unallocated_amount,
+        'print_mode': True
+    }
+
+    return render(request, 'core/payments/print.html', context)

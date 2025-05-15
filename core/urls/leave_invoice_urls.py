@@ -9,4 +9,5 @@ urlpatterns = [
     path('leave-invoices/<int:leave_invoice_id>/', views.leave_invoice_detail, name='leave_invoice_detail'),
     path('leave-invoices/<int:leave_invoice_id>/edit/', views.leave_invoice_edit, name='leave_invoice_edit'),
     path('leave-invoices/<int:leave_invoice_id>/delete/', views.leave_invoice_delete, name='leave_invoice_delete'),
+    path('leave-invoices/<int:leave_invoice_id>/print/', views.leave_invoice_print, name='leave_invoice_print'),
 ]

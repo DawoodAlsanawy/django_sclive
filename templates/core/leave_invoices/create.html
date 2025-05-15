@@ -144,11 +144,86 @@
 
         // ملء البيانات من معلمات URL إذا كانت موجودة
         var urlParams = new URLSearchParams(window.location.search);
+
+        // تحميل البيانات بالترتيب الصحيح
         if (urlParams.has('leave_type')) {
-            $('#id_leave_type').val(urlParams.get('leave_type')).trigger('change');
+            $('#id_leave_type').val(urlParams.get('leave_type'));
         }
+
         if (urlParams.has('leave_id')) {
-            $('#id_leave_id').val(urlParams.get('leave_id')).trigger('change');
+            $('#id_leave_id').val(urlParams.get('leave_id'));
+        }
+
+        if (urlParams.has('client_id')) {
+            $('#id_client').val(urlParams.get('client_id')).trigger('change');
+        } else if (urlParams.has('client_name')) {
+            // البحث عن العميل بالاسم
+            var clientName = urlParams.get('client_name');
+            $.ajax({
+                url: '/api/clients/api/search/',
+                data: { q: clientName },
+                dataType: 'json',
+                success: function(data) {
+                    if (data.length > 0) {
+                        // إذا وجدنا عميلًا بنفس الاسم، قم بتحديده
+                        var client = data[0];
+
+                        // إنشاء خيار جديد إذا لم يكن موجودًا
+                        if ($('#id_client option[value="' + client.id + '"]').length === 0) {
+                            var newOption = new Option(client.display, client.id, true, true);
+                            $('#id_client').append(newOption);
+                        }
+
+                        // تحديد العميل
+                        $('#id_client').val(client.id).trigger('change');
+                    }
+                }
+            });
+        }
+
+        // تعيين المبلغ إذا كان موجودًا
+        if (urlParams.has('amount')) {
+            $('#id_amount').val(urlParams.get('amount'));
+        }
+
+        // تحديث السعر بناءً على نوع الإجازة ومدتها والعميل
+        if (urlParams.has('leave_type') && urlParams.has('leave_id')) {
+            // تأخير قليلاً للتأكد من تحميل العميل أولاً
+            setTimeout(function() {
+                var leaveType = $('#id_leave_type').val();
+                var leaveId = $('#id_leave_id').val();
+                var clientId = $('#id_client').val();
+
+                if (leaveType && leaveId && clientId) {
+                    // الحصول على معلومات الإجازة
+                    $.ajax({
+                        url: '/api/' + (leaveType === 'sick_leave' ? 'sick-leaves' : 'companion-leaves') + '/api/search/',
+                        data: { q: leaveId },
+                        dataType: 'json',
+                        success: function(data) {
+                            if (data.length > 0) {
+                                var leave = data[0];
+                                var durationDays = leave.duration_days;
+
+                                // الحصول على سعر الإجازة
+                                $.ajax({
+                                    url: '{% url "core:leave_price_api_get_price" %}',
+                                    data: {
+                                        leave_type: leaveType,
+                                        duration_days: durationDays,
+                                        client_id: clientId
+                                    },
+                                    success: function(priceData) {
+                                        if (priceData.success && !urlParams.has('amount')) {
+                                            $('#id_amount').val(priceData.price);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+            }, 500);
         }
     });
 </script>

@@ -151,6 +151,61 @@ def leave_invoice_create(request):
             'issue_date': today,
             'due_date': due_date
         }
+
+        # استخدام معلمات URL لملء البيانات تلقائيًا
+        leave_type = request.GET.get('leave_type')
+        leave_id = request.GET.get('leave_id')
+        client_id = request.GET.get('client_id')
+        amount = request.GET.get('amount')
+
+        if leave_type:
+            initial_data['leave_type'] = leave_type
+
+        if leave_id:
+            initial_data['leave_id'] = leave_id
+
+            # البحث عن الإجازة المرتبطة
+            leave_obj = None
+            if leave_type == 'sick_leave':
+                try:
+                    leave_obj = SickLeave.objects.get(leave_id=leave_id)
+                    # إذا كان المريض لديه جهة عمل، استخدمها كعميل
+                    if leave_obj.patient and leave_obj.patient.employer_name:
+                        # البحث عن عميل بنفس الاسم
+                        try:
+                            client = Client.objects.get(name=leave_obj.patient.employer_name)
+                            initial_data['client'] = client.id
+                        except Client.DoesNotExist:
+                            pass
+                except SickLeave.DoesNotExist:
+                    pass
+            elif leave_type == 'companion_leave':
+                try:
+                    leave_obj = CompanionLeave.objects.get(leave_id=leave_id)
+                    # إذا كان المريض لديه جهة عمل، استخدمها كعميل
+                    if leave_obj.patient and leave_obj.patient.employer_name:
+                        # البحث عن عميل بنفس الاسم
+                        try:
+                            client = Client.objects.get(name=leave_obj.patient.employer_name)
+                            initial_data['client'] = client.id
+                        except Client.DoesNotExist:
+                            pass
+                except CompanionLeave.DoesNotExist:
+                    pass
+
+        if client_id:
+            try:
+                client = Client.objects.get(id=client_id)
+                initial_data['client'] = client.id
+            except Client.DoesNotExist:
+                pass
+
+        if amount:
+            try:
+                initial_data['amount'] = float(amount)
+            except (ValueError, TypeError):
+                pass
+
         form = LeaveInvoiceForm(initial=initial_data)
 
     return render(request, 'core/leave_invoices/create.html', {'form': form})
@@ -262,3 +317,69 @@ def leave_invoice_delete(request, leave_invoice_id):
     }
 
     return render(request, 'core/leave_invoices/delete.html', context)
+
+
+@login_required
+def leave_invoice_print(request, leave_invoice_id):
+    """طباعة فاتورة إجازة"""
+    invoice = get_object_or_404(LeaveInvoice, id=leave_invoice_id)
+
+    # الحصول على معلومات الإجازة المرتبطة بالفاتورة
+    leave_info = None
+    if invoice.leave_type == 'sick_leave':
+        try:
+            # استخدام select_related لتحسين الأداء
+            leave = SickLeave.objects.select_related('patient', 'doctor', 'doctor__hospital').get(leave_id=invoice.leave_id)
+            leave_info = {
+                'type': 'sick_leave',
+                'type_display': 'إجازة مرضية',
+                'leave': leave,
+                'id': leave.id,
+                'leave_id': leave.leave_id,
+                'patient': leave.patient,
+                'doctor': leave.doctor,
+                'start_date': leave.start_date,
+                'end_date': leave.end_date,
+                'duration_days': leave.duration_days,
+                'status': leave.status
+            }
+        except SickLeave.DoesNotExist:
+            pass
+    elif invoice.leave_type == 'companion_leave':
+        try:
+            # استخدام select_related لتحسين الأداء
+            leave = CompanionLeave.objects.select_related('patient', 'companion', 'doctor', 'doctor__hospital').get(leave_id=invoice.leave_id)
+            leave_info = {
+                'type': 'companion_leave',
+                'type_display': 'إجازة مرافق',
+                'leave': leave,
+                'id': leave.id,
+                'leave_id': leave.leave_id,
+                'patient': leave.patient,
+                'companion': leave.companion,
+                'doctor': leave.doctor,
+                'start_date': leave.start_date,
+                'end_date': leave.end_date,
+                'duration_days': leave.duration_days,
+                'status': leave.status
+            }
+        except CompanionLeave.DoesNotExist:
+            pass
+
+    # الحصول على تفاصيل المدفوعات المرتبطة بالفاتورة
+    payment_details = invoice.payment_details.all().select_related('payment').order_by('-payment__payment_date')
+
+    # حساب المبلغ المدفوع والمتبقي باستخدام الدوال المعرفة في النموذج
+    paid_amount = invoice.get_total_paid()
+    remaining_amount = invoice.get_remaining()
+
+    context = {
+        'invoice': invoice,
+        'leave_info': leave_info,
+        'payment_details': payment_details,
+        'paid_amount': paid_amount,
+        'remaining_amount': remaining_amount,
+        'print_mode': True
+    }
+
+    return render(request, 'core/leave_invoices/print.html', context)

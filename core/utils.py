@@ -1,7 +1,8 @@
 import datetime
 import random
 
-from core.models import CompanionLeave, LeaveInvoice, Payment, SickLeave
+from core.models import (CompanionLeave, LeaveInvoice, LeavePrice, Payment,
+                         SickLeave)
 
 
 def generate_unique_number(prefix, model=None):
@@ -50,3 +51,116 @@ def generate_unique_number(prefix, model=None):
                 unique_number = f'{prefix}-{date_string}-{timestamp}'
 
     return unique_number
+
+
+def calculate_leave_duration(start_date, end_date):
+    """
+    حساب مدة الإجازة بالأيام
+
+    المعلمات:
+    - start_date: تاريخ بداية الإجازة
+    - end_date: تاريخ نهاية الإجازة
+
+    يعيد:
+    - عدد أيام الإجازة (بما في ذلك يوم البداية ويوم النهاية)
+    """
+    if end_date < start_date:
+        return 0
+
+    # حساب الفرق بين التاريخين بالأيام
+    delta = (end_date - start_date).days
+
+    # إضافة 1 لتضمين يوم البداية
+    return delta + 1
+
+
+def generate_sick_leave_id():
+    """
+    توليد رقم فريد للإجازة المرضية
+    """
+    return generate_unique_number('SL', SickLeave)
+
+
+def generate_companion_leave_id():
+    """
+    توليد رقم فريد لإجازة المرافق
+    """
+    return generate_unique_number('CL', CompanionLeave)
+
+
+def generate_invoice_number():
+    """
+    توليد رقم فريد للفاتورة
+    """
+    return generate_unique_number('INV', LeaveInvoice)
+
+
+def generate_payment_number():
+    """
+    توليد رقم فريد للدفعة
+    """
+    return generate_unique_number('PAY', Payment)
+
+
+def get_leave_price(leave_type, duration, client=None):
+    """
+    الحصول على سعر الإجازة بناءً على نوعها ومدتها والعميل
+
+    المعلمات:
+    - leave_type: نوع الإجازة ('sick_leave' أو 'companion_leave')
+    - duration: مدة الإجازة بالأيام
+    - client: العميل (اختياري)
+
+    يعيد:
+    - سعر الإجازة
+    """
+    from decimal import Decimal
+
+    # البحث عن سعر ثابت خاص بالعميل
+    if client:
+        fixed_price = LeavePrice.objects.filter(
+            leave_type=leave_type,
+            pricing_type='fixed',
+            client=client,
+            is_active=True
+        ).first()
+
+        if fixed_price:
+            return fixed_price.price
+
+    # البحث عن سعر ثابت عام
+    fixed_price = LeavePrice.objects.filter(
+        leave_type=leave_type,
+        pricing_type='fixed',
+        client__isnull=True,
+        is_active=True
+    ).first()
+
+    if fixed_price:
+        return fixed_price.price
+
+    # البحث عن سعر يومي خاص بالعميل
+    if client:
+        per_day_price = LeavePrice.objects.filter(
+            leave_type=leave_type,
+            pricing_type='per_day',
+            client=client,
+            is_active=True
+        ).first()
+
+        if per_day_price:
+            return per_day_price.price * Decimal(duration)
+
+    # البحث عن سعر يومي عام
+    per_day_price = LeavePrice.objects.filter(
+        leave_type=leave_type,
+        pricing_type='per_day',
+        client__isnull=True,
+        is_active=True
+    ).first()
+
+    if per_day_price:
+        return per_day_price.price * Decimal(duration)
+
+    # إذا لم يتم العثور على أي سعر
+    return Decimal('0')

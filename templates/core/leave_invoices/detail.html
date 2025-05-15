@@ -320,7 +320,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">المدفوعات المرتبطة</h5>
-                <a href="{% url 'core:payment_create' %}?invoice_id={{ leave_invoice.id }}" class="btn btn-sm btn-primary">
+                <a href="{% url 'core:payment_create' %}?invoice_id={{ leave_invoice.id }}&client_id={{ leave_invoice.client.id }}&amount={{ leave_invoice.get_remaining }}" class="btn btn-sm btn-primary">
                     <i class="fas fa-plus"></i> إضافة دفعة
                 </a>
             </div>
