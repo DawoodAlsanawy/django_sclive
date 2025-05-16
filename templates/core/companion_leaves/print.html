@@ -1,0 +1,172 @@
+{% extends 'base_print.html' %}
+
+{% block title %}طباعة إجازة المرافق - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="container mt-4 print-container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2>إجازة مرافق</h2>
+            <p class="text-muted">رقم الإجازة: {{ companion_leave.leave_id }}</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>معلومات المريض</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>الاسم:</strong> {{ companion_leave.patient.name }}</p>
+                    <p><strong>رقم الهوية:</strong> {{ companion_leave.patient.national_id }}</p>
+                    <p><strong>الجنسية:</strong> {{ companion_leave.patient.nationality }}</p>
+                    <p><strong>جهة العمل:</strong> {{ companion_leave.patient.employer_name|default:"غير محدد" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>معلومات المرافق</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>الاسم:</strong> {{ companion_leave.companion.name }}</p>
+                    <p><strong>رقم الهوية:</strong> {{ companion_leave.companion.national_id }}</p>
+                    <p><strong>الجنسية:</strong> {{ companion_leave.companion.nationality }}</p>
+                    <p><strong>جهة العمل:</strong> {{ companion_leave.companion.employer_name|default:"غير محدد" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>معلومات الطبيب</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>الاسم:</strong> {{ companion_leave.doctor.name }}</p>
+                    <p><strong>التخصص:</strong> {{ companion_leave.doctor.specialization }}</p>
+                    <p><strong>المنصب:</strong> {{ companion_leave.doctor.position }}</p>
+                    <p><strong>المستشفى:</strong> {{ companion_leave.doctor.hospital.name }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>تفاصيل الإجازة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>تاريخ البداية:</strong> {{ companion_leave.start_date }}</p>
+                            <p><strong>تاريخ النهاية:</strong> {{ companion_leave.end_date }}</p>
+                            <p><strong>المدة (أيام):</strong> {{ companion_leave.duration_days }}</p>
+                            <p><strong>تاريخ الإصدار:</strong> {{ companion_leave.issue_date }}</p>
+                        </div>
+                        <div class="col-6">
+                            <p><strong>تاريخ الدخول:</strong> {{ companion_leave.admission_date }}</p>
+                            <p><strong>تاريخ الخروج:</strong> {{ companion_leave.discharge_date }}</p>
+                            <p><strong>الحالة:</strong> 
+                                {% if companion_leave.status == 'active' %}
+                                <span class="badge bg-success">نشطة</span>
+                                {% elif companion_leave.status == 'cancelled' %}
+                                <span class="badge bg-danger">ملغية</span>
+                                {% elif companion_leave.status == 'expired' %}
+                                <span class="badge bg-secondary">منتهية</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>التشخيص والملاحظات</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>التشخيص:</strong> {{ companion_leave.diagnosis|default:"غير محدد" }}</p>
+                    <p><strong>الملاحظات:</strong> {{ companion_leave.notes|default:"لا توجد ملاحظات"|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if invoices %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>الفواتير المرتبطة</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>تاريخ الإصدار</th>
+                                <th>المبلغ</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in invoices %}
+                            <tr>
+                                <td>{{ invoice.invoice_number }}</td>
+                                <td>{{ invoice.issue_date }}</td>
+                                <td>{{ invoice.amount }} ريال</td>
+                                <td>
+                                    {% if invoice.status == 'unpaid' %}
+                                    غير مدفوعة
+                                    {% elif invoice.status == 'partially_paid' %}
+                                    مدفوعة جزئيًا
+                                    {% elif invoice.status == 'paid' %}
+                                    مدفوعة بالكامل
+                                    {% elif invoice.status == 'cancelled' %}
+                                    ملغية
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mt-5">
+        <div class="col-4">
+            <p><strong>توقيع المريض:</strong> ____________________</p>
+        </div>
+        <div class="col-4">
+            <p><strong>توقيع المرافق:</strong> ____________________</p>
+        </div>
+        <div class="col-4 text-end">
+            <p><strong>توقيع وختم الطبيب:</strong> ____________________</p>
+        </div>
+    </div>
+
+    {% if not print_mode %}
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> طباعة
+            </button>
+            <a href="{% url 'core:companion_leave_detail' companion_leave.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> العودة للتفاصيل
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

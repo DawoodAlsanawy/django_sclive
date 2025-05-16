@@ -10,6 +10,9 @@
     </div>
     <div class="col-md-6 text-md-end">
         <div class="btn-group" role="group">
+            <a href="{% url 'core:sick_leave_print' sick_leave.id %}" class="btn btn-primary">
+                <i class="fas fa-print"></i> طباعة
+            </a>
             <a href="{% url 'core:sick_leave_edit' sick_leave.id %}" class="btn btn-warning">
                 <i class="fas fa-edit"></i> تعديل
             </a>
