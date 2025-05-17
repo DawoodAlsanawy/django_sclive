@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)https://sahafaty.site/sick-companion-reports/92/print -->
+<html dir="rtl" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    {% load static %}
+    {% load core_extras %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>sickLeaves--مرافق</title>
+    <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet">
+    <style>
+    @font-face {
+    font-family: 'Cairo';
+    src: url('/fonts/Cairo-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+        }
+
+    @font-face {
+    font-family: 'Cairo';
+    src: url('/fonts/Cairo-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+            }
+
+    @font-face {
+    font-family: 'Cairo';
+    src: url('/fonts/Cairo-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+            }
+
+    @font-face {
+    font-family: 'Cairo';
+    src: url('/fonts/ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+            }
+
+        body {
+            width: 794px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: bold;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-sizing: border-box;
+        }
+
+        #content {
+            width: 100%;
+            height: 100%;
+            /* padding: 42px; */
+            box-sizing: border-box;
+            /* background-color: red; */
+        }
+
+        .header-image {
+            width: 100%;
+            height: auto;
+        }
+
+        .header-image img {
+            margin-right: 5px !important;
+            width: 100%;
+            /* position: relative; */
+            /* margin-top: -5px; */
+            /* width: auto; */
+            /* height: 100%; */
+            /* display: auto; */
+        }
+
+        #table-parent {
+            /* width: 688px; */
+            height: auto;
+            margin-left: 57px;
+            margin-right: 57px;
+            border: 0.5px solid #ddd;
+            border-radius: 11px 11px 11px 11px;
+            overflow: hidden;
+            background-color: #e5e5e5;
+        }
+
+        .row {
+            display: flex;
+            /* flex-wrap: wrap; */
+        }
+
+        .col-6 {
+            width: 49%;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-8 {
+            margin-top: 2rem;
+        }
+
+        .text-sm {
+            font-size: 11px;
+        }
+
+        .text-xs {
+            font-size: 11px;
+        }
+
+        .text-gray-700 {
+            color: #374151;
+        }
+
+        .text-gray-500 {
+            color: #6b7280;
+        }
+
+        .text-gray-600 {
+            color: #4b5563;
+        }
+
+        .text-blue-500 {
+            color: #3b82f6;
+        }
+
+        .underline {
+            text-decoration: underline;
+        }
+
+        .tableTop {
+            border-top: none;
+            font-weight: bold;
+            color: #346EB1;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 0px;
+            font-size: 14px;
+            border:1px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        th {
+            border: 1.5px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        td {
+            border: 1.5px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .TableRight {
+            font-weight: bold;
+        }
+
+        thead th {
+            border: none;
+            background-color: #4E78BB;
+            color: white;
+            font-weight: bold;
+        }
+
+        #header {
+            border-top: none;
+            font-weight: bold;
+            background-color: white;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #f8f8f8;
+        }
+
+        thead td {
+            border-top: none;
+
+        }
+
+      /*th, td {*/
+      /*   border: 4px solid #f8f8f8;*/
+
+      /*  }*/
+
+        tbody tr:nth-child(even) {
+            background-color: #fff;
+              /*background-color:red;*/
+        }
+
+        tbody td, tbody th {
+            color: #2c3e77;
+            font-size:11px;
+        }
+        .highlight {
+            border: 1.5px solid #ccc;
+            background-color: #2C3D77;
+            color: white;
+            font-weight: bold;
+        }
+
+        .LeftAndRight {
+            font-weight: bold;
+            color: #346EB1;
+            background-color: white;
+        }
+
+        .gray-backgraound {
+            font-weight: bold;
+            color: #346EB1;
+            background-color: #f8f8f8;
+        }
+
+        .white-backgraound {
+            font-weight: bold;
+            color: #346EB1;
+            background-color: white;
+        }
+
+        tbody {
+            padding-bottom: 0;
+        }
+
+        .footer-section {
+            margin-top: 30px;
+            padding: 0 10px;
+        }
+
+        .footer-logo {
+            /*margin-top:-26px;*/
+            width: 135px;
+            height: 110px;
+            object-fit: cover;
+            margin-right: 110px;
+            display: block;
+        }
+
+        .medical-logo-name .medical-name {
+            margin-left:70px;
+            display: block;
+            font-weight: 200;
+            color: black;
+            font-size: 9px;
+        }
+
+      .footer-section .fotter-dates-logo-section {
+            margin-top: 10px;
+            /* padding: 0 10px; */
+            padding: 0;
+
+        }
+        .footer-section .fotter-dates-logo-section img{
+            width: 100px;
+            height: 80px;
+            padding: 0;
+            object-fit: contain;
+            display: block;
+        }
+        .qr-code-section .qr-text {
+            font-size: 9px;
+            font-weight: 200;
+            color: black;
+            margin-right: 50px;
+        }
+
+        .qr-code {
+            width: 80px;
+            height: 90px;
+            margin-right: 162px;
+            margin-top:4px;
+            margin-bottom: 7px;
+        }
+
+        .national-logo {
+            height: 60px;
+            width: auto;
+            margin-right: 15px;
+        }
+    </style>
+<style>
+                @page {
+                    size: A4 portrait !important;
+                    margin: 0 !important;
+                }
+                body {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+            </style></head>
+<body>
+        <!-- Header Section -->
+        <div class="header-image">
+            <img src="{% static 'images/sick_compenation_header.png' %}" alt="sahosa Logo">
+        </div>
+        <div id="content">
+
+        <!-- Table Section -->
+        <div id="table-parent">
+            <table>
+                <tbody>
+                    <tr id="header">
+                        <td class="LeftAndRight">رمز الإجازة</td>
+                        <td colspan="2" style="color:#2c3e77">{{ companion_leave.leave_id }}</td>
+                        <td style="color: #346EB1;">Leave ID</td>
+                    </tr>
+                    <tr>
+                        <th class="highlight">مدة الإجازة</th>
+                        <td colspan="1" class="highlight" style="font-weight: 300">
+                                                        {{ companion_leave.duration_days }} يوم ({{ companion_leave.start_date|date:"d-m-Y" }} الى {{ companion_leave.end_date|date:"d-m-Y" }})
+                        </td>
+                        <td dir="ltr" colspan="1" class="highlight" style="font-weight: 300">
+                          {{ companion_leave.duration_days }} day{% if companion_leave.duration_days > 1 %}s{% endif %} ({{ companion_leave.start_date|date:"d-m-Y" }} to {{ companion_leave.end_date|date:"d-m-Y" }})
+
+                        </td>
+                        <th class="highlight">Leave Duration</th>
+                    </tr>
+                    <tr>
+                        <th class="white-backgraound">تاريخ الدخول</th>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 300">
+                            {{ companion_leave.admission_date|hijri_date }}
+                        </td>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 300">
+                            {{ companion_leave.admission_date|date:"d-m-Y" }}
+                        </td>
+                        <th class="white-backgraound">Admission Date</th>
+                    </tr>
+                    <tr>
+                        <th class="gray-backgraound">تاريخ الخروج</th>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 300">
+                            {{ companion_leave.discharge_date|hijri_date }}
+                        </td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight:500">
+                            {{ companion_leave.discharge_date|date:"d-m-Y" }}
+                        </td>
+                        <th class="gray-backgraound">Discharge Date</th>
+                    </tr>
+                    <tr>
+                        <th class="white-backgraound">تاريخ إصدار التقرير</th>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200" colspan="2">
+                            {{ companion_leave.issue_date|date:"d-m-Y" }}
+                        </td>
+                        <th class="white-backgraound">Issue Date</th>
+                    </tr>
+                    <tr>
+                        <th class="gray-backgraound">أسم المرافق</th>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.name }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.name|translate_to_english|upper }}</td>
+                        <th class="gray-backgraound">Name</th>
+                    </tr>
+                    <tr>
+                        <th class="white-backgraound">رقم الهوية/الإقامة</th>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200" colspan="2">{{ companion_leave.companion.national_id }}</td>
+                        <th class="white-backgraound">National ID/Iqama</th>
+                    </tr>
+                    <tr>
+                        <th class="gray-backgraound">الجنسية</th>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality|translate_to_english|upper }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality }}</td>
+                        <th class="gray-backgraound">Nationality</th>
+                    </tr>
+                    <tr>
+                        <th class="gray-backgraound">صلة القرابة</th>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.relation|translate_to_english|upper }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.relation }}</td>
+                        <th class="gray-backgraound">Relation</th>
+                    </tr>
+                    <tr>
+                        <th class="white-backgraound">جهة العمل</th>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.employer_name }}</td>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.employer_name|translate_to_english|upper }}</td>
+                        <th class="white-backgraound">Employer</th>
+                    </tr>
+                    <tr>
+                        <th class="gray-backgraound">اسم الطبيب المعالج</th>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.name }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.name|translate_to_english|upper }}</td>
+                        <th class="gray-backgraound">Physician Name</th>
+                    </tr>
+                    <tr>
+                        <th class="white-backgraound">المسمى الوظيفي</th>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position|translate_to_english|upper }}</td>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position }}</td>
+                        <th class="white-backgraound">Position</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer Section -->
+        <div class="footer-section">
+            <div class="row">
+                <div class="text-center col-6 medical-logo-name" style="border-left: 2px solid lightgray;height:150px;">
+                    <img src="{{ companion_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
+                    <p style="margin-top: -2px ;
+                    margin-left:30px" class="text-xs text-gray-500 medical-name">{{ companion_leave.doctor.hospital.name }} <br>{{ companion_leave.doctor.hospital.name|translate_to_english|upper }}</p>
+                </div>
+
+                <div class="text-center col-6 qr-code-section">
+                    <div class="qr-code">
+                        <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="qr-image">
+                    </div>
+                    <p class="text-gray-500 qr-text">
+                        <span style="font-size: 10px;">للتحقق من بيانات التقرير، يرجى زيارة موقع منصة صحة الرسمي <br>
+                        To check the report data, please visit Seha's official website
+                        <a href="https://sahafaty.site/quiries/slenquiry" style="color: #0000FF;" class="underline">www.seha.sa/#/quiries/quiry</a>
+                    </span></p>
+                </div>
+            </div>
+
+            <div class="row fotter-dates-logo-section">
+                <div class="col-6">
+                    <img src="{% static 'images/National_center_for_midical.png' %}" alt="National Center" class="national-logo">
+                </div>
+                <div class="text-left col-6" style="font-size:10px; margin-top:35px; font-weight: 500">
+                <span style="display: inline-block;">AM</span>
+                    <span style="display: inline-block;">12:17</span>
+                    <br> {% now "l, d F Y" %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.onload = function() {
+            // Add print styles
+            var style = document.createElement('style');
+            style.textContent = `
+                @page {
+                    size: A4 portrait !important;
+                    margin: 0 !important;
+                }
+                body {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Trigger print
+            window.print();
+        }
+    </script>
+
+
+</body></html>

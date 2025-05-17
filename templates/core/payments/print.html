@@ -1,0 +1,199 @@
+{% extends 'base_print.html' %}
+
+{% block title %}طباعة إيصال الدفع - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="container mt-4 print-container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2>إيصال دفع</h2>
+            <p class="text-muted">رقم الدفعة: {{ payment.payment_number }}</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>معلومات العميل</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>الاسم:</strong> {{ payment.client.name }}</p>
+                    <p><strong>رقم الهاتف:</strong> {{ payment.client.phone }}</p>
+                    <p><strong>البريد الإلكتروني:</strong> {{ payment.client.email|default:"غير محدد" }}</p>
+                    <p><strong>العنوان:</strong> {{ payment.client.address|default:"غير محدد" }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>معلومات الدفعة</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>تاريخ الدفع:</strong> {{ payment.payment_date }}</p>
+                    <p><strong>طريقة الدفع:</strong> 
+                        {% if payment.payment_method == 'cash' %}
+                        نقدًا
+                        {% elif payment.payment_method == 'bank_transfer' %}
+                        تحويل بنكي
+                        {% elif payment.payment_method == 'check' %}
+                        شيك
+                        {% elif payment.payment_method == 'credit_card' %}
+                        بطاقة ائتمان
+                        {% endif %}
+                    </p>
+                    <p><strong>رقم المرجع:</strong> {{ payment.reference_number|default:"غير محدد" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>تفاصيل الدفعة</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>الوصف</th>
+                                <th class="text-end">المبلغ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if payment_details %}
+                                {% for detail in payment_details %}
+                                <tr>
+                                    <td>
+                                        دفعة لفاتورة رقم {{ detail.invoice.invoice_number }}
+                                        {% if detail.invoice.leave_type == 'sick_leave' %}
+                                        (إجازة مرضية)
+                                        {% elif detail.invoice.leave_type == 'companion_leave' %}
+                                        (إجازة مرافق)
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">{{ detail.amount }} ريال</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td>دفعة نقدية</td>
+                                    <td class="text-end">{{ payment.amount }} ريال</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>المبلغ الإجمالي</th>
+                                <th class="text-end">{{ payment.amount }} ريال</th>
+                            </tr>
+                            <tr>
+                                <th>المبلغ المخصص</th>
+                                <th class="text-end">{{ allocated_amount }} ريال</th>
+                            </tr>
+                            <tr>
+                                <th>المبلغ غير المخصص</th>
+                                <th class="text-end">{{ unallocated_amount }} ريال</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if payment_details %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>الفواتير المدفوعة</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>رقم الفاتورة</th>
+                                <th>نوع الفاتورة</th>
+                                <th>تاريخ الإصدار</th>
+                                <th>إجمالي الفاتورة</th>
+                                <th>المبلغ المدفوع</th>
+                                <th>المبلغ المتبقي</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detail in payment_details %}
+                            <tr>
+                                <td>{{ detail.invoice.invoice_number }}</td>
+                                <td>
+                                    {% if detail.invoice.leave_type == 'sick_leave' %}
+                                    إجازة مرضية
+                                    {% elif detail.invoice.leave_type == 'companion_leave' %}
+                                    إجازة مرافق
+                                    {% endif %}
+                                </td>
+                                <td>{{ detail.invoice.issue_date }}</td>
+                                <td>{{ detail.invoice.amount }} ريال</td>
+                                <td>{{ detail.amount }} ريال</td>
+                                <td>{{ detail.invoice.get_remaining }} ريال</td>
+                                <td>
+                                    {% if detail.invoice.status == 'paid' %}
+                                    مدفوعة بالكامل
+                                    {% elif detail.invoice.status == 'partially_paid' %}
+                                    مدفوعة جزئيًا
+                                    {% elif detail.invoice.status == 'unpaid' %}
+                                    غير مدفوعة
+                                    {% elif detail.invoice.status == 'cancelled' %}
+                                    ملغية
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>ملاحظات</h5>
+                </div>
+                <div class="card-body">
+                    {{ payment.notes|default:"لا توجد ملاحظات"|linebreaks }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-6">
+            <p><strong>توقيع المستلم:</strong> ____________________</p>
+        </div>
+        <div class="col-6 text-end">
+            <p><strong>ختم الشركة:</strong></p>
+        </div>
+    </div>
+
+    {% if not print_mode %}
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print"></i> طباعة
+            </button>
+            <a href="{% url 'core:payment_detail' payment.id %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> العودة للتفاصيل
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

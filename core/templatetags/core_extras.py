@@ -1,8 +1,16 @@
+import datetime
 import os
+import re
+from datetime import date
 
 from django import template
 from django.conf import settings
 from django.contrib.staticfiles import finders
+from googletrans import Translator
+from hijri_converter import Gregorian
+
+# إنشاء كائن المترجم
+translator = Translator()
 
 register = template.Library()
 
@@ -109,6 +117,87 @@ def dictsortreversed(value, arg):
                 return ""
 
     return sorted(value, key=lambda x: get_value(x, arg), reverse=True)
+
+@register.filter
+def hijri_date(value):
+    """
+    فلتر لتحويل التاريخ الميلادي إلى تاريخ هجري
+
+    الاستخدام:
+    {{ date_value|hijri_date }}
+
+    مثال:
+    {{ "2023-01-01"|hijri_date }} -> "1444-06-08"
+    """
+    if not value:
+        return ""
+
+    try:
+        if isinstance(value, str):
+            # محاولة تحويل النص إلى تاريخ
+            try:
+                # تجربة تنسيق ISO
+                value = datetime.datetime.strptime(value, "%Y-%m-%d").date()
+            except ValueError:
+                try:
+                    # تجربة تنسيق آخر
+                    value = datetime.datetime.strptime(value, "%d-%m-%Y").date()
+                except ValueError:
+                    return value  # إرجاع القيمة الأصلية إذا فشل التحويل
+
+        # تحويل التاريخ الميلادي إلى هجري
+        hijri = Gregorian(value.year, value.month, value.day).to_hijri()
+
+        # إرجاع التاريخ الهجري بتنسيق "يوم-شهر-سنة"
+        return f"{hijri.day:02d}-{hijri.month:02d}-{hijri.year}"
+    except Exception:
+        # إرجاع القيمة الأصلية في حالة حدوث أي خطأ
+        return value
+
+@register.filter
+def translate_to_english(value):
+    """
+    فلتر لترجمة النص العربي إلى اللغة الإنجليزية
+
+    الاستخدام:
+    {{ arabic_text|translate_to_english }}
+
+    مثال:
+    {{ "مرحبا بالعالم"|translate_to_english }} -> "Hello World"
+    """
+    if not value:
+        return ""
+
+    try:
+        # التحقق من أن النص يحتوي على أحرف عربية
+        arabic_pattern = re.compile(r'[\u0600-\u06FF]+')
+        if arabic_pattern.search(str(value)):
+            # ترجمة النص من العربية إلى الإنجليزية
+            translation = translator.translate(str(value), src='ar', dest='en')
+            return translation.text
+        return value
+    except Exception:
+        # إرجاع القيمة الأصلية في حالة حدوث أي خطأ
+        return value
+
+@register.filter
+def to_uppercase(value):
+    """
+    فلتر لتحويل النص إلى أحرف كبيرة
+
+    الاستخدام:
+    {{ text|to_uppercase }}
+
+    مثال:
+    {{ "hello world"|to_uppercase }} -> "HELLO WORLD"
+    """
+    if not value:
+        return ""
+
+    try:
+        return str(value).upper()
+    except Exception:
+        return value
 
 @register.filter
 def add(value, arg):

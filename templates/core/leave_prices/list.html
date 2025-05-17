@@ -92,8 +92,10 @@
                             <tr>
                                 <th>#</th>
                                 <th>المدة (أيام)</th>
+                                <th>طريقة التسعير</th>
                                 <th>السعر الإجمالي (ريال)</th>
                                 <th>السعر اليومي (ريال)</th>
+                                <th>العميل</th>
                                 <th>الحالة</th>
                                 <th>تاريخ الإنشاء</th>
                                 <th>الإجراءات</th>
@@ -104,8 +106,22 @@
                             <tr>
                                 <td>{{ price.id }}</td>
                                 <td>{{ price.duration_days }}</td>
+                                <td>
+                                    {% if price.pricing_type == 'per_day' %}
+                                    <span class="badge bg-info">سعر يومي</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">سعر ثابت</span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ price.price }} ريال</td>
                                 <td>{{ price.get_daily_price|floatformat:2 }} ريال</td>
+                                <td>
+                                    {% if price.client %}
+                                    {{ price.client.name }}
+                                    {% else %}
+                                    <span class="text-muted">سعر عام</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if price.is_active %}
                                     <span class="badge bg-success">نشط</span>
@@ -149,8 +165,10 @@
                             <tr>
                                 <th>#</th>
                                 <th>المدة (أيام)</th>
+                                <th>طريقة التسعير</th>
                                 <th>السعر الإجمالي (ريال)</th>
                                 <th>السعر اليومي (ريال)</th>
+                                <th>العميل</th>
                                 <th>الحالة</th>
                                 <th>تاريخ الإنشاء</th>
                                 <th>الإجراءات</th>
@@ -161,8 +179,22 @@
                             <tr>
                                 <td>{{ price.id }}</td>
                                 <td>{{ price.duration_days }}</td>
+                                <td>
+                                    {% if price.pricing_type == 'per_day' %}
+                                    <span class="badge bg-info">سعر يومي</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">سعر ثابت</span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ price.price }} ريال</td>
                                 <td>{{ price.get_daily_price|floatformat:2 }} ريال</td>
+                                <td>
+                                    {% if price.client %}
+                                    {{ price.client.name }}
+                                    {% else %}
+                                    <span class="text-muted">سعر عام</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     {% if price.is_active %}
                                     <span class="badge bg-success">نشط</span>

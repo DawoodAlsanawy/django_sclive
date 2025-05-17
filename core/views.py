@@ -3,19 +3,26 @@ from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.paginator import Paginator
-from django.db.models import Count, Q, Sum
 from django.db import models
+from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
-from .forms import (ClientForm, CompanionLeaveForm, DoctorForm, EmployerForm,
+# Eliminado: from .bert_processor import load_model
+from .forms import (ClientForm, CompanionLeaveForm,
+                    CompanionLeaveWithInvoiceForm, DoctorForm, EmployerForm,
                     HospitalForm, LeaveInvoiceForm, LeavePriceForm,
                     PatientForm, PaymentDetailForm, PaymentForm, RegisterForm,
-                    SickLeaveForm, UserCreateForm, UserEditForm)
+                    SickLeaveForm, SickLeaveWithInvoiceForm, UserCreateForm,
+                    UserEditForm)
 from .models import (Client, CompanionLeave, Doctor, Employer, Hospital,
                      LeaveInvoice, LeavePrice, Patient, Payment, PaymentDetail,
                      SickLeave, User)
+
+# تم نقل وظائف معالجة BERT إلى تطبيق ai_leaves
 
 
 def home(request):
@@ -174,6 +181,9 @@ def verify(request):
     return render(request, 'core/verify.html', context)
 
 
+# تم نقل وظائف طلبات الإجازات الذكية إلى تطبيق ai_leaves
+
+
 # وظائف إدارة المستخدمين
 @login_required
 def user_list(request):
@@ -262,8 +272,13 @@ def hospital_list(request):
 @login_required
 def hospital_create(request):
     """إنشاء مستشفى جديد"""
+    # التحقق من صلاحيات المستخدم
+    if not request.user.is_admin() and not request.user.is_staff:
+        messages.error(request, 'ليس لديك صلاحية للوصول إلى هذه الصفحة')
+        return redirect('core:home')
+
     if request.method == 'POST':
-        form = HospitalForm(request.POST)
+        form = HospitalForm(request.POST, request.FILES)
         if form.is_valid():
             hospital = form.save()
             messages.success(request, f'تم إنشاء المستشفى {hospital.name} بنجاح')
@@ -277,10 +292,15 @@ def hospital_create(request):
 @login_required
 def hospital_edit(request, hospital_id):
     """تعديل مستشفى"""
+    # التحقق من صلاحيات المستخدم
+    if not request.user.is_admin() and not request.user.is_staff:
+        messages.error(request, 'ليس لديك صلاحية للوصول إلى هذه الصفحة')
+        return redirect('core:home')
+
     hospital = get_object_or_404(Hospital, id=hospital_id)
 
     if request.method == 'POST':
-        form = HospitalForm(request.POST, instance=hospital)
+        form = HospitalForm(request.POST, request.FILES, instance=hospital)
         if form.is_valid():
             form.save()
             messages.success(request, f'تم تعديل المستشفى {hospital.name} بنجاح')
@@ -294,6 +314,11 @@ def hospital_edit(request, hospital_id):
 @login_required
 def hospital_delete(request, hospital_id):
     """حذف مستشفى"""
+    # التحقق من صلاحيات المستخدم
+    if not request.user.is_admin() and not request.user.is_staff:
+        messages.error(request, 'ليس لديك صلاحية للوصول إلى هذه الصفحة')
+        return redirect('core:home')
+
     hospital = get_object_or_404(Hospital, id=hospital_id)
 
     # التحقق من وجود أطباء مرتبطين بالمستشفى
@@ -301,11 +326,17 @@ def hospital_delete(request, hospital_id):
 
     if request.method == 'POST':
         hospital_name = hospital.name  # حفظ اسم المستشفى قبل الحذف
+
+        # حذف ملف الشعار إذا كان موجودًا
+        if hospital.logo:
+            if hospital.logo.storage.exists(hospital.logo.name):
+                hospital.logo.delete()
+
         hospital.delete()
         messages.success(request, f'تم حذف المستشفى {hospital_name} بنجاح')
         return redirect('core:hospital_list')
 
-    return render(request, 'core/hospitals/delete.html', {'hospital': hospital})
+    return render(request, 'core/hospitals/delete.html', {'hospital': hospital, 'doctors_count': doctors_count})
 
 
 # وظائف إدارة جهات العمل
@@ -924,21 +955,42 @@ def leave_price_api_get_price(request):
     """واجهة برمجية للحصول على سعر الإجازة"""
     leave_type = request.GET.get('leave_type', '')
     duration_days = request.GET.get('duration_days', 0, type=int)
+    client_id = request.GET.get('client_id')
 
     if not leave_type or duration_days <= 0:
         return JsonResponse({'success': False, 'message': 'بيانات غير صحيحة'})
 
-    price = LeavePrice.get_price(leave_type, duration_days)
+    # الحصول على العميل إذا تم تحديده
+    client = None
+    if client_id:
+        try:
+            client = Client.objects.get(id=client_id)
+        except Client.DoesNotExist:
+            pass
+
+    price = LeavePrice.get_price(leave_type, duration_days, client)
 
     # الحصول على معلومات إضافية
     leave_type_display = 'إجازة مرضية' if leave_type == 'sick_leave' else 'إجازة مرافق'
 
-    # البحث عن سعر مطابق تمامًا
-    exact_price = LeavePrice.objects.filter(
-        leave_type=leave_type,
-        duration_days=duration_days,
-        is_active=True
-    ).first()
+    # البحث عن سعر مطابق تمامًا للعميل
+    exact_price = None
+    if client:
+        exact_price = LeavePrice.objects.filter(
+            leave_type=leave_type,
+            duration_days=duration_days,
+            client=client,
+            is_active=True
+        ).first()
+
+    # إذا لم يتم العثور على سعر مخصص للعميل، ابحث عن السعر العام
+    if not exact_price:
+        exact_price = LeavePrice.objects.filter(
+            leave_type=leave_type,
+            duration_days=duration_days,
+            client__isnull=True,
+            is_active=True
+        ).first()
 
     price_type = 'exact' if exact_price else 'calculated'
 
@@ -1065,8 +1117,125 @@ def sick_leave_create(request):
     if request.method == 'POST':
         form = SickLeaveForm(request.POST)
         if form.is_valid():
+            # معالجة إضافة مريض جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_patient_name') and form.cleaned_data.get('new_patient_national_id'):
+                # التحقق مما إذا كان المريض موجودًا بالفعل
+                try:
+                    patient = Patient.objects.get(national_id=form.cleaned_data['new_patient_national_id'])
+                    # تحديث بيانات المريض إذا تغيرت
+                    if patient.name != form.cleaned_data['new_patient_name']:
+                        patient.name = form.cleaned_data['new_patient_name']
+                    if form.cleaned_data.get('new_patient_phone'):
+                        patient.phone = form.cleaned_data['new_patient_phone']
+                    if form.cleaned_data.get('new_patient_employer_name'):
+                        patient.employer_name = form.cleaned_data['new_patient_employer_name']
+
+                    patient.save()
+                except Patient.DoesNotExist:
+                    # إنشاء مريض جديد
+                    patient = Patient.objects.create(
+                        national_id=form.cleaned_data['new_patient_national_id'],
+                        name=form.cleaned_data['new_patient_name'],
+                        phone=form.cleaned_data.get('new_patient_phone', ''),
+                        employer_name=form.cleaned_data.get('new_patient_employer_name', '')
+                    )
+
+                # تعيين المريض الجديد في النموذج
+                form.instance.patient = patient
+            elif not form.cleaned_data.get('patient'):
+                # إذا لم يتم تحديد مريض ولم يتم إدخال بيانات مريض جديد
+                form.add_error('patient', 'يجب اختيار مريض موجود أو إدخال بيانات مريض جديد')
+
+            # معالجة إضافة طبيب جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_doctor_name') and form.cleaned_data.get('new_doctor_national_id'):
+                # التحقق مما إذا كان الطبيب موجودًا بالفعل
+                try:
+                    doctor = Doctor.objects.get(national_id=form.cleaned_data['new_doctor_national_id'])
+                    # تحديث بيانات الطبيب إذا تغيرت
+                    if doctor.name != form.cleaned_data['new_doctor_name']:
+                        doctor.name = form.cleaned_data['new_doctor_name']
+                    if form.cleaned_data.get('new_doctor_position'):
+                        doctor.position = form.cleaned_data['new_doctor_position']
+
+                    # معالجة إضافة مستشفى جديد إذا تم إدخال بياناته
+                    if form.cleaned_data.get('new_hospital_name'):
+                        # التحقق مما إذا كان المستشفى موجودًا بالفعل
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                        doctor.hospital = hospital
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+
+                    doctor.save()
+                except Doctor.DoesNotExist:
+                    # إنشاء مستشفى جديد إذا تم إدخال بياناته
+                    hospital = None
+                    if form.cleaned_data.get('new_hospital_name'):
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        hospital = form.cleaned_data['new_doctor_hospital']
+
+                    if not hospital:
+                        form.add_error('new_doctor_hospital', 'يجب اختيار مستشفى موجود أو إدخال بيانات مستشفى جديد للطبيب الجديد')
+                        return render(request, 'core/sick_leaves/create.html', {'form': form})
+
+                    # إنشاء طبيب جديد
+                    doctor = Doctor.objects.create(
+                        national_id=form.cleaned_data['new_doctor_national_id'],
+                        name=form.cleaned_data['new_doctor_name'],
+                        position=form.cleaned_data.get('new_doctor_position', ''),
+                        hospital=hospital
+                    )
+
+                # تعيين الطبيب الجديد في النموذج
+                form.instance.doctor = doctor
+            elif not form.cleaned_data.get('doctor'):
+                # إذا لم يتم تحديد طبيب ولم يتم إدخال بيانات طبيب جديد
+                form.add_error('doctor', 'يجب اختيار طبيب موجود أو إدخال بيانات طبيب جديد')
+
             sick_leave = form.save()
-            messages.success(request, f'تم إنشاء الإجازة المرضية رقم {sick_leave.leave_id} بنجاح')
+
+            # إنشاء فاتورة إذا تم اختيار ذلك
+            if form.cleaned_data.get('create_invoice') and form.cleaned_data.get('client'):
+                from datetime import timedelta
+
+                from core.utils import generate_unique_number
+
+                client = form.cleaned_data['client']
+
+                # حساب المبلغ بناءً على نوع الإجازة ومدتها والعميل
+                price = LeavePrice.get_price('sick_leave', sick_leave.duration_days, client)
+
+                # إنشاء رقم فاتورة فريد
+                invoice_number = generate_unique_number('INV', LeaveInvoice)
+
+                # تعيين تاريخ استحقاق افتراضي (بعد 30 يومًا من تاريخ الإصدار)
+                due_date = sick_leave.issue_date + timedelta(days=30)
+
+                # إنشاء الفاتورة
+                invoice = LeaveInvoice.objects.create(
+                    invoice_number=invoice_number,
+                    client=client,
+                    leave_type='sick_leave',
+                    leave_id=sick_leave.leave_id,
+                    amount=price,
+                    issue_date=sick_leave.issue_date,
+                    due_date=due_date
+                )
+
+                messages.success(request, f'تم إنشاء الإجازة المرضية رقم {sick_leave.leave_id} والفاتورة رقم {invoice_number} بنجاح')
+            else:
+                messages.success(request, f'تم إنشاء الإجازة المرضية رقم {sick_leave.leave_id} بنجاح')
+
             return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
     else:
         # توليد رقم إجازة تلقائي
@@ -1083,6 +1252,143 @@ def sick_leave_create(request):
         form = SickLeaveForm(initial=initial_data)
 
     return render(request, 'core/sick_leaves/create.html', {'form': form})
+
+
+@login_required
+def sick_leave_create_with_invoice(request):
+    """إنشاء إجازة مرضية مع فاتورة في خطوة واحدة"""
+    from datetime import datetime, timedelta
+
+    from core.utils import generate_unique_number
+
+    if request.method == 'POST':
+        form = SickLeaveWithInvoiceForm(request.POST)
+        if form.is_valid():
+            # استخراج البيانات من النموذج
+            patient_national_id = form.cleaned_data['patient_national_id']
+            patient_name = form.cleaned_data['patient_name']
+            patient_phone = form.cleaned_data['patient_phone']
+
+            # معالجة إضافة طبيب جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_doctor_name') and form.cleaned_data.get('new_doctor_national_id'):
+                # التحقق مما إذا كان الطبيب موجودًا بالفعل
+                try:
+                    doctor = Doctor.objects.get(national_id=form.cleaned_data['new_doctor_national_id'])
+                    # تحديث بيانات الطبيب إذا تغيرت
+                    if doctor.name != form.cleaned_data['new_doctor_name']:
+                        doctor.name = form.cleaned_data['new_doctor_name']
+                    if form.cleaned_data.get('new_doctor_position'):
+                        doctor.position = form.cleaned_data['new_doctor_position']
+
+                    # معالجة إضافة مستشفى جديد إذا تم إدخال بياناته
+                    if form.cleaned_data.get('new_hospital_name'):
+                        # التحقق مما إذا كان المستشفى موجودًا بالفعل
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                        doctor.hospital = hospital
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+
+                    doctor.save()
+                except Doctor.DoesNotExist:
+                    # إنشاء مستشفى جديد إذا تم إدخال بياناته
+                    hospital = None
+                    if form.cleaned_data.get('new_hospital_name'):
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        hospital = form.cleaned_data['new_doctor_hospital']
+
+                    # إنشاء طبيب جديد
+                    doctor = Doctor.objects.create(
+                        national_id=form.cleaned_data['new_doctor_national_id'],
+                        name=form.cleaned_data['new_doctor_name'],
+                        position=form.cleaned_data.get('new_doctor_position', ''),
+                        hospital=hospital
+                    )
+            else:
+                # استخدام الطبيب المحدد من القائمة
+                doctor = form.cleaned_data['doctor']
+
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            issue_date = form.cleaned_data['issue_date']
+            create_invoice = form.cleaned_data['create_invoice']
+            client = form.cleaned_data['client']
+
+            # حساب مدة الإجازة
+            delta = end_date - start_date
+            duration_days = delta.days + 1  # +1 لأن اليوم الأخير محسوب
+
+            # البحث عن المريض أو إنشاء مريض جديد
+            try:
+                patient = Patient.objects.get(national_id=patient_national_id)
+                # تحديث بيانات المريض إذا تغيرت
+                if patient.name != patient_name:
+                    patient.name = patient_name
+                if patient_phone and patient.phone != patient_phone:
+                    patient.phone = patient_phone
+                patient.save()
+            except Patient.DoesNotExist:
+                # إنشاء مريض جديد
+                patient = Patient.objects.create(
+                    national_id=patient_national_id,
+                    name=patient_name,
+                    phone=patient_phone
+                )
+
+            # إنشاء الإجازة المرضية
+            leave_id = generate_unique_number('SL', SickLeave)
+            sick_leave = SickLeave.objects.create(
+                leave_id=leave_id,
+                patient=patient,
+                doctor=doctor,
+                start_date=start_date,
+                end_date=end_date,
+                duration_days=duration_days,
+                issue_date=issue_date
+            )
+
+            # إنشاء فاتورة إذا تم اختيار ذلك
+            if create_invoice:
+                # حساب المبلغ بناءً على نوع الإجازة ومدتها والعميل
+                price = LeavePrice.get_price('sick_leave', duration_days, client)
+
+                # إنشاء رقم فاتورة فريد
+                invoice_number = generate_unique_number('INV', LeaveInvoice)
+
+                # تعيين تاريخ استحقاق افتراضي (بعد 30 يومًا من تاريخ الإصدار)
+                due_date = issue_date + timedelta(days=30)
+
+                # إنشاء الفاتورة
+                invoice = LeaveInvoice.objects.create(
+                    invoice_number=invoice_number,
+                    client=client,
+                    leave_type='sick_leave',
+                    leave_id=leave_id,
+                    amount=price,
+                    issue_date=issue_date,
+                    due_date=due_date
+                )
+
+                messages.success(request, f'تم إنشاء الإجازة المرضية رقم {leave_id} والفاتورة رقم {invoice_number} بنجاح')
+            else:
+                messages.success(request, f'تم إنشاء الإجازة المرضية رقم {leave_id} بنجاح')
+
+            return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
+    else:
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        form = SickLeaveWithInvoiceForm(initial={'issue_date': datetime.now().date()})
+
+    return render(request, 'core/sick_leaves/create_with_invoice.html', {'form': form})
 
 
 @login_required
@@ -1108,8 +1414,15 @@ def sick_leave_detail(request, sick_leave_id):
     # حساب المبلغ المتبقي
     remaining_amount = total_invoices_amount - total_paid_amount
 
-    # الحصول على سعر الإجازة المرضية
-    leave_price = LeavePrice.get_price('sick_leave', sick_leave.duration_days)
+    # الحصول على سعر الإجازة المرضية بناءً على العميل
+    client = None
+    if sick_leave.patient.employer:
+        # البحث عن العميل المرتبط بجهة العمل
+        try:
+            client = Client.objects.filter(name=sick_leave.patient.employer.name).first()
+        except:
+            pass
+    leave_price = LeavePrice.get_price('sick_leave', sick_leave.duration_days, client)
 
     context = {
         'sick_leave': sick_leave,
@@ -1284,8 +1597,154 @@ def companion_leave_create(request):
     if request.method == 'POST':
         form = CompanionLeaveForm(request.POST)
         if form.is_valid():
+            # معالجة إضافة مريض جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_patient_name') and form.cleaned_data.get('new_patient_national_id'):
+                # التحقق مما إذا كان المريض موجودًا بالفعل
+                try:
+                    patient = Patient.objects.get(national_id=form.cleaned_data['new_patient_national_id'])
+                    # تحديث بيانات المريض إذا تغيرت
+                    if patient.name != form.cleaned_data['new_patient_name']:
+                        patient.name = form.cleaned_data['new_patient_name']
+                    if form.cleaned_data.get('new_patient_phone'):
+                        patient.phone = form.cleaned_data['new_patient_phone']
+                    if form.cleaned_data.get('new_patient_employer_name'):
+                        patient.employer_name = form.cleaned_data['new_patient_employer_name']
+
+                    patient.save()
+                except Patient.DoesNotExist:
+                    # إنشاء مريض جديد
+                    patient = Patient.objects.create(
+                        national_id=form.cleaned_data['new_patient_national_id'],
+                        name=form.cleaned_data['new_patient_name'],
+                        phone=form.cleaned_data.get('new_patient_phone', ''),
+                        employer_name=form.cleaned_data.get('new_patient_employer_name', '')
+                    )
+
+                # تعيين المريض الجديد في النموذج
+                form.instance.patient = patient
+            elif not form.cleaned_data.get('patient'):
+                # إذا لم يتم تحديد مريض ولم يتم إدخال بيانات مريض جديد
+                form.add_error('patient', 'يجب اختيار مريض موجود أو إدخال بيانات مريض جديد')
+
+            # معالجة إضافة مرافق جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_companion_name') and form.cleaned_data.get('new_companion_national_id'):
+                # التحقق مما إذا كان المرافق موجودًا بالفعل
+                try:
+                    companion = Patient.objects.get(national_id=form.cleaned_data['new_companion_national_id'])
+                    # تحديث بيانات المرافق إذا تغيرت
+                    if companion.name != form.cleaned_data['new_companion_name']:
+                        companion.name = form.cleaned_data['new_companion_name']
+                    if form.cleaned_data.get('new_companion_phone'):
+                        companion.phone = form.cleaned_data['new_companion_phone']
+                    if form.cleaned_data.get('new_companion_employer_name'):
+                        companion.employer_name = form.cleaned_data['new_companion_employer_name']
+
+                    companion.save()
+                except Patient.DoesNotExist:
+                    # إنشاء مرافق جديد
+                    companion = Patient.objects.create(
+                        national_id=form.cleaned_data['new_companion_national_id'],
+                        name=form.cleaned_data['new_companion_name'],
+                        phone=form.cleaned_data.get('new_companion_phone', ''),
+                        employer_name=form.cleaned_data.get('new_companion_employer_name', '')
+                    )
+
+                # تعيين المرافق الجديد في النموذج
+                form.instance.companion = companion
+            elif not form.cleaned_data.get('companion'):
+                # إذا لم يتم تحديد مرافق ولم يتم إدخال بيانات مرافق جديد
+                form.add_error('companion', 'يجب اختيار مرافق موجود أو إدخال بيانات مرافق جديد')
+
+            # معالجة إضافة طبيب جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_doctor_name') and form.cleaned_data.get('new_doctor_national_id'):
+                # التحقق مما إذا كان الطبيب موجودًا بالفعل
+                try:
+                    doctor = Doctor.objects.get(national_id=form.cleaned_data['new_doctor_national_id'])
+                    # تحديث بيانات الطبيب إذا تغيرت
+                    if doctor.name != form.cleaned_data['new_doctor_name']:
+                        doctor.name = form.cleaned_data['new_doctor_name']
+                    if form.cleaned_data.get('new_doctor_position'):
+                        doctor.position = form.cleaned_data['new_doctor_position']
+
+                    # معالجة إضافة مستشفى جديد إذا تم إدخال بياناته
+                    if form.cleaned_data.get('new_hospital_name'):
+                        # التحقق مما إذا كان المستشفى موجودًا بالفعل
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                        doctor.hospital = hospital
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+
+                    doctor.save()
+                except Doctor.DoesNotExist:
+                    # إنشاء مستشفى جديد إذا تم إدخال بياناته
+                    hospital = None
+                    if form.cleaned_data.get('new_hospital_name'):
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        hospital = form.cleaned_data['new_doctor_hospital']
+
+                    if not hospital:
+                        form.add_error('new_doctor_hospital', 'يجب اختيار مستشفى موجود أو إدخال بيانات مستشفى جديد للطبيب الجديد')
+                        return render(request, 'core/companion_leaves/create.html', {'form': form})
+
+                    # إنشاء طبيب جديد
+                    doctor = Doctor.objects.create(
+                        national_id=form.cleaned_data['new_doctor_national_id'],
+                        name=form.cleaned_data['new_doctor_name'],
+                        position=form.cleaned_data.get('new_doctor_position', ''),
+                        hospital=hospital
+                    )
+
+                # تعيين الطبيب الجديد في النموذج
+                form.instance.doctor = doctor
+            elif not form.cleaned_data.get('doctor'):
+                # إذا لم يتم تحديد طبيب ولم يتم إدخال بيانات طبيب جديد
+                form.add_error('doctor', 'يجب اختيار طبيب موجود أو إدخال بيانات طبيب جديد')
+
             companion_leave = form.save()
-            messages.success(request, f'تم إنشاء إجازة المرافق رقم {companion_leave.leave_id} بنجاح')
+
+            # إنشاء فاتورة إذا تم اختيار ذلك
+            if form.cleaned_data.get('create_invoice') and form.cleaned_data.get('client'):
+                from datetime import timedelta
+
+                from core.utils import generate_unique_number
+
+                client = form.cleaned_data['client']
+
+                # حساب المبلغ بناءً على نوع الإجازة ومدتها والعميل
+                price = LeavePrice.get_price('companion_leave', companion_leave.duration_days, client)
+
+                # إنشاء رقم فاتورة فريد
+                invoice_number = generate_unique_number('INV', LeaveInvoice)
+
+                # تعيين تاريخ استحقاق افتراضي (بعد 30 يومًا من تاريخ الإصدار)
+                due_date = companion_leave.issue_date + timedelta(days=30)
+
+                # إنشاء الفاتورة
+                LeaveInvoice.objects.create(
+                    invoice_number=invoice_number,
+                    client=client,
+                    leave_type='companion_leave',
+                    leave_id=companion_leave.leave_id,
+                    amount=price,
+                    issue_date=companion_leave.issue_date,
+                    due_date=due_date
+                )
+
+                messages.success(request, f'تم إنشاء إجازة المرافق رقم {companion_leave.leave_id} والفاتورة رقم {invoice_number} بنجاح')
+            else:
+                messages.success(request, f'تم إنشاء إجازة المرافق رقم {companion_leave.leave_id} بنجاح')
+
             return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
     else:
         # توليد رقم إجازة تلقائي
@@ -1304,6 +1763,166 @@ def companion_leave_create(request):
         form = CompanionLeaveForm(initial=initial_data)
 
     return render(request, 'core/companion_leaves/create.html', {'form': form})
+
+
+@login_required
+def companion_leave_create_with_invoice(request):
+    """إنشاء إجازة مرافق مع فاتورة في خطوة واحدة"""
+    from datetime import datetime, timedelta
+
+    from core.utils import generate_unique_number
+
+    if request.method == 'POST':
+        form = CompanionLeaveWithInvoiceForm(request.POST)
+        if form.is_valid():
+            # استخراج البيانات من النموذج
+            patient_national_id = form.cleaned_data['patient_national_id']
+            patient_name = form.cleaned_data['patient_name']
+            patient_phone = form.cleaned_data['patient_phone']
+            companion_national_id = form.cleaned_data['companion_national_id']
+            companion_name = form.cleaned_data['companion_name']
+            companion_phone = form.cleaned_data['companion_phone']
+
+            # معالجة إضافة طبيب جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_doctor_name') and form.cleaned_data.get('new_doctor_national_id'):
+                # التحقق مما إذا كان الطبيب موجودًا بالفعل
+                try:
+                    doctor = Doctor.objects.get(national_id=form.cleaned_data['new_doctor_national_id'])
+                    # تحديث بيانات الطبيب إذا تغيرت
+                    if doctor.name != form.cleaned_data['new_doctor_name']:
+                        doctor.name = form.cleaned_data['new_doctor_name']
+                    if form.cleaned_data.get('new_doctor_position'):
+                        doctor.position = form.cleaned_data['new_doctor_position']
+
+                    # معالجة إضافة مستشفى جديد إذا تم إدخال بياناته
+                    if form.cleaned_data.get('new_hospital_name'):
+                        # التحقق مما إذا كان المستشفى موجودًا بالفعل
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                        doctor.hospital = hospital
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+
+                    doctor.save()
+                except Doctor.DoesNotExist:
+                    # إنشاء مستشفى جديد إذا تم إدخال بياناته
+                    hospital = None
+                    if form.cleaned_data.get('new_hospital_name'):
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        hospital = form.cleaned_data['new_doctor_hospital']
+
+                    # إنشاء طبيب جديد
+                    doctor = Doctor.objects.create(
+                        national_id=form.cleaned_data['new_doctor_national_id'],
+                        name=form.cleaned_data['new_doctor_name'],
+                        position=form.cleaned_data.get('new_doctor_position', ''),
+                        hospital=hospital
+                    )
+            else:
+                # استخدام الطبيب المحدد من القائمة
+                doctor = form.cleaned_data['doctor']
+
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            issue_date = form.cleaned_data['issue_date']
+            create_invoice = form.cleaned_data['create_invoice']
+            client = form.cleaned_data['client']
+
+            # حساب مدة الإجازة
+            # إذا كان تاريخ البداية والنهاية في نفس اليوم، فالمدة يوم واحد
+            # وإلا، فالمدة هي الفرق بين التاريخين + 1 (لأن اليوم الأخير محسوب)
+            delta = end_date - start_date
+            duration_days = delta.days + 1  # +1 لأن اليوم الأخير محسوب
+
+            # البحث عن المريض أو إنشاء مريض جديد
+            try:
+                patient = Patient.objects.get(national_id=patient_national_id)
+                # تحديث بيانات المريض إذا تغيرت
+                if patient.name != patient_name:
+                    patient.name = patient_name
+                if patient_phone and patient.phone != patient_phone:
+                    patient.phone = patient_phone
+                patient.save()
+            except Patient.DoesNotExist:
+                # إنشاء مريض جديد
+                patient = Patient.objects.create(
+                    national_id=patient_national_id,
+                    name=patient_name,
+                    phone=patient_phone
+                )
+
+            # البحث عن المرافق أو إنشاء مرافق جديد
+            try:
+                companion = Patient.objects.get(national_id=companion_national_id)
+                # تحديث بيانات المرافق إذا تغيرت
+                if companion.name != companion_name:
+                    companion.name = companion_name
+                if companion_phone and companion.phone != companion_phone:
+                    companion.phone = companion_phone
+                companion.save()
+            except Patient.DoesNotExist:
+                # إنشاء مرافق جديد
+                companion = Patient.objects.create(
+                    national_id=companion_national_id,
+                    name=companion_name,
+                    phone=companion_phone
+                )
+
+            # إنشاء إجازة المرافق
+            leave_id = generate_unique_number('CL', CompanionLeave)
+            companion_leave = CompanionLeave.objects.create(
+                leave_id=leave_id,
+                patient=patient,
+                companion=companion,
+                doctor=doctor,
+                start_date=start_date,
+                end_date=end_date,
+                duration_days=duration_days,
+                issue_date=issue_date
+            )
+
+            # إنشاء فاتورة إذا تم اختيار ذلك
+            if create_invoice:
+                # حساب المبلغ بناءً على نوع الإجازة ومدتها والعميل
+                price = LeavePrice.get_price('companion_leave', duration_days, client)
+
+                # إنشاء رقم فاتورة فريد
+                invoice_number = generate_unique_number('INV', LeaveInvoice)
+
+                # تعيين تاريخ استحقاق افتراضي (بعد 30 يومًا من تاريخ الإصدار)
+                due_date = issue_date + timedelta(days=30)
+
+                # إنشاء الفاتورة
+                invoice = LeaveInvoice.objects.create(
+                    invoice_number=invoice_number,
+                    client=client,
+                    leave_type='companion_leave',
+                    leave_id=leave_id,
+                    amount=price,
+                    issue_date=issue_date,
+                    due_date=due_date
+                )
+
+                messages.success(request, f'تم إنشاء إجازة المرافق رقم {leave_id} والفاتورة رقم {invoice_number} بنجاح')
+            else:
+                messages.success(request, f'تم إنشاء إجازة المرافق رقم {leave_id} بنجاح')
+
+            return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
+    else:
+        # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
+        form = CompanionLeaveWithInvoiceForm(initial={'issue_date': datetime.now().date()})
+
+    return render(request, 'core/companion_leaves/create_with_invoice.html', {'form': form})
 
 
 @login_required
@@ -1329,8 +1948,15 @@ def companion_leave_detail(request, companion_leave_id):
     # حساب المبلغ المتبقي
     remaining_amount = total_invoices_amount - total_paid_amount
 
-    # الحصول على سعر إجازة المرافق
-    leave_price = LeavePrice.get_price('companion_leave', companion_leave.duration_days)
+    # الحصول على سعر إجازة المرافق بناءً على العميل
+    client = None
+    if companion_leave.companion.employer:
+        # البحث عن العميل المرتبط بجهة العمل
+        try:
+            client = Client.objects.filter(name=companion_leave.companion.employer.name).first()
+        except:
+            pass
+    leave_price = LeavePrice.get_price('companion_leave', companion_leave.duration_days, client)
 
     context = {
         'companion_leave': companion_leave,
@@ -1586,8 +2212,15 @@ def leave_invoice_create(request):
                     if sick_leave.patient.employer:
                         initial_data['client'] = sick_leave.patient.employer.id
 
-                    # تعيين المبلغ بناءً على سعر الإجازة
-                    leave_price = LeavePrice.get_price('sick_leave', sick_leave.duration_days)
+                    # تعيين المبلغ بناءً على سعر الإجازة والعميل
+                    client = None
+                    if sick_leave.patient.employer:
+                        # البحث عن العميل المرتبط بجهة العمل
+                        try:
+                            client = Client.objects.filter(name=sick_leave.patient.employer.name).first()
+                        except:
+                            pass
+                    leave_price = LeavePrice.get_price('sick_leave', sick_leave.duration_days, client)
                     initial_data['amount'] = leave_price
                 except SickLeave.DoesNotExist:
                     pass
@@ -1597,8 +2230,15 @@ def leave_invoice_create(request):
                     if companion_leave.companion.employer:
                         initial_data['client'] = companion_leave.companion.employer.id
 
-                    # تعيين المبلغ بناءً على سعر الإجازة
-                    leave_price = LeavePrice.get_price('companion_leave', companion_leave.duration_days)
+                    # تعيين المبلغ بناءً على سعر الإجازة والعميل
+                    client = None
+                    if companion_leave.companion.employer:
+                        # البحث عن العميل المرتبط بجهة العمل
+                        try:
+                            client = Client.objects.filter(name=companion_leave.companion.employer.name).first()
+                        except:
+                            pass
+                    leave_price = LeavePrice.get_price('companion_leave', companion_leave.duration_days, client)
                     initial_data['amount'] = leave_price
                 except CompanionLeave.DoesNotExist:
                     pass
@@ -2550,3 +3190,88 @@ def report_clients(request):
     }
 
     return render(request, 'core/reports/clients.html', context)
+
+
+# وظائف AJAX
+@login_required
+@require_POST
+def patient_create_ajax(request):
+    """إنشاء مريض جديد عبر AJAX"""
+    form = PatientForm(request.POST)
+    if form.is_valid():
+        patient = form.save()
+        return JsonResponse({
+            'success': True,
+            'patient': {
+                'id': patient.id,
+                'name': patient.name,
+                'national_id': patient.national_id
+            }
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors
+        })
+
+@login_required
+@require_POST
+def doctor_create_ajax(request):
+    """إنشاء طبيب جديد عبر AJAX"""
+    form = DoctorForm(request.POST)
+    if form.is_valid():
+        doctor = form.save()
+        return JsonResponse({
+            'success': True,
+            'doctor': {
+                'id': doctor.id,
+                'name': doctor.name,
+                'national_id': doctor.national_id
+            }
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors
+        })
+
+@login_required
+@require_POST
+def hospital_create_ajax(request):
+    """إنشاء مستشفى جديد عبر AJAX"""
+    form = HospitalForm(request.POST)
+    if form.is_valid():
+        hospital = form.save()
+        return JsonResponse({
+            'success': True,
+            'hospital': {
+                'id': hospital.id,
+                'name': hospital.name
+            }
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors
+        })
+
+@login_required
+@require_POST
+def client_create_ajax(request):
+    """إنشاء عميل جديد عبر AJAX"""
+    form = ClientForm(request.POST)
+    if form.is_valid():
+        client = form.save()
+        return JsonResponse({
+            'success': True,
+            'client': {
+                'id': client.id,
+                'name': client.name,
+                'phone': client.phone
+            }
+        })
+    else:
+        return JsonResponse({
+            'success': False,
+            'errors': form.errors
+        })

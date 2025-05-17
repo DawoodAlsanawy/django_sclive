@@ -16,6 +16,12 @@
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 36px;
     }
+    .modal-header, .modal-footer {
+        flex-direction: row-reverse;
+    }
+    .modal-header .btn-close {
+        margin: -0.5rem auto -0.5rem -0.5rem;
+    }
 </style>
 {% endblock %}
 
@@ -27,29 +33,114 @@
     </div>
 </div>
 
+<!-- Include modals -->
+{% include 'core/modals/entity_modals.html' %}
+
 <div class="card">
     <div class="card-body">
         <form method="post" id="sick-leave-form">
             {% csrf_token %}
-            
+
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    {{ form.prefix|as_crispy_field }}
+                </div>
+                <div class="col-md-4">
                     {{ form.leave_id|as_crispy_field }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     {{ form.issue_date|as_crispy_field }}
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.patient|as_crispy_field }}
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="add-new-patient-btn">
+                            <i class="fas fa-plus-circle"></i> إضافة مريض جديد
+                        </button>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     {{ form.doctor|as_crispy_field }}
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="add-new-doctor-btn">
+                            <i class="fas fa-plus-circle"></i> إضافة طبيب جديد
+                        </button>
+                    </div>
                 </div>
             </div>
-            
+
+            <!-- حقول إضافة مريض جديد -->
+            <div id="new-patient-fields" class="d-none">
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> أدخل بيانات المريض الجديد
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        {{ form.new_patient_national_id|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.new_patient_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.new_patient_phone|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        {{ form.new_patient_employer_name|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- حقول إضافة طبيب جديد -->
+            <div id="new-doctor-fields" class="d-none">
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> أدخل بيانات الطبيب الجديد
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        {{ form.new_doctor_national_id|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.new_doctor_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form.new_doctor_position|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        {{ form.new_doctor_hospital|as_crispy_field }}
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-new-hospital-btn">
+                                <i class="fas fa-plus-circle"></i> إضافة مستشفى جديد
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-8" id="new-hospital-fields" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.new_hospital_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.new_hospital_address|as_crispy_field }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.start_date|as_crispy_field }}
@@ -58,7 +149,7 @@
                     {{ form.end_date|as_crispy_field }}
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.admission_date|as_crispy_field }}
@@ -67,7 +158,7 @@
                     {{ form.discharge_date|as_crispy_field }}
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-md-6">
                     {{ form.status|as_crispy_field }}
@@ -76,11 +167,30 @@
                     <div class="form-group">
                         <label for="duration_days">المدة (أيام)</label>
                         <input type="text" class="form-control" id="duration_days" readonly>
-                        <small class="form-text text-muted">سيتم حساب المدة تلقائيًا بناءً على تاريخ البداية والنهاية</small>
+                        <small class="form-text text-muted">
+                            سيتم حساب المدة تلقائيًا بناءً على تاريخ البداية والنهاية.
+                            إذا كان تاريخ البداية والنهاية في نفس اليوم، فالإجازة تعتبر ليوم واحد.
+                            إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين.
+                        </small>
                     </div>
                 </div>
             </div>
-            
+
+            <div class="card mt-3 mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">بيانات الفاتورة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            {{ form.create_invoice }}
+                            <p class="text-info">سيتم إنشاء فاتورة تلقائياً عند حفظ الإجازة المرضية</p>
+                            {{ form.client|as_crispy_field }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">حفظ</button>
                 <a href="{% url 'core:sick_leave_list' %}" class="btn btn-secondary">إلغاء</a>
@@ -92,6 +202,8 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{% load static %}
+<script src="{% static 'js/modal_forms.js' %}"></script>
 <script>
     $(document).ready(function() {
         // تفعيل Select2 للمريض والطبيب
@@ -99,45 +211,126 @@
             placeholder: 'اختر المريض',
             allowClear: true
         });
-        
+
         $('#id_doctor').select2({
             placeholder: 'اختر الطبيب',
             allowClear: true
         });
-        
+
+        $('#id_new_doctor_hospital').select2({
+            placeholder: 'اختر المستشفى',
+            allowClear: true
+        });
+
+        $('#id_client').select2({
+            placeholder: 'اختر العميل',
+            allowClear: true
+        });
+
+        // تم إزالة كود إظهار/إخفاء حقل العميل لأن الفاتورة تنشأ تلقائياً
+
         // حساب المدة تلقائيًا
         function calculateDuration() {
             var startDate = $('#id_start_date').val();
             var endDate = $('#id_end_date').val();
-            
+
             if (startDate && endDate) {
                 var start = new Date(startDate);
                 var end = new Date(endDate);
                 var diffTime = Math.abs(end - start);
-                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 لأن اليوم الأخير محسوب
-                
+                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                // +1 لأن اليوم الأخير محسوب
+                // إذا كان تاريخ البداية والنهاية في نفس اليوم، فالإجازة تعتبر ليوم واحد
+                // إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين
+                // وهكذا، كل فرق بين التاريخين يضيف يومًا إضافيًا للإجازة
+
                 $('#duration_days').val(diffDays);
             }
         }
-        
+
         $('#id_start_date, #id_end_date').change(calculateDuration);
-        
-        // توليد رقم إجازة تلقائي إذا كان الحقل فارغًا
-        if (!$('#id_leave_id').val()) {
-            var today = new Date();
-            var dateString = today.getFullYear().toString() +
-                             (today.getMonth() + 1).toString().padStart(2, '0') +
-                             today.getDate().toString().padStart(2, '0');
-            var randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            $('#id_leave_id').val('SL-' + dateString + '-' + randomNum);
-        }
-        
+
+        // تعطيل حقل رقم الإجازة لأنه سيتم توليده تلقائيًا
+        $('#id_leave_id').prop('readonly', true);
+
+        // توليد رقم إجازة تلقائي عند اختيار البادئة
+        $('#id_prefix').change(function() {
+            var prefix = $(this).val();
+            // إرسال طلب AJAX للحصول على رقم إجازة جديد
+            $.ajax({
+                url: '/api/generate-sick-leave-id/',
+                type: 'GET',
+                data: {
+                    prefix: prefix
+                },
+                success: function(response) {
+                    $('#id_leave_id').val(response.leave_id);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error generating leave ID:', error);
+                    // في حالة الخطأ، نقوم بتوليد رقم محلي مؤقت
+                    var today = new Date();
+                    var dateString = today.getFullYear().toString() +
+                                    (today.getMonth() + 1).toString().padStart(2, '0') +
+                                    today.getDate().toString().padStart(2, '0');
+                    var randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                    $('#id_leave_id').val(prefix + dateString + randomNum);
+                }
+            });
+        });
+
+        // تشغيل التغيير مرة واحدة عند تحميل الصفحة لتوليد رقم الإجازة الأولي
+        $('#id_prefix').trigger('change');
+
         // تعيين تاريخ اليوم كتاريخ افتراضي للإصدار إذا كان فارغًا
         if (!$('#id_issue_date').val()) {
             var today = new Date();
             var dateString = today.toISOString().split('T')[0];
             $('#id_issue_date').val(dateString);
         }
+
+        // تعديل سلوك أزرار إضافة العناصر الجديدة
+        $('#add-new-patient-btn').click(function(e) {
+            e.preventDefault();
+            $('#patientModal').modal('show');
+        });
+
+        $('#add-new-doctor-btn').click(function(e) {
+            e.preventDefault();
+            $('#doctorModal').modal('show');
+        });
+
+        $('#add-new-hospital-btn').click(function(e) {
+            e.preventDefault();
+            $('#hospitalModal').modal('show');
+        });
+
+        // ربط أزرار الحفظ في المودالات
+        $('#save-patient-btn').click(function() {
+            $('#patient-form').submit();
+        });
+
+        $('#save-doctor-btn').click(function() {
+            $('#doctor-form').submit();
+        });
+
+        $('#save-hospital-btn').click(function() {
+            $('#hospital-form').submit();
+        });
+
+        // إضافة زر إضافة مستشفى في مودال الطبيب
+        $('#add-hospital-modal-btn').click(function(e) {
+            e.preventDefault();
+            $('#doctorModal').modal('hide');
+            $('#hospitalModal').modal('show');
+
+            // عند إغلاق مودال المستشفى، إعادة فتح مودال الطبيب
+            $('#hospitalModal').on('hidden.bs.modal', function (e) {
+                $('#doctorModal').modal('show');
+                // إزالة الحدث لمنع تكراره
+                $('#hospitalModal').off('hidden.bs.modal');
+            });
+        });
     });
 </script>
 {% endblock %}

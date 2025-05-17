@@ -1,0 +1,71 @@
+{% load static %}
+
+<div class="sidebar-menu">
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'core:home' %}">
+                <i class="fas fa-home"></i> الرئيسية
+            </a>
+        </li>
+
+        <!-- طلبات الإجازات الذكية -->
+        <li class="nav-item">
+            <a class="nav-link {% if '/ai-leaves/' in request.path %}active{% endif %}" href="#leaveRequestsSubmenu" data-toggle="collapse" aria-expanded="false">
+                <i class="fas fa-robot"></i> طلبات الإجازات الذكية
+            </a>
+            <ul class="collapse list-unstyled {% if '/ai-leaves/' in request.path %}show{% endif %}" id="leaveRequestsSubmenu">
+                <li>
+                    <a class="nav-link {% if request.path == '/ai-leaves/' %}active{% endif %}" href="{% url 'ai_leaves:leave_request_list' %}">
+                        <i class="fas fa-list"></i> قائمة الطلبات
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link {% if request.path == '/ai-leaves/create/' %}active{% endif %}" href="{% url 'ai_leaves:leave_request_create' %}">
+                        <i class="fas fa-plus"></i> إضافة طلب جديد
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- الإجازات المرضية -->
+        <li class="nav-item">
+            <a class="nav-link {% if '/sick-leaves/' in request.path %}active{% endif %}" href="#sickLeavesSubmenu" data-toggle="collapse" aria-expanded="false">
+                <i class="fas fa-procedures"></i> الإجازات المرضية
+            </a>
+            <ul class="collapse list-unstyled {% if '/sick-leaves/' in request.path %}show{% endif %}" id="sickLeavesSubmenu">
+                <li>
+                    <a class="nav-link {% if request.path == '/sick-leaves/' %}active{% endif %}" href="{% url 'core:sick_leave_list' %}">
+                        <i class="fas fa-list"></i> قائمة الإجازات المرضية
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link {% if request.path == '/sick-leaves/create/' %}active{% endif %}" href="{% url 'core:sick_leave_create' %}">
+                        <i class="fas fa-plus"></i> إضافة إجازة مرضية
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- إجازات المرافقين -->
+        <li class="nav-item">
+            <a class="nav-link {% if '/companion-leaves/' in request.path %}active{% endif %}" href="#companionLeavesSubmenu" data-toggle="collapse" aria-expanded="false">
+                <i class="fas fa-user-friends"></i> إجازات المرافقين
+            </a>
+            <ul class="collapse list-unstyled {% if '/companion-leaves/' in request.path %}show{% endif %}" id="companionLeavesSubmenu">
+                <li>
+                    <a class="nav-link {% if request.path == '/companion-leaves/' %}active{% endif %}" href="{% url 'core:companion_leave_list' %}">
+                        <i class="fas fa-list"></i> قائمة إجازات المرافقين
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link {% if request.path == '/companion-leaves/create/' %}active{% endif %}" href="{% url 'core:companion_leave_create' %}">
+                        <i class="fas fa-plus"></i> إضافة إجازة مرافق
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- باقي القوائم -->
+        <!-- ... -->
+    </ul>
+</div>

@@ -14,11 +14,14 @@
     <div class="card-body">
         <div class="alert alert-danger">
             <p><strong>تحذير:</strong> سيتم حذف هذا المستشفى نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
-            {% if hospital.doctors.count > 0 %}
-            <p><strong>ملاحظة:</strong> هذا المستشفى مرتبط بـ {{ hospital.doctors.count }} طبيب. سيؤدي حذف المستشفى إلى حذف هذه العلاقات.</p>
+            {% if doctors_count > 0 %}
+            <p><strong>تنبيه هام:</strong> هذا المستشفى مرتبط بـ {{ doctors_count }} طبيب. سيؤدي حذف المستشفى إلى حذف هذه العلاقات وقد يؤثر على الإجازات المرتبطة بهؤلاء الأطباء.</p>
+            {% endif %}
+            {% if hospital.logo %}
+            <p><strong>ملاحظة:</strong> سيتم حذف شعار المستشفى من النظام.</p>
             {% endif %}
         </div>
-        
+
         <div class="mb-4">
             <h5>بيانات المستشفى:</h5>
             <ul>
@@ -26,12 +29,27 @@
                 <li><strong>العنوان:</strong> {{ hospital.address|default:"-" }}</li>
                 <li><strong>معلومات الاتصال:</strong> {{ hospital.contact_info|default:"-" }}</li>
                 <li><strong>تاريخ الإنشاء:</strong> {{ hospital.created_at|date:"Y-m-d" }}</li>
+                <li><strong>عدد الأطباء المرتبطين:</strong> {{ doctors_count }}</li>
             </ul>
+            {% if hospital.logo %}
+            <div class="mt-3">
+                <h6>شعار المستشفى:</h6>
+                <img src="{{ hospital.logo.url }}" alt="{{ hospital.name }}" class="img-thumbnail" style="max-height: 100px;">
+            </div>
+            {% endif %}
         </div>
-        
+
         <form method="post">
             {% csrf_token %}
             <div class="mt-4">
+                {% if doctors_count > 0 %}
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                    <label class="form-check-label" for="confirmDelete">
+                        أنا أفهم أن حذف هذا المستشفى سيؤثر على {{ doctors_count }} طبيب وقد يؤثر على الإجازات المرتبطة بهم
+                    </label>
+                </div>
+                {% endif %}
                 <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
                 <a href="{% url 'core:hospital_list' %}" class="btn btn-secondary">إلغاء</a>
             </div>

@@ -1,0 +1,235 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}طباعة إجازة المرافق{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        .print-only {
+            display: block !important;
+        }
+        body {
+            font-size: 14px;
+            background-color: white;
+        }
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        .card {
+            border: none;
+            box-shadow: none;
+        }
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+        }
+        .table {
+            width: 100%;
+        }
+    }
+    
+    .print-only {
+        display: none;
+    }
+    
+    .leave-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .leave-header h1 {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .leave-header h2 {
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+    
+    .leave-info {
+        margin-bottom: 20px;
+    }
+    
+    .leave-info table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .leave-info table th {
+        text-align: right;
+        padding: 5px;
+        width: 30%;
+    }
+    
+    .leave-info table td {
+        padding: 5px;
+        width: 70%;
+    }
+    
+    .leave-footer {
+        margin-top: 50px;
+        text-align: center;
+    }
+    
+    .signature-box {
+        display: inline-block;
+        width: 45%;
+        text-align: center;
+        margin: 0 10px;
+    }
+    
+    .signature-line {
+        border-top: 1px solid #000;
+        margin-top: 50px;
+        padding-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-3 no-print">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>طباعة إجازة المرافق</h1>
+                <div>
+                    <a href="{% url 'core:companion_leave_detail' companion_leave.id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-right ml-1"></i> العودة للتفاصيل
+                    </a>
+                    <button onclick="window.print();" class="btn btn-primary">
+                        <i class="fas fa-print ml-1"></i> طباعة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="leave-header">
+                <h1>إجازة مرافق</h1>
+                <h2>رقم الإجازة: {{ companion_leave.leave_id }}</h2>
+                <p>تاريخ الإصدار: {{ companion_leave.issue_date }}</p>
+            </div>
+
+            <div class="leave-info">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>اسم المريض</th>
+                        <td>{{ companion_leave.patient.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>رقم هوية المريض</th>
+                        <td>{{ companion_leave.patient.national_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>اسم المرافق</th>
+                        <td>{{ companion_leave.companion.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>رقم هوية المرافق</th>
+                        <td>{{ companion_leave.companion.national_id }}</td>
+                    </tr>
+                    {% if companion_leave.companion.employer_name %}
+                    <tr>
+                        <th>جهة عمل المرافق</th>
+                        <td>{{ companion_leave.companion.employer_name }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>تاريخ بداية الإجازة</th>
+                        <td>{{ companion_leave.start_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>تاريخ نهاية الإجازة</th>
+                        <td>{{ companion_leave.end_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>مدة الإجازة</th>
+                        <td>{{ companion_leave.duration_days }} يوم</td>
+                    </tr>
+                    <tr>
+                        <th>اسم الطبيب</th>
+                        <td>{{ companion_leave.doctor.name }}</td>
+                    </tr>
+                    {% if companion_leave.doctor.position %}
+                    <tr>
+                        <th>تخصص الطبيب</th>
+                        <td>{{ companion_leave.doctor.position }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if companion_leave.doctor.hospital %}
+                    <tr>
+                        <th>المستشفى</th>
+                        <td>{{ companion_leave.doctor.hospital.name }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+
+            <div class="leave-footer">
+                <div class="signature-box">
+                    <div class="signature-line">توقيع الطبيب</div>
+                </div>
+                <div class="signature-box">
+                    <div class="signature-line">ختم المستشفى</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if invoices %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>الفواتير المرتبطة</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>رقم الفاتورة</th>
+                        <th>العميل</th>
+                        <th>المبلغ</th>
+                        <th>تاريخ الإصدار</th>
+                        <th>تاريخ الاستحقاق</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td>{{ invoice.invoice_number }}</td>
+                        <td>{{ invoice.client.name }}</td>
+                        <td>{{ invoice.amount }}</td>
+                        <td>{{ invoice.issue_date }}</td>
+                        <td>{{ invoice.due_date }}</td>
+                        <td>{{ invoice.get_status_display }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if print_mode %}
+<script>
+    // طباعة تلقائية عند تحميل الصفحة
+    window.onload = function() {
+        setTimeout(function() {
+            window.print();
+        }, 500);
+    };
+</script>
+{% endif %}
+{% endblock %}

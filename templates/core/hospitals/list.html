@@ -15,6 +15,26 @@
     </div>
 </div>
 
+<!-- فلتر البحث -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="name" class="form-label">اسم المستشفى</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ request.GET.name|default:'' }}">
+            </div>
+            <div class="col-md-12 mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> بحث
+                </button>
+                <a href="{% url 'core:hospital_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i> إعادة تعيين
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -22,6 +42,7 @@
                 <thead>
                     <tr>
                         <th>#</th>
+                        <th>الشعار</th>
                         <th>اسم المستشفى</th>
                         <th>العنوان</th>
                         <th>معلومات الاتصال</th>
@@ -33,24 +54,34 @@
                     {% for hospital in hospitals %}
                     <tr>
                         <td>{{ hospital.id }}</td>
+                        <td>
+                            {% if hospital.logo %}
+                            <img src="{{ hospital.logo.url }}" alt="{{ hospital.name }}" class="img-thumbnail" style="max-height: 50px;">
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
                         <td>{{ hospital.name }}</td>
                         <td>{{ hospital.address|default:"-" }}</td>
                         <td>{{ hospital.contact_info|default:"-" }}</td>
                         <td>{{ hospital.created_at|date:"Y-m-d" }}</td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{% url 'core:hospital_edit' hospital.id %}" class="btn btn-sm btn-warning">
+                                <a href="{% url 'core:hospital_edit' hospital.id %}" class="btn btn-sm btn-warning" title="تعديل">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="{% url 'core:hospital_delete' hospital.id %}" class="btn btn-sm btn-danger">
+                                <a href="{% url 'core:hospital_delete' hospital.id %}" class="btn btn-sm btn-danger" title="حذف">
                                     <i class="fas fa-trash"></i>
                                 </a>
+                                <span class="btn btn-sm btn-info" title="عدد الأطباء">
+                                    <i class="fas fa-user-md"></i> {{ hospital.doctors.count }}
+                                </span>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">لا توجد مستشفيات</td>
+                        <td colspan="7" class="text-center">لا توجد مستشفيات</td>
                     </tr>
                     {% endfor %}
                 </tbody>

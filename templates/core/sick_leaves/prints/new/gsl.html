@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)https://sahafaty.site/seeker-reports/6630/updatedPrint -->
+<html lang="ar" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SickLeaves</title>
+    {% load static %}
+    {% load core_extras %}
+    <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet">
+    <style>
+        @page {
+            size: 210mm 297mm;
+            margin: 0;
+            padding: 0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Calibri', sans-serif !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        html, body {
+            width: 210mm;
+            height: 297mm;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: white;
+            font-family: 'Calibri', sans-serif !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background-color: white;
+            color: #000;
+            line-height: 1.5;
+            font-family: 'Calibri', sans-serif !important;
+            font-weight: bold;
+        }
+        .body-image{
+            margin-right: 50px;
+            margin-left: 50px;
+
+        }
+        /* Mobile devices */
+        @media only screen and (max-width: 767px) {
+            html, body {
+                width: 120mm !important;  /* Much narrower width for mobile */
+                transform: scale(0.65);  /* Much more reduction in scale */
+                transform-origin: top center;
+                margin: 0 !important;
+                padding: 0 !important;
+
+            }
+
+            #table-parent {
+                margin: 10px 5px !important;  /* Minimal margins */
+                width: 98% !important;  /* Take up almost all width */
+                background-color: red !important;
+
+
+            }
+
+            .content {
+                transform: scale(0.65);
+                transform-origin: top center;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+
+            }
+
+
+
+
+            .header-image {
+                width: 98% !important;
+                margin: 0 auto !important;
+                transform: scale(0.65);
+                transform-origin: top center;
+            }
+
+            .footer-section {
+                transform: scale(0.65);
+                transform-origin: top center;
+                margin-top: 5px !important;
+                width: 98% !important;
+            }
+
+            .footer-logo {
+                width: 100px !important;  /* Smaller logo */
+                height: auto !important;
+            }
+
+            .medical-name {
+                font-size: 10px !important;  /* Smaller text */
+            }
+
+            .qr-code img {
+                width: 60px !important;  /* Smaller QR code */
+                height: auto !important;
+            }
+             .highlight {
+            color: #ffffff;
+             }
+        }
+
+        /* Print settings */
+        @media print {
+            html, body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                font-family: 'Calibri', sans-serif !important;
+            }
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .container {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Calibri', sans-serif;
+            background-color: white;
+            width: 210mm;
+            margin: 0 auto;
+            color: #000;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            html, body {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            img {
+                max-width: 100%;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Content styles */
+        .header-image {
+            width: 100%;
+            height: auto;
+        }
+
+        .header-image img {
+            width: 100%;
+            margin-right: 5px;
+        }
+
+        /* #table-parent {
+
+            margin: 20px 57px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #E2E8F0;
+        } */
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .col-6 {
+            width: 48%;
+        }
+
+        .footer-section {
+            margin-top: 30px;
+            padding: 0 10px;
+        }
+
+        .footer-logo {
+            width: 135px;
+            height: 90px;
+            object-fit: contain;
+            margin-right: 110px;
+            display: block;
+        }
+
+        .medical-name {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #4B5563;
+        }
+
+        /* Print button styles */
+        .print-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #2C3D77;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Calibri', sans-serif;
+            font-size: 16px;
+            z-index: 9999;
+        }
+
+        /* Print instructions */
+        .print-instructions {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+            z-index: 9999;
+        }
+
+        /* Your existing table styles */
+        .header-image {
+            width: 100%;
+            height: auto;
+        }
+
+        .header-image img {
+            margin-right: 5px !important;
+            width: 100%;
+        }
+
+        /* #table-parent {
+            height: auto;
+            margin-left: 7%;
+            margin-right: 77px; */
+            /* border: 0.5px solid  #d3d3d37d; */
+            /* border-radius: 11px 11px 11px 11px; */
+            /* overflow: hidden; */
+            /* background-color: #e5e5e5; */
+
+        /* } */
+
+        .row {
+            display: flex;
+        }
+
+        .col-6 {
+            width: 49%;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-8 {
+            margin-top: 2rem;
+        }
+
+        .text-sm {
+            font-size: 11px;
+        }
+
+        .text-xs {
+            font-size: 11px;
+        }
+
+        .text-gray-700 {
+            color: #374151;
+        }
+
+        .text-gray-500 {
+            color: #6b7280;
+        }
+
+        .text-gray-600 {
+            color: #4b5563;
+        }
+
+        .text-blue-500 {
+            color: #3b82f6;
+        }
+
+        .underline {
+            text-decoration: underline;
+        }
+
+        .tableTop {
+            border-top: none;
+            font-weight: bold;
+            color: #5d89bb;
+        }
+
+         table {
+            width: 100%;
+            margin-top: 0px;
+            font-size: 12px;
+            border:none;
+            border-radius:none;
+            /* overflow: hidden;  */
+
+        }
+
+       tr th{
+           width:100px;
+       }
+    td {
+  border:none; /* Border color */
+  padding: 3px;
+  text-align: center;
+}
+
+        .TableRight {
+            font-weight: bold;
+        }
+
+        /* thead th {
+            border: none;
+            background-color: #4E78BB;
+            color: white;
+            font-weight: bold;
+              padding-right: 0px;
+            padding-left:0px;
+
+        } */
+
+        #header {
+            border-top: none;
+            font-weight: bold;
+            background-color: white;
+        }
+
+
+
+        /* tbody td, tbody th {
+            color: #2c3e77;
+            font-size:11px;
+            padding-right: 0px;
+            padding-left:0px;
+
+        } */
+       .highlight {
+            color: #ffffff;
+            justify-content: center;
+            align-self: center;
+            font-weight: 200;
+
+        }
+
+        /* .LeftAndRight {
+            font-weight: bold;
+            color: #5d89bb;
+            background-color: white;
+        } */
+
+        /* .gray-backgraound {
+            font-weight: bold;
+            color:#5d89bb;
+            background-color:#f5f5f5;
+
+        } */
+
+        .white-backgraound {
+            font-weight: bold;
+            color: #5d89bb;
+            background-color: white;
+        }
+        .codenum{
+              font-weight: bold;
+            color: #5d89bb;
+            position: relative;
+            margin-top: -350px;
+            background-color: none;
+        }
+        tbody {
+            padding-bottom: 0;
+
+        }
+
+        .footer-section {
+            margin-top: 26px;
+            padding: 0 10px;
+        }
+
+        .footer-logo {
+            width: 135px;
+            height: 90px;
+            object-fit: contain;
+            margin-right: 110px;
+            display: block;
+        }
+
+        .medical-logo-name .medical-name {
+            margin-left:70px;
+            display: block;
+            font-weight: 200;
+            color: black;
+            font-size: 9px;
+        }
+
+      .footer-section .fotter-dates-logo-section {
+            margin-top: 10px;
+            padding: 0;
+
+        }
+        .footer-section .fotter-dates-logo-section img{
+            width: 100px;
+            height: 80px;
+            padding: 0;
+            margin-right:22px;
+            object-fit: contain;
+            display: block;
+        }
+        .qr-code-section .qr-text {
+            font-size:9px;
+            font-weight: 600;
+            color: black;
+            margin-right: -40px;
+            -webkit-text-stroke: 0.1px black;
+             /* text-stroke: 0.1px black;  */
+        }
+
+        .qr-code {
+            width: 80px;
+            height: 90px;
+            margin-right: 120px;
+            margin-top:-10px;
+            margin-bottom: 5px;
+        }
+
+        .national-logo {
+            height: 60px;
+            width: auto;
+            margin-right: 15px;
+        }
+        .arabic-text {
+            font-family: 'Calibri', sans-serif !important;
+        }
+
+        .english-text {
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+
+        .number-text {
+            font-family: 'Times New Roman', Times, serif !important;
+            direction: ltr;
+            display: inline-block;
+        }
+    </style>
+<style>
+                @page {
+                    size: A4 portrait;
+                    margin: 0;
+                }
+                body {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+            </style></head>
+<body>
+    <div class="header-image">
+        <img src="{% static 'images/header_updated.png' %}" alt="sahosa Logo">
+    </div>
+
+    <!-- <div id="table-parent"> -->
+          <table style="width:418px;max-width:418px;  position: absolute; margin-right:175px; margin-top:15px; table-layout: fixed; border-collapse: separate; border-spacing: 1;">
+            <tbody><tr style="height:30px;">
+                <td colspan="2" class="english-text codenum" style="color:#2c3e77;max-height: 30px;  height: 30px;font-weight: 500; vertical-align: middle;">{{ sick_leave.leave_id }}</td>
+            </tr>
+                            <tr style="height:35px;">
+                    <td class="highlight english-text" style="max-height: 35px; height:35px;color:#ffffff;vertical-align: middle;">
+                                                {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date|hijri_date }} الى {{ sick_leave.end_date|hijri_date }})
+                    </td>
+                    <td class="highlight english-text" dir="ltr" style="vertical-align: middle;">
+                        {{ sick_leave.duration_days }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.start_date|date:"d-m-Y" }} to {{ sick_leave.end_date|date:"d-m-Y" }})
+                    </td>
+                </tr>
+                        <tr style="height:35px;">
+                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date|hijri_date }}</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date|date:"d-m-Y" }}</td>
+            </tr>
+            <tr style="height:35px;">
+                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date|hijri_date }}</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date|date:"d-m-Y" }}</td>
+            </tr>
+            <tr style="height:35px;">
+                <td class="english-text" style="color:#2c3e77; font-weight: 200; height: 100%;font-size: 12px; vertical-align: middle;" colspan="2">
+                    {{ sick_leave.issue_date|date:"d-m-Y" }}
+                </td>
+            </tr>
+            <tr style="height:35px;">
+                <td style="color:#2c3e77; font-weight: 200;max-height: 35px; height:35px;width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; height: 35px; max-height: 35px;">
+                    <span class="arabic-text" style="display: block; white-space: wrap;font-size: 14px; overflow: hidden; text-overflow: ellipsis;">{{ sick_leave.patient.name }}</span>
+                </td>
+                <td style="color:#2c3e77; font-weight: 200;max-height: 35px; height:35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; height: 35px; max-height: 35px;">
+                    <span class="english-text" style="display: block; white-space: wrap;  text-overflow: ellipsis;">{{ sick_leave.patient.name|upper }}</span>
+                </td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="color:#2c3e77; font-weight: 200;height: 35px;max-height: 35px; width: 209px;font-size: 12px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;" colspan="2">
+                    <span style="padding-top:-17px;" class="number-text">{{ sick_leave.patient.national_id }}</span>
+                </td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px;font-size: 14px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+                    <span class="arabic-text">{{ sick_leave.patient.nationality }}</span>
+                </td>
+                <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+                    <span class="english-text">{{ sick_leave.patient.nationality|upper }}</span>
+                </td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px;width: 209px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+                    <span class="arabic-text">{{ sick_leave.patient.employer_name }}</span>
+                </td>
+                <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px;overflow: hidden; text-overflow: ellipsis; vertical-align: middle;"></td>
+            </tr>
+            <tr style="height: 60px;">
+                <td style="color:#2c3e77; font-weight: 200;max-height:60px;height:60px; width: 209px;font-size: 14px;  overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+                    <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.name }}</span>
+                </td>
+                <td style="color:#2c3e77; font-weight: 200; width: 209px;max-height:60px;height:60px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.name|upper }}</span>
+                </td>
+            </tr>
+            <tr style="height: 35px;">
+                <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px; width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
+                    <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.position }}</span>
+                </td>
+                <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px;  width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position|upper }}</span>
+                </td>
+            </tr>
+          </tbody></table>
+            <div class="body-image">
+
+              <img src="{% static 'images/body-image-updated.png' %}" alt="sahosa Logo">
+            </div>
+
+        <!-- </div> -->
+
+
+    <!-- Footer Section -->
+    <div class="footer-section">
+        <div class="row">
+            <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:180px;">
+                <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
+                <p class="arabic-text" style="margin-top: 2px ;
+                margin-left:30px">{{ sick_leave.doctor.hospital.name }}</p>
+               <p class="english-text" style="margin-top: -2px ; font-size:12px;
+                margin-left:30px">{{ sick_leave.doctor.hospital.name|translate_to_english|upper }}</p>
+                 <p class="arabic-text" style="margin-top: 2px ; font-size:12px;
+                margin-left:30px">   </p>
+
+            </div>
+
+            <div class="text-center col-6 qr-code-section">
+                <div class="qr-code">
+                    <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="qr-image">
+                </div>
+             <p class="text-gray-700 qr-text" style="line-height: 2.2;">
+            <span class="arabic-text" style="font-size: 12px;font-weight:700;">للتحقق من بيانات التقرير، يرجى التأكد من زيارة موقع منصة صحة </span>
+            <br> <span class="arabic-text" style="font-size: 12px;font-weight:700;">الرسمي</span>
+             <span class="english-text" style="display: block; margin-top: -2px;font-size: 10px;font-weight: 200;">To check the report data, please visit Seha's official website</span>
+             <a href="https://sahafaty.site/quiries/quiry" class="underline english-text" style="color:#0000ffc2; text-decoration: underline #0000ffc2; border-bottom: none; box-shadow: none; -webkit-text-decoration-color: #0000ffc2;">
+                www.seha.sa/#/inquiries/slenquiry
+            </a>
+            </p>
+            </div>
+        </div>
+
+        <div class="row fotter-dates-logo-section">
+            <div class="col-6">
+                <img src="{% static 'images/National_center_for_midical.png' %}" alt="National Center" class="national-logo">
+            </div>
+            <div class="text-left col-6" style="font-size:10px; margin-top:20px; font-weight: bold;  margin-left:22px;">
+            <span class="english-text" style="display: inline-block;">AM</span>
+                <span class="english-text" style="display: inline-block;">12:06</span>
+                <br>  <span class="english-text"> {% now "l, d F Y" %}</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Add print styles
+            var style = document.createElement('style');
+            style.textContent = `
+                @page {
+                    size: A4 portrait;
+                    margin: 0;
+                }
+                body {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Trigger print
+            window.print();
+        }
+    </script>
+
+
+</body></html>

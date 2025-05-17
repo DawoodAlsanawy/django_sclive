@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}إنشاء إجازة مرافق مع فاتورة{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">إنشاء إجازة مرافق مع فاتورة</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <h5>بيانات المريض</h5>
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.patient_national_id|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.patient_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.patient_phone|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12 mb-3">
+                                <h5>بيانات المرافق</h5>
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.companion_national_id|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.companion_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.companion_phone|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12 mb-3">
+                                <h5>بيانات الطبيب والإجازة</h5>
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.doctor|as_crispy_field }}
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="add-new-doctor-btn">
+                                        <i class="fas fa-plus-circle"></i> إضافة طبيب جديد
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.start_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.end_date|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- حقول إضافة طبيب جديد -->
+                        <div id="new-doctor-fields" class="d-none">
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> أدخل بيانات الطبيب الجديد
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    {{ form.new_doctor_national_id|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.new_doctor_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.new_doctor_position|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    {{ form.new_doctor_hospital|as_crispy_field }}
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="add-new-hospital-btn">
+                                            <i class="fas fa-plus-circle"></i> إضافة مستشفى جديد
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-8" id="new-hospital-fields" class="d-none">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {{ form.new_hospital_name|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.new_hospital_address|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                {{ form.issue_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="alert alert-info mt-4">
+                                    <i class="fas fa-info-circle"></i> سيتم حساب مدة الإجازة تلقائيًا بناءً على تاريخ البداية والنهاية.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-12 mb-3">
+                                <h5>بيانات الفاتورة</h5>
+                                <hr>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check mt-4">
+                                    {{ form.create_invoice }}
+                                    <label class="form-check-label" for="{{ form.create_invoice.id_for_label }}">
+                                        {{ form.create_invoice.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-8" id="client-field">
+                                {{ form.client|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> حفظ
+                            </button>
+                            <a href="{% url 'core:companion_leave_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // تحديث حقل العميل بناءً على حالة إنشاء الفاتورة
+        function updateClientField() {
+            if ($('#{{ form.create_invoice.id_for_label }}').is(':checked')) {
+                $('#client-field').show();
+            } else {
+                $('#client-field').hide();
+            }
+        }
+
+        // تنفيذ الدالة عند تحميل الصفحة
+        updateClientField();
+
+        // تنفيذ الدالة عند تغيير حالة الاختيار
+        $('#{{ form.create_invoice.id_for_label }}').change(function() {
+            updateClientField();
+        });
+
+        // تحقق من أن تاريخ النهاية لا يسبق تاريخ البداية
+        $('#{{ form.end_date.id_for_label }}').change(function() {
+            var startDate = new Date($('#{{ form.start_date.id_for_label }}').val());
+            var endDate = new Date($(this).val());
+
+            if (endDate < startDate) {
+                alert('تاريخ النهاية لا يمكن أن يكون قبل تاريخ البداية');
+                $(this).val($('#{{ form.start_date.id_for_label }}').val());
+            }
+        });
+
+        // إظهار/إخفاء حقول الطبيب الجديد
+        $('#add-new-doctor-btn').click(function() {
+            $('#new-doctor-fields').toggleClass('d-none');
+            if (!$('#new-doctor-fields').hasClass('d-none')) {
+                // إذا تم إظهار حقول الطبيب الجديد، قم بتعطيل حقل اختيار الطبيب
+                $('#{{ form.doctor.id_for_label }}').prop('disabled', true);
+                // تفريغ حقل اختيار الطبيب
+                $('#{{ form.doctor.id_for_label }}').val('');
+            } else {
+                // إذا تم إخفاء حقول الطبيب الجديد، قم بتفعيل حقل اختيار الطبيب
+                $('#{{ form.doctor.id_for_label }}').prop('disabled', false);
+                // تفريغ حقول الطبيب الجديد
+                $('#{{ form.new_doctor_national_id.id_for_label }}').val('');
+                $('#{{ form.new_doctor_name.id_for_label }}').val('');
+                $('#{{ form.new_doctor_position.id_for_label }}').val('');
+                $('#{{ form.new_doctor_hospital.id_for_label }}').val('');
+                // إخفاء حقول المستشفى الجديد
+                $('#new-hospital-fields').addClass('d-none');
+            }
+        });
+
+        // إظهار/إخفاء حقول المستشفى الجديد
+        $('#add-new-hospital-btn').click(function() {
+            $('#new-hospital-fields').toggleClass('d-none');
+            if (!$('#new-hospital-fields').hasClass('d-none')) {
+                // إذا تم إظهار حقول المستشفى الجديد، قم بتعطيل حقل اختيار المستشفى
+                $('#{{ form.new_doctor_hospital.id_for_label }}').prop('disabled', true);
+                // تفريغ حقل اختيار المستشفى
+                $('#{{ form.new_doctor_hospital.id_for_label }}').val('');
+            } else {
+                // إذا تم إخفاء حقول المستشفى الجديد، قم بتفعيل حقل اختيار المستشفى
+                $('#{{ form.new_doctor_hospital.id_for_label }}').prop('disabled', false);
+                // تفريغ حقول المستشفى الجديد
+                $('#{{ form.new_hospital_name.id_for_label }}').val('');
+                $('#{{ form.new_hospital_address.id_for_label }}').val('');
+            }
+        });
+    });
+</script>
+{% endblock %}

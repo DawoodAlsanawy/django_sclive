@@ -5722,3 +5722,7 @@ django.template.exceptions.TemplateSyntaxError: Invalid filter: 'hijri_date'
 [2025-05-18 02:13:53] INFO django.utils.autoreload: Watching for file changes with StatReloader
 [2025-05-18 02:13:56] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\sclive\settings.py changed, reloading.
 [2025-05-18 02:13:57] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-18 02:14:38] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\core\forms.py changed, reloading.
+[2025-05-18 02:14:40] INFO django.utils.autoreload: Watching for file changes with StatReloader
+[2025-05-18 02:14:43] INFO django.utils.autoreload: D:\projects\2025\Disktop\django_sclive\sclive\settings.py changed, reloading.
+[2025-05-18 02:14:45] INFO django.utils.autoreload: Watching for file changes with StatReloader
