@@ -10,7 +10,7 @@ from django.utils import timezone
 from core.forms import SickLeaveForm, SickLeaveWithInvoiceForm
 from core.models import (Doctor, Hospital, LeaveInvoice, LeavePrice, Patient,
                          SickLeave)
-from core.utils import generate_unique_number
+from core.utils import generate_sick_leave_id, generate_unique_number
 
 
 @login_required
@@ -180,6 +180,15 @@ def sick_leave_create(request):
                 # إذا لم يتم تحديد طبيب ولم يتم إدخال بيانات طبيب جديد
                 form.add_error('doctor', 'يجب اختيار طبيب موجود أو إدخال بيانات طبيب جديد')
 
+            # الحصول على البادئة المختارة
+            prefix = form.cleaned_data.get('prefix', 'PSL')
+
+            # توليد رقم إجازة تلقائي باستخدام البادئة المختارة
+            leave_id = generate_sick_leave_id(prefix)
+
+            # تعيين رقم الإجازة في النموذج
+            form.instance.leave_id = leave_id
+
             sick_leave = form.save()
 
             # إنشاء فاتورة تلقائياً دائماً
@@ -211,14 +220,12 @@ def sick_leave_create(request):
 
             return redirect('core:sick_leave_detail', sick_leave_id=sick_leave.id)
     else:
-        # توليد رقم إجازة تلقائي
-        leave_id = generate_unique_number('SL', SickLeave)
-
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
         import datetime
         today = datetime.date.today()
+
+        # سيتم توليد رقم الإجازة بعد اختيار البادئة
         initial_data = {
-            'leave_id': leave_id,
             'issue_date': today
         }
         form = SickLeaveForm(initial=initial_data)
@@ -318,8 +325,11 @@ def sick_leave_create_with_invoice(request):
                     phone=patient_phone
                 )
 
+            # الحصول على البادئة المختارة
+            prefix = form.cleaned_data.get('prefix', 'PSL')
+
             # إنشاء الإجازة المرضية
-            leave_id = generate_unique_number('SL', SickLeave)
+            leave_id = generate_sick_leave_id(prefix)
             sick_leave = SickLeave.objects.create(
                 leave_id=leave_id,
                 patient=patient,
@@ -606,10 +616,39 @@ def sick_leave_print(request, sick_leave_id):
     # الحصول على الفواتير المرتبطة بالإجازة
     invoices = LeaveInvoice.objects.filter(leave_type='sick_leave', leave_id=sick_leave.leave_id)
 
+    # الحصول على نوع الطباعة من الطلب
+    print_type = request.GET.get('print_type', 'new')  # القيمة الافتراضية هي 'new'
+
+    # الحصول على البادئة من الطلب أو استخراجها من رقم الإجازة
+    prefix = request.GET.get('prefix')
+    if not prefix:
+        # استخراج البادئة من رقم الإجازة
+        prefix = 'PSL'  # القيمة الافتراضية
+        if sick_leave.leave_id.startswith('GSL'):
+            prefix = 'GSL'
+        elif sick_leave.leave_id.startswith('PSL'):
+            prefix = 'PSL'
+
+    # تحديد قالب الطباعة المناسب
+    template_path = 'core/sick_leaves/print.html'  # القالب الافتراضي
+
+    if print_type == 'old':
+        if prefix == 'PSL':
+            template_path = 'core/sick_leaves/prints/old/psl.html'
+        elif prefix == 'GSL':
+            template_path = 'core/sick_leaves/prints/old/gsl.html'
+    else:  # print_type == 'new'
+        if prefix == 'PSL':
+            template_path = 'core/sick_leaves/prints/new/psl.html'
+        elif prefix == 'GSL':
+            template_path = 'core/sick_leaves/prints/new/gsl.html'
+
     context = {
         'sick_leave': sick_leave,
         'invoices': invoices,
-        'print_mode': True
+        'print_mode': True,
+        'print_type': print_type,
+        'prefix': prefix
     }
 
-    return render(request, 'core/sick_leaves/print.html', context)
+    return render(request, template_path, context)

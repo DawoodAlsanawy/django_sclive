@@ -10,7 +10,7 @@ from django.utils import timezone
 from core.forms import CompanionLeaveForm, CompanionLeaveWithInvoiceForm
 from core.models import (CompanionLeave, Doctor, Hospital, LeaveInvoice,
                          LeavePrice, Patient)
-from core.utils import generate_unique_number
+from core.utils import generate_companion_leave_id, generate_unique_number
 
 
 @login_required
@@ -101,6 +101,15 @@ def companion_leave_create(request):
     if request.method == 'POST':
         form = CompanionLeaveForm(request.POST)
         if form.is_valid():
+            # الحصول على البادئة المختارة
+            prefix = form.cleaned_data.get('prefix', 'PSL')
+
+            # توليد رقم إجازة تلقائي باستخدام البادئة المختارة
+            leave_id = generate_companion_leave_id(prefix)
+
+            # تعيين رقم الإجازة في النموذج
+            form.instance.leave_id = leave_id
+
             companion_leave = form.save()
 
             # إنشاء فاتورة تلقائياً دائماً
@@ -132,14 +141,12 @@ def companion_leave_create(request):
 
             return redirect('core:companion_leave_detail', companion_leave_id=companion_leave.id)
     else:
-        # توليد رقم إجازة تلقائي
-        leave_id = generate_unique_number('CL', CompanionLeave)
-
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
         import datetime
         today = datetime.date.today()
+
+        # سيتم توليد رقم الإجازة بعد اختيار البادئة
         initial_data = {
-            'leave_id': leave_id,
             'issue_date': today
         }
         form = CompanionLeaveForm(initial=initial_data)
@@ -156,10 +163,122 @@ def companion_leave_create_with_invoice(request):
     if request.method == 'POST':
         form = CompanionLeaveWithInvoiceForm(request.POST)
         if form.is_valid():
-            companion_leave = form.save(commit=False)
+            # استخراج البيانات من النموذج
+            patient_national_id = form.cleaned_data['patient_national_id']
+            patient_name = form.cleaned_data['patient_name']
+            patient_phone = form.cleaned_data.get('patient_phone', '')
 
-            # حفظ الإجازة
-            companion_leave.save()
+            companion_national_id = form.cleaned_data['companion_national_id']
+            companion_name = form.cleaned_data['companion_name']
+            companion_phone = form.cleaned_data.get('companion_phone', '')
+
+            # معالجة إضافة طبيب جديد إذا تم إدخال بياناته
+            if form.cleaned_data.get('new_doctor_name') and form.cleaned_data.get('new_doctor_national_id'):
+                # التحقق مما إذا كان الطبيب موجودًا بالفعل
+                try:
+                    doctor = Doctor.objects.get(national_id=form.cleaned_data['new_doctor_national_id'])
+                    # تحديث بيانات الطبيب إذا تغيرت
+                    if doctor.name != form.cleaned_data['new_doctor_name']:
+                        doctor.name = form.cleaned_data['new_doctor_name']
+                    if form.cleaned_data.get('new_doctor_position'):
+                        doctor.position = form.cleaned_data['new_doctor_position']
+
+                    # معالجة إضافة مستشفى جديد إذا تم إدخال بياناته
+                    if form.cleaned_data.get('new_hospital_name'):
+                        # التحقق مما إذا كان المستشفى موجودًا بالفعل
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                        doctor.hospital = hospital
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+
+                    doctor.save()
+                except Doctor.DoesNotExist:
+                    # إنشاء مستشفى جديد إذا تم إدخال بياناته
+                    hospital = None
+                    if form.cleaned_data.get('new_hospital_name'):
+                        hospital, _ = Hospital.objects.get_or_create(
+                            name=form.cleaned_data['new_hospital_name'],
+                            defaults={
+                                'address': form.cleaned_data.get('new_hospital_address', '')
+                            }
+                        )
+                    elif form.cleaned_data.get('new_doctor_hospital'):
+                        hospital = form.cleaned_data['new_doctor_hospital']
+
+                    # إنشاء طبيب جديد
+                    doctor = Doctor.objects.create(
+                        national_id=form.cleaned_data['new_doctor_national_id'],
+                        name=form.cleaned_data['new_doctor_name'],
+                        position=form.cleaned_data.get('new_doctor_position', ''),
+                        hospital=hospital
+                    )
+            else:
+                # استخدام الطبيب المحدد من القائمة
+                doctor = form.cleaned_data['doctor']
+
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            issue_date = form.cleaned_data['issue_date']
+            client = form.cleaned_data.get('client')
+
+            # حساب مدة الإجازة
+            delta = end_date - start_date
+            duration_days = delta.days + 1  # +1 لأن اليوم الأخير محسوب
+
+            # البحث عن المريض أو إنشاء مريض جديد
+            try:
+                patient = Patient.objects.get(national_id=patient_national_id)
+                # تحديث بيانات المريض إذا تغيرت
+                if patient.name != patient_name:
+                    patient.name = patient_name
+                if patient_phone and patient.phone != patient_phone:
+                    patient.phone = patient_phone
+                patient.save()
+            except Patient.DoesNotExist:
+                # إنشاء مريض جديد
+                patient = Patient.objects.create(
+                    national_id=patient_national_id,
+                    name=patient_name,
+                    phone=patient_phone
+                )
+
+            # البحث عن المرافق أو إنشاء مرافق جديد
+            try:
+                companion = Patient.objects.get(national_id=companion_national_id)
+                # تحديث بيانات المرافق إذا تغيرت
+                if companion.name != companion_name:
+                    companion.name = companion_name
+                if companion_phone and companion.phone != companion_phone:
+                    companion.phone = companion_phone
+                companion.save()
+            except Patient.DoesNotExist:
+                # إنشاء مرافق جديد
+                companion = Patient.objects.create(
+                    national_id=companion_national_id,
+                    name=companion_name,
+                    phone=companion_phone
+                )
+
+            # الحصول على البادئة المختارة
+            prefix = form.cleaned_data.get('prefix', 'PSL')
+
+            # إنشاء إجازة المرافق
+            leave_id = generate_companion_leave_id(prefix)
+            companion_leave = CompanionLeave.objects.create(
+                leave_id=leave_id,
+                patient=patient,
+                companion=companion,
+                doctor=doctor,
+                start_date=start_date,
+                end_date=end_date,
+                duration_days=duration_days,
+                issue_date=issue_date
+            )
 
             # إنشاء فاتورة تلقائياً دائماً
             client = form.cleaned_data.get('client')
@@ -191,14 +310,12 @@ def companion_leave_create_with_invoice(request):
             # توجيه المستخدم مباشرة إلى صفحة الطباعة
             return redirect('core:companion_leave_print', companion_leave_id=companion_leave.id)
     else:
-        # توليد رقم إجازة تلقائي
-        leave_id = generate_unique_number('CL', CompanionLeave)
+        # لن نقوم بتوليد رقم إجازة تلقائي هنا، سيتم توليده بعد اختيار البادئة
 
         # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
         import datetime
         today = datetime.date.today()
         initial_data = {
-            'leave_id': leave_id,
             'issue_date': today
         }
         form = CompanionLeaveWithInvoiceForm(initial=initial_data)
@@ -477,10 +594,24 @@ def companion_leave_print(request, companion_leave_id):
     # الحصول على الفواتير المرتبطة بالإجازة
     invoices = LeaveInvoice.objects.filter(leave_type='companion_leave', leave_id=companion_leave.leave_id)
 
+    # الحصول على البادئة من الطلب أو استخراجها من رقم الإجازة
+    prefix = request.GET.get('prefix')
+    if not prefix:
+        # استخراج البادئة من رقم الإجازة
+        prefix = 'PSL'  # القيمة الافتراضية
+        if companion_leave.leave_id.startswith('GSL'):
+            prefix = 'GSL'
+        elif companion_leave.leave_id.startswith('PSL'):
+            prefix = 'PSL'
+
+    # تحديد قالب الطباعة المناسب - دائمًا نستخدم نفس القالب بغض النظر عن البادئة
+    template_path = 'core/companion_leaves/prints/psl.html'
+
     context = {
         'companion_leave': companion_leave,
         'invoices': invoices,
-        'print_mode': True
+        'print_mode': True,
+        'prefix': prefix
     }
 
-    return render(request, 'core/companion_leaves/print.html', context)
+    return render(request, template_path, context)

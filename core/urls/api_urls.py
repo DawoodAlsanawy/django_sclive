@@ -11,4 +11,6 @@ urlpatterns = [
     path('companion-leaves/api/search/', views.companion_leave_search_api, name='companion_leave_search_api'),
     path('leave-prices/api/get-price/', views.leave_price_api_get_price, name='leave_price_api_get_price'),
     path('api/client/<int:client_id>/unpaid-invoices/', views.api_client_unpaid_invoices, name='api_client_unpaid_invoices'),
+    path('api/generate-sick-leave-id/', views.generate_sick_leave_id_api, name='generate_sick_leave_id_api'),
+    path('api/generate-companion-leave-id/', views.generate_companion_leave_id_api, name='generate_companion_leave_id_api'),
 ]

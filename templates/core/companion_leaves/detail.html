@@ -10,9 +10,15 @@
     </div>
     <div class="col-md-6 text-md-end">
         <div class="btn-group" role="group">
-            <a href="{% url 'core:companion_leave_print' companion_leave.id %}" class="btn btn-primary">
-                <i class="fas fa-print"></i> طباعة
-            </a>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="printDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-print"></i> طباعة
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="printDropdown">
+                    <li><a class="dropdown-item" href="{% url 'core:companion_leave_print' companion_leave.id %}?prefix=PSL">PSL - طباعة</a></li>
+                    <li><a class="dropdown-item" href="{% url 'core:companion_leave_print' companion_leave.id %}?prefix=GSL">GSL - طباعة</a></li>
+                </ul>
+            </div>
             <a href="{% url 'core:companion_leave_edit' companion_leave.id %}" class="btn btn-warning">
                 <i class="fas fa-edit"></i> تعديل
             </a>

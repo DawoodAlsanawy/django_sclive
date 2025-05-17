@@ -10,9 +10,20 @@
     </div>
     <div class="col-md-6 text-md-end">
         <div class="btn-group" role="group">
-            <a href="{% url 'core:sick_leave_print' sick_leave.id %}" class="btn btn-primary">
-                <i class="fas fa-print"></i> طباعة
-            </a>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" id="printDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-print"></i> طباعة
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="printDropdown">
+                    <li><h6 class="dropdown-header">نوع الطباعة الجديدة</h6></li>
+                    <li><a class="dropdown-item" href="{% url 'core:sick_leave_print' sick_leave.id %}?print_type=new&prefix=PSL">PSL - طباعة جديدة</a></li>
+                    <li><a class="dropdown-item" href="{% url 'core:sick_leave_print' sick_leave.id %}?print_type=new&prefix=GSL">GSL - طباعة جديدة</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><h6 class="dropdown-header">نوع الطباعة القديمة</h6></li>
+                    <li><a class="dropdown-item" href="{% url 'core:sick_leave_print' sick_leave.id %}?print_type=old&prefix=PSL">PSL - طباعة قديمة</a></li>
+                    <li><a class="dropdown-item" href="{% url 'core:sick_leave_print' sick_leave.id %}?print_type=old&prefix=GSL">GSL - طباعة قديمة</a></li>
+                </ul>
+            </div>
             <a href="{% url 'core:sick_leave_edit' sick_leave.id %}" class="btn btn-warning">
                 <i class="fas fa-edit"></i> تعديل
             </a>

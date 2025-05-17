@@ -185,6 +185,14 @@ class LeavePriceForm(forms.ModelForm):
 
 class SickLeaveForm(forms.ModelForm):
     """نموذج إنشاء وتعديل الإجازة المرضية"""
+    # حقل اختيار بادئة رقم الإجازة
+    prefix = forms.ChoiceField(
+        label='بادئة رقم الإجازة',
+        choices=[('PSL', 'PSL'), ('GSL', 'GSL')],
+        initial='PSL',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     # حقول إضافة مريض جديد
     new_patient_national_id = forms.CharField(
         label='رقم هوية المريض الجديد',
@@ -348,12 +356,19 @@ class SickLeaveForm(forms.ModelForm):
 
 class SickLeaveWithInvoiceForm(forms.Form):
     """نموذج إنشاء إجازة مرضية مع فاتورة في خطوة واحدة"""
+    # حقل اختيار بادئة رقم الإجازة
+    prefix = forms.ChoiceField(
+        label='بادئة رقم الإجازة',
+        choices=[('PSL', 'PSL'), ('GSL', 'GSL')],
+        initial='PSL',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     # حقول المريض
     patient_national_id = forms.CharField(
         label='رقم هوية المريض',
         max_length=20,
         widget=forms.TextInput(attrs={'class': 'form-control'})
-        
+
     )
     patient_name = forms.CharField(
         label='اسم المريض',
@@ -365,7 +380,7 @@ class SickLeaveWithInvoiceForm(forms.Form):
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'})
-       
+
     )
 
     # حقول الطبيب
@@ -447,6 +462,14 @@ class SickLeaveWithInvoiceForm(forms.Form):
 
 class CompanionLeaveForm(forms.ModelForm):
     """نموذج إنشاء وتعديل إجازة المرافق"""
+    # حقل اختيار بادئة رقم الإجازة
+    prefix = forms.ChoiceField(
+        label='بادئة رقم الإجازة',
+        choices=[('PSL', 'PSL'), ('GSL', 'GSL')],
+        initial='PSL',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     # حقول إضافة مريض جديد
     new_patient_national_id = forms.CharField(
         label='رقم هوية المريض الجديد',
@@ -645,6 +668,13 @@ class CompanionLeaveForm(forms.ModelForm):
 
 class CompanionLeaveWithInvoiceForm(forms.Form):
     """نموذج إنشاء إجازة مرافق مع فاتورة في خطوة واحدة"""
+    # حقل اختيار بادئة رقم الإجازة
+    prefix = forms.ChoiceField(
+        label='بادئة رقم الإجازة',
+        choices=[('PSL', 'PSL'), ('GSL', 'GSL')],
+        initial='PSL',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     # حقول المريض
     patient_national_id = forms.CharField(
         label='رقم هوية المريض',

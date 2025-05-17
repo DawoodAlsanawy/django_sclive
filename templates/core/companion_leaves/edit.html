@@ -33,10 +33,13 @@
             {% csrf_token %}
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    {{ form.prefix|as_crispy_field }}
+                </div>
+                <div class="col-md-4">
                     {{ form.leave_id|as_crispy_field }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     {{ form.issue_date|as_crispy_field }}
                 </div>
             </div>

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <!-- saved from url=(0054)https://sahafaty.site/seeker-reports/6630/updatedPrint -->
 <html lang="ar" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SickLeaves</title>
-    <link href="./SickLeaves_files/tailwind.min.css" rel="stylesheet">
+    {% load static %}
+    {% load core_extras %}
+    <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet">
     <style>
         @page {
             size: 210mm 297mm;
@@ -46,7 +48,7 @@
         .body-image{
             margin-right: 50px;
             margin-left: 50px;
-            
+
         }
         /* Mobile devices */
         @media only screen and (max-width: 767px) {
@@ -58,15 +60,15 @@
                 padding: 0 !important;
 
             }
-            
+
             #table-parent {
                 margin: 10px 5px !important;  /* Minimal margins */
                 width: 98% !important;  /* Take up almost all width */
                 background-color: red !important;
 
-             
+
             }
-            
+
             .content {
                 transform: scale(0.65);
                 transform-origin: top center;
@@ -77,7 +79,7 @@
             }
 
 
-          
+
 
             .header-image {
                 width: 98% !important;
@@ -275,7 +277,7 @@
             /* border-radius: 11px 11px 11px 11px; */
             /* overflow: hidden; */
             /* background-color: #e5e5e5; */
-          
+
         /* } */
 
         .row {
@@ -317,7 +319,7 @@
         .text-xs {
             font-size: 11px;
         }
-      
+
         .text-gray-700 {
             color: #374151;
         }
@@ -349,11 +351,11 @@
             margin-top: 0px;
             font-size: 12px;
             border:none;
-            border-radius:none; 
+            border-radius:none;
             /* overflow: hidden;  */
-       
-        } 
-     
+
+        }
+
        tr th{
            width:100px;
        }
@@ -361,8 +363,8 @@
   border:none; /* Border color */
   padding: 3px;
   text-align: center;
-} 
-     
+}
+
         .TableRight {
             font-weight: bold;
         }
@@ -374,7 +376,7 @@
             font-weight: bold;
               padding-right: 0px;
             padding-left:0px;
- 
+
         } */
 
         #header {
@@ -383,7 +385,7 @@
             background-color: white;
         }
 
-          
+
 
         /* tbody td, tbody th {
             color: #2c3e77;
@@ -397,8 +399,8 @@
             justify-content: center;
             align-self: center;
             font-weight: 200;
-            
-        } 
+
+        }
 
         /* .LeftAndRight {
             font-weight: bold;
@@ -410,7 +412,7 @@
             font-weight: bold;
             color:#5d89bb;
             background-color:#f5f5f5;
-         
+
         } */
 
         .white-backgraound {
@@ -427,7 +429,7 @@
         }
         tbody {
             padding-bottom: 0;
-           
+
         }
 
         .footer-section {
@@ -450,11 +452,11 @@
             color: black;
             font-size: 9px;
         }
-       
+
       .footer-section .fotter-dates-logo-section {
             margin-top: 10px;
             padding: 0;
-           
+
         }
         .footer-section .fotter-dates-logo-section img{
             width: 100px;
@@ -489,11 +491,11 @@
         .arabic-text {
             font-family: 'Calibri', sans-serif !important;
         }
-        
+
         .english-text {
             font-family: 'Times New Roman', Times, serif !important;
         }
-        
+
         .number-text {
             font-family: 'Times New Roman', Times, serif !important;
             direction: ltr;
@@ -512,104 +514,104 @@
             </style></head>
 <body>
     <div class="header-image">
-        <img src="./SickLeaves_files/header_updated.png" alt="sahosa Logo">
+        <img src="{% static 'images/header_updated.png' %}" alt="sahosa Logo">
     </div>
 
     <!-- <div id="table-parent"> -->
           <table style="width:418px;max-width:418px;  position: absolute; margin-right:175px; margin-top:15px; table-layout: fixed; border-collapse: separate; border-spacing: 1;">
             <tbody><tr style="height:30px;">
-                <td colspan="2" class="english-text codenum" style="color:#2c3e77;max-height: 30px;  height: 30px;font-weight: 500; vertical-align: middle;">GSL25051542904</td>
+                <td colspan="2" class="english-text codenum" style="color:#2c3e77;max-height: 30px;  height: 30px;font-weight: 500; vertical-align: middle;">{{ sick_leave.leave_id }}</td>
             </tr>
                             <tr style="height:35px;">
                     <td class="highlight english-text" style="max-height: 35px; height:35px;color:#ffffff;vertical-align: middle;">
-                                                1 يوم (1446-11-17 الى 1446-11-17)
+                                                {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date|hijri_date }} الى {{ sick_leave.end_date|hijri_date }})
                     </td>
                     <td class="highlight english-text" dir="ltr" style="vertical-align: middle;">
-                        1 day (15-05-2025 to 15-05-2025)
+                        {{ sick_leave.duration_days }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.start_date|date:"d-m-Y" }} to {{ sick_leave.end_date|date:"d-m-Y" }})
                     </td>
                 </tr>
                         <tr style="height:35px;">
-                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">17-11-1446</td>
-                <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">15-05-2025</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date|hijri_date }}</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date|date:"d-m-Y" }}</td>
             </tr>
             <tr style="height:35px;">
-                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">17-11-1446</td>
-                <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">15-05-2025</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date|hijri_date }}</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date|date:"d-m-Y" }}</td>
             </tr>
             <tr style="height:35px;">
                 <td class="english-text" style="color:#2c3e77; font-weight: 200; height: 100%;font-size: 12px; vertical-align: middle;" colspan="2">
-                    15-05-2025
+                    {{ sick_leave.issue_date|date:"d-m-Y" }}
                 </td>
             </tr>
             <tr style="height:35px;">
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px; height:35px;width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; height: 35px; max-height: 35px;">
-                    <span class="arabic-text" style="display: block; white-space: wrap;font-size: 14px; overflow: hidden; text-overflow: ellipsis;">عبدالله محمد سعد العمري</span>
+                    <span class="arabic-text" style="display: block; white-space: wrap;font-size: 14px; overflow: hidden; text-overflow: ellipsis;">{{ sick_leave.patient.name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px; height:35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; height: 35px; max-height: 35px;">
-                    <span class="english-text" style="display: block; white-space: wrap;  text-overflow: ellipsis;">ABDULLAH MOHAMMED SAAD AL-OMARI</span>
+                    <span class="english-text" style="display: block; white-space: wrap;  text-overflow: ellipsis;">{{ sick_leave.patient.name|upper }}</span>
                 </td>
             </tr>
             <tr style="height: 35px;">
                 <td style="color:#2c3e77; font-weight: 200;height: 35px;max-height: 35px; width: 209px;font-size: 12px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;" colspan="2">
-                    <span style="padding-top:-17px;" class="number-text">1089066557</span>
+                    <span style="padding-top:-17px;" class="number-text">{{ sick_leave.patient.national_id }}</span>
                 </td>
             </tr>
             <tr style="height: 35px;">
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px;font-size: 14px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="arabic-text">السعودية</span>
+                    <span class="arabic-text">{{ sick_leave.patient.nationality }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text">Saudi Arabia</span>
+                    <span class="english-text">{{ sick_leave.patient.nationality|upper }}</span>
                 </td>
             </tr>
             <tr style="height: 35px;">
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px;width: 209px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="arabic-text">وزارة الدفاع</span>
+                    <span class="arabic-text">{{ sick_leave.patient.employer_name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px;overflow: hidden; text-overflow: ellipsis; vertical-align: middle;"></td>
             </tr>
             <tr style="height: 60px;">
                 <td style="color:#2c3e77; font-weight: 200;max-height:60px;height:60px; width: 209px;font-size: 14px;  overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="arabic-text" style="display: block;">غازي عبدالله عسيري</span>
+                    <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200; width: 209px;max-height:60px;height:60px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text" style="display: block;">GHAZI ABDULLAH AL-ASIRI</span>
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.name|upper }}</span>
                 </td>
             </tr>
             <tr style="height: 35px;">
                 <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px; width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="arabic-text" style="display: block;">طبيب عام</span>
+                    <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.position }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px;  width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text" style="display: block;">General</span>
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position|upper }}</span>
                 </td>
             </tr>
           </tbody></table>
             <div class="body-image">
-                
-              <img src="./SickLeaves_files/body-image-updated.png" alt="sahosa Logo">
-            </div> 
-          
+
+              <img src="{% static 'images/body-image-updated.png' %}" alt="sahosa Logo">
+            </div>
+
         <!-- </div> -->
-    
+
 
     <!-- Footer Section -->
     <div class="footer-section">
         <div class="row">
             <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:180px;">
-                <img src="./SickLeaves_files/1745399893_6808b0553f01a.jpg" alt="Medical Center Logo" class="footer-logo">
+                <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
                 <p class="arabic-text" style="margin-top: 2px ;
-                margin-left:30px">مستشفى خميس مشيط العام </p>
+                margin-left:30px">{{ sick_leave.doctor.hospital.name }}</p>
                <p class="english-text" style="margin-top: -2px ; font-size:12px;
-                margin-left:30px">Khamis Mushait General Hospital</p>
+                margin-left:30px">{{ sick_leave.doctor.hospital.name|translate_to_english|upper }}</p>
                  <p class="arabic-text" style="margin-top: 2px ; font-size:12px;
                 margin-left:30px">   </p>
-                 
+
             </div>
 
             <div class="text-center col-6 qr-code-section">
                 <div class="qr-code">
-                    <img src="./SickLeaves_files/saved_resource" alt="QR Code" class="qr-image">
+                    <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="qr-image">
                 </div>
              <p class="text-gray-700 qr-text" style="line-height: 2.2;">
             <span class="arabic-text" style="font-size: 12px;font-weight:700;">للتحقق من بيانات التقرير، يرجى التأكد من زيارة موقع منصة صحة </span>
@@ -624,12 +626,12 @@
 
         <div class="row fotter-dates-logo-section">
             <div class="col-6">
-                <img src="./SickLeaves_files/National_center_for_midical.png" alt="National Center" class="national-logo">
+                <img src="{% static 'images/National_center_for_midical.png' %}" alt="National Center" class="national-logo">
             </div>
             <div class="text-left col-6" style="font-size:10px; margin-top:20px; font-weight: bold;  margin-left:22px;">
             <span class="english-text" style="display: inline-block;">AM</span>
                 <span class="english-text" style="display: inline-block;">12:06</span>
-                <br>  <span class="english-text"> Thursday, 15 May 2025</span>
+                <br>  <span class="english-text"> {% now "l, d F Y" %}</span>
             </div>
         </div>
     </div>
@@ -649,7 +651,7 @@
                 }
             `;
             document.head.appendChild(style);
-            
+
             // Trigger print
             window.print();
         }

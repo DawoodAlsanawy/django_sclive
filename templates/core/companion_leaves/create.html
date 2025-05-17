@@ -42,10 +42,13 @@
             {% csrf_token %}
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    {{ form.prefix|as_crispy_field }}
+                </div>
+                <div class="col-md-4">
                     {{ form.leave_id|as_crispy_field }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     {{ form.issue_date|as_crispy_field }}
                 </div>
             </div>
@@ -295,15 +298,37 @@
 
         $('#id_start_date, #id_end_date').change(calculateDuration);
 
-        // توليد رقم إجازة تلقائي إذا كان الحقل فارغًا
-        if (!$('#id_leave_id').val()) {
-            var today = new Date();
-            var dateString = today.getFullYear().toString() +
-                             (today.getMonth() + 1).toString().padStart(2, '0') +
-                             today.getDate().toString().padStart(2, '0');
-            var randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            $('#id_leave_id').val('CL-' + dateString + '-' + randomNum);
-        }
+        // تعطيل حقل رقم الإجازة لأنه سيتم توليده تلقائيًا
+        $('#id_leave_id').prop('readonly', true);
+
+        // توليد رقم إجازة تلقائي عند اختيار البادئة
+        $('#id_prefix').change(function() {
+            var prefix = $(this).val();
+            // إرسال طلب AJAX للحصول على رقم إجازة جديد
+            $.ajax({
+                url: '/api/generate-companion-leave-id/',
+                type: 'GET',
+                data: {
+                    prefix: prefix
+                },
+                success: function(response) {
+                    $('#id_leave_id').val(response.leave_id);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error generating leave ID:', error);
+                    // في حالة الخطأ، نقوم بتوليد رقم محلي مؤقت
+                    var today = new Date();
+                    var dateString = today.getFullYear().toString() +
+                                    (today.getMonth() + 1).toString().padStart(2, '0') +
+                                    today.getDate().toString().padStart(2, '0');
+                    var randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                    $('#id_leave_id').val(prefix + dateString + randomNum);
+                }
+            });
+        });
+
+        // تشغيل التغيير مرة واحدة عند تحميل الصفحة لتوليد رقم الإجازة الأولي
+        $('#id_prefix').trigger('change');
 
         // تعيين تاريخ اليوم كتاريخ افتراضي للإصدار إذا كان فارغًا
         if (!$('#id_issue_date').val()) {

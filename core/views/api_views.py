@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from core.models import (Client, CompanionLeave, Doctor, LeaveInvoice,
                          LeavePrice, Patient, SickLeave)
+from core.utils import generate_companion_leave_id, generate_sick_leave_id
 
 
 def doctor_search_api(request):
@@ -230,6 +231,20 @@ def companion_leave_search_api(request):
         })
 
     return JsonResponse(results, safe=False)
+
+
+def generate_sick_leave_id_api(request):
+    """واجهة برمجية لتوليد رقم إجازة مرضية جديد"""
+    prefix = request.GET.get('prefix', 'PSL')
+    leave_id = generate_sick_leave_id(prefix)
+    return JsonResponse({'leave_id': leave_id})
+
+
+def generate_companion_leave_id_api(request):
+    """واجهة برمجية لتوليد رقم إجازة مرافق جديد"""
+    prefix = request.GET.get('prefix', 'PSL')
+    leave_id = generate_companion_leave_id(prefix)
+    return JsonResponse({'leave_id': leave_id})
 
 
 def api_client_unpaid_invoices(request, client_id):
