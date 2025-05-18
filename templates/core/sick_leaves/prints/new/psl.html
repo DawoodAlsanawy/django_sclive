@@ -584,7 +584,7 @@
                     <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.position }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px;  width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position|translate_to_english|capitalize }}</span>
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position|translate_to_english|capitalize|first_word }}</span>
                 </td>
             </tr>
           </tbody></table>
@@ -630,9 +630,19 @@
                 <img src="{% static 'images/National_center_for_midical.png' %}" alt="National Center" class="national-logo">
             </div>
             <div class="text-left col-6" style="font-size:10px; margin-top:20px; font-weight: bold;  margin-left:22px;">
-            <span class="english-text" style="display: inline-block;">AM</span>
-                <span class="english-text" style="display: inline-block;">12:03</span>
-                <br>  <span class="english-text"> {% now "l, d F Y" %}</span>
+                {% if sick_leave.created_at.hour < 12 %}
+                <span class="english-text" style="display: inline-block;">AM</span>
+                {% else %}
+                <span class="english-text" style="display: inline-block;">PM</span>
+                {% endif %}
+                <span class="english-text" style="display: inline-block;">
+                    {% if sick_leave.created_at.hour <= 12 %}
+                        {{ sick_leave.created_at|date:"h:i" }}
+                    {% else %}
+                        {{ sick_leave.created_at|date:"h:i" }}
+                    {% endif %}
+                </span>
+                <br> <span class="english-text">{{ sick_leave.created_at|date:"l, d F Y" }}</span>
             </div>
         </div>
     </div>
@@ -659,4 +669,4 @@
     </script>
 
 
-</body></html>
+</body></html>nts

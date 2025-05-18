@@ -214,7 +214,7 @@ def capitalize(value):
         return ""
 
     try:
-        return str(value).capitalize()
+        return str(value).title()
     except Exception:
         return value
 
@@ -256,3 +256,12 @@ def to_list(value):
         return list(value)
     except (ValueError, TypeError):
         return [value]
+
+@register.filter(name='first_word')
+def first_word(value):
+    """
+    يستخرج أول كلمة من الجملة
+    """
+    if not value:
+        return ''
+    return value.split()[0] if value.split() else ''
