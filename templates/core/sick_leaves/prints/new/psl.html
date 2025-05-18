@@ -523,7 +523,7 @@
             </tr>
                             <tr style="height:35px;">
                     <td class="highlight english-text" style="max-height: 35px; height:35px;color:#ffffff;vertical-align: middle;">
-                                                {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date|hijri_date }} الى {{ sick_leave.end_date|hijri_date }})
+                        {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date|hijri_date }} الى {{ sick_leave.end_date|hijri_date }})
                     </td>
                     <td class="highlight english-text" dir="ltr" style="vertical-align: middle;">
                         {{ sick_leave.duration_days }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.start_date|date:"d-m-Y" }} to {{ sick_leave.end_date|date:"d-m-Y" }})
@@ -560,7 +560,7 @@
                     <span class="arabic-text">{{ sick_leave.patient.nationality }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text">{{ sick_leave.patient.nationality|translate_to_english|upper }}</span>
+                    <span class="english-text">{{ sick_leave.patient.nationality|translate_to_english|capitalize }}</span>
                 </td>
             </tr>
             <tr style="height: 35px;">
@@ -568,7 +568,7 @@
                     <span class="arabic-text">{{ sick_leave.patient.employer_name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px;overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text">{{ sick_leave.patient.employer_name|translate_to_english|upper }}</span>
+                    <span class="english-text"></span>
                 </td>
             </tr>
             <tr style="height: 60px;">
@@ -584,7 +584,7 @@
                     <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.position }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px;  width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position|translate_to_english|upper }}</span>
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position|translate_to_english|capitalize }}</span>
                 </td>
             </tr>
           </tbody></table>
@@ -604,7 +604,7 @@
                 <p class="arabic-text" style="margin-top: 2px ;
                 margin-left:30px">{{ sick_leave.doctor.hospital.name }}</p>
                <p class="english-text" style="margin-top: -2px ; font-size:12px;
-                margin-left:30px">{{ sick_leave.doctor.hospital.name|translate_to_english|upper }}</p>
+                margin-left:30px">{{ sick_leave.doctor.hospital.name|translate_to_english|capitalize }}</p>
                  <p class="arabic-text" style="margin-top: 2px ; font-size:12px;
                 margin-left:30px">   رقـم  الـــترخيص :     14101535512860  </p>
 

@@ -198,6 +198,25 @@ def to_uppercase(value):
         return str(value).upper()
     except Exception:
         return value
+    
+@register.filter
+def capitalize(value):
+    """
+    فلتر لتحويل النص إلى أحرف كبيرة
+
+    الاستخدام:
+    {{ text|to_uppercase }}
+
+    مثال:
+    {{ "hello world"|to_uppercase }} -> "HELLO WORLD"
+    """
+    if not value:
+        return ""
+
+    try:
+        return str(value).capitalize()
+    except Exception:
+        return value
 
 @register.filter
 def add(value, arg):

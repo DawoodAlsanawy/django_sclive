@@ -566,11 +566,11 @@
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality|translate_to_english|upper }}</td>
+            <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality|translate_to_english|capitalize }}</td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.employer_name }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200">{{ sick_leave.patient.employer_name|translate_to_english|upper }}</td>
+            <td style="color:#2c3e77 ;font-weight: 200"></td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:19px;">{{ sick_leave.doctor.name }}</td>
@@ -578,7 +578,7 @@
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position|translate_to_english|upper }}</td>
+            <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position|translate_to_english|capitalize }}</td>
             </tr>
           </tbody></table>
             <div class="body-image">
@@ -595,7 +595,7 @@
             <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:140px;">
                 <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
                 <p style="margin-top: -2px ;
-                margin-left:30px" class="text-xs text-gray-500 medical-name">{{ sick_leave.doctor.hospital.name }} <br>{{ sick_leave.doctor.hospital.name|translate_to_english|upper }} <br>
+                margin-left:30px" class="text-xs text-gray-500 medical-name">{{ sick_leave.doctor.hospital.name }} <br>{{ sick_leave.doctor.hospital.name|translate_to_english|capitalize }} <br>
                 </p>
             </div>
 

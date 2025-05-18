@@ -368,7 +368,7 @@
                     <tr>
                         <th class="gray-backgraound">الجنسية</th>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality|translate_to_english|upper }}</td>
-                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality|capitalize }}</td>
                         <th class="gray-backgraound">Nationality</th>
                     </tr>
                     <tr>
@@ -391,8 +391,8 @@
                     </tr>
                     <tr>
                         <th class="white-backgraound">المسمى الوظيفي</th>
-                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position|translate_to_english|upper }}</td>
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position }}</td>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position|translate_to_english|capitalize }}</td>
                         <th class="white-backgraound">Position</th>
                     </tr>
                 </tbody>
