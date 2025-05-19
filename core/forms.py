@@ -162,10 +162,16 @@ class PatientForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # جعل حقول الترجمة الإنجليزية غير مطلوبة
+        # جعل جميع الحقول اختيارية ما عدا اسم المريض
+        self.fields['national_id'].required = False
         self.fields['name_en'].required = False
+        self.fields['nationality'].required = False
         self.fields['nationality_en'].required = False
+        self.fields['employer_name'].required = False
         self.fields['employer_name_en'].required = False
+        self.fields['phone'].required = False
+        self.fields['email'].required = False
+        self.fields['address'].required = False
         self.fields['address_en'].required = False
 
         # إضافة تلميحات للمستخدم

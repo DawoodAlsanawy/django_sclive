@@ -48,11 +48,12 @@ def patient_search_api(request):
     results = []
     for patient in patients:
         employer_name = patient.employer_name or "غير محدد"
+        national_id_display = f" ({patient.national_id})" if patient.national_id else ""
         results.append({
             'id': patient.id,
-            'text': f"{patient.name} ({patient.national_id})",
+            'text': f"{patient.name}{national_id_display}",
             'display': patient.name,
-            'national_id': patient.national_id,
+            'national_id': patient.national_id or '',
             'nationality': patient.nationality or '',
             'employer': employer_name,
             'phone': patient.phone or '',

@@ -185,7 +185,7 @@ class Doctor(models.Model):
 
 class Patient(models.Model):
     """نموذج المريض"""
-    national_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الهوية')
+    national_id = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم المريض')
     name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم المريض (بالإنجليزية)')
     nationality = models.CharField(max_length=50, blank=True, null=True, verbose_name='الجنسية')
