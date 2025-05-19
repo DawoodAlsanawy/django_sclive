@@ -10,21 +10,21 @@
     <style>
         @font-face {
             font-family: 'Cairo';
-            src: url('/fonts/Cairo-Regular.ttf') format('truetype');
+            src: url('{%static "fonts/Cairo-Regular.ttf"%}') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
 
         @font-face {
             font-family: 'Cairo';
-            src: url('/fonts/Cairo-Bold.ttf') format('truetype');
+            src: url('{%static "fonts/Cairo-Bold.ttf"%}') format('truetype');
             font-weight: bold;
             font-style: normal;
         }
 
         @font-face {
             font-family: 'Cairo';
-            src: url('/fonts/Cairo-Black.ttf') format('truetype');
+            src: url('{%static "fonts/Cairo-Black.ttf"%}') format('truetype');
             font-weight: 900;
             font-style: normal;
         }
@@ -570,7 +570,7 @@
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.employer_name }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200"></td>
+            <td style="color:#2c3e77 ;font-weight: 200">{{ sick_leave.patient.employer_name|translate_to_english|upper }}</td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:19px;">{{ sick_leave.doctor.name }}</td>
@@ -628,7 +628,7 @@
                         {{ sick_leave.created_at|date:"h:i" }}
                     {% endif %}
                 </span>
-                <br> {{ sick_leave.created_at|date:"l, d F Y" }}
+                <br> {{ sick_leave.created_at|date:"l, d F Y"|translate_to_english }}
             </div>
         </div>
     </div>

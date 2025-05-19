@@ -54,10 +54,46 @@
                             <h6 class="mb-0">إضافة مريض جديد</h6>
                         </div>
                         <div class="card-body">
-                            {{ form.new_patient_national_id|as_crispy_field }}
-                            {{ form.new_patient_name|as_crispy_field }}
-                            {{ form.new_patient_phone|as_crispy_field }}
-                            {{ form.new_patient_employer_name|as_crispy_field }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.new_patient_national_id|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.new_patient_name|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.new_patient_name_en|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.new_patient_phone|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.new_patient_nationality|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.new_patient_nationality_en|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.new_patient_employer_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.new_patient_employer_name_en|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.new_patient_address|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.new_patient_address_en|as_crispy_field }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -70,10 +106,35 @@
                             <h6 class="mb-0">إضافة طبيب جديد</h6>
                         </div>
                         <div class="card-body">
-                            {{ form.new_doctor_national_id|as_crispy_field }}
-                            {{ form.new_doctor_name|as_crispy_field }}
-                            {{ form.new_doctor_position|as_crispy_field }}
-                            {{ form.new_doctor_hospital|as_crispy_field }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.new_doctor_national_id|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.new_doctor_name|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.new_doctor_name_en|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.new_doctor_phone|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.new_doctor_position|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.new_doctor_position_en|as_crispy_field }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    {{ form.new_doctor_hospital|as_crispy_field }}
+                                </div>
+                            </div>
 
                             <!-- حقول إضافة مستشفى جديد -->
                             <div class="card mt-2 new-hospital-fields" style="display: none;">
@@ -81,8 +142,22 @@
                                     <h6 class="mb-0">إضافة مستشفى جديد</h6>
                                 </div>
                                 <div class="card-body">
-                                    {{ form.new_hospital_name|as_crispy_field }}
-                                    {{ form.new_hospital_address|as_crispy_field }}
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {{ form.new_hospital_name|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.new_hospital_name_en|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {{ form.new_hospital_address|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            {{ form.new_hospital_address_en|as_crispy_field }}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

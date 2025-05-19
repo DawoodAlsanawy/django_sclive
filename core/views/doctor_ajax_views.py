@@ -54,7 +54,7 @@ def doctor_create_ajax(request):
             })
 
         # إنشاء الطبيب
-        doctor = Doctor.objects.create(
+        doctor = Doctor(
             national_id=national_id,
             name=name,
             position=position,
@@ -62,6 +62,8 @@ def doctor_create_ajax(request):
             phone=phone,
             email=email
         )
+        # استخدام دالة save() لتفعيل الترجمة التلقائية
+        doctor.save()
 
         # إرجاع استجابة ناجحة
         return JsonResponse({

@@ -1,8 +1,15 @@
 import datetime
 import random
+import re
+
+from googletrans import Translator
+from hijri_converter import Gregorian
 
 from core.models import (CompanionLeave, LeaveInvoice, LeavePrice, Payment,
                          SickLeave)
+
+# إنشاء كائن المترجم
+translator = Translator()
 
 
 def generate_unique_number(prefix, model=None):
@@ -133,6 +140,59 @@ def generate_payment_number():
     توليد رقم فريد للدفعة
     """
     return generate_unique_number('PAY', Payment)
+
+
+def translate_text(text, src='ar', dest='en'):
+    """
+    ترجمة نص من لغة إلى أخرى
+
+    المعلمات:
+    - text: النص المراد ترجمته
+    - src: لغة المصدر (افتراضيًا: العربية)
+    - dest: لغة الهدف (افتراضيًا: الإنجليزية)
+
+    يعيد:
+    - النص المترجم
+    """
+    if not text:
+        return ""
+
+    try:
+        # التحقق من أن النص يحتوي على أحرف من لغة المصدر
+        if src == 'ar':
+            # التحقق من وجود أحرف عربية
+            arabic_pattern = re.compile(r'[\u0600-\u06FF]+')
+            if not arabic_pattern.search(str(text)):
+                return text
+
+        # ترجمة النص
+        translation = translator.translate(str(text), src=src, dest=dest)
+        return translation.text
+    except Exception as e:
+        print(f"خطأ في الترجمة: {e}")
+        return text
+
+
+def convert_to_hijri(date_obj):
+    """
+    تحويل تاريخ ميلادي إلى تاريخ هجري
+
+    المعلمات:
+    - date_obj: كائن تاريخ ميلادي (datetime.date)
+
+    يعيد:
+    - سلسلة نصية تمثل التاريخ الهجري بتنسيق "YYYY-MM-DD"
+    """
+    if not date_obj:
+        return ""
+
+    try:
+        g_date = Gregorian(date_obj.year, date_obj.month, date_obj.day)
+        hijri_date = g_date.to_hijri()
+        return f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+    except Exception as e:
+        print(f"خطأ في تحويل التاريخ إلى هجري: {e}")
+        return ""
 
 
 def get_leave_price(leave_type, duration, client=None):

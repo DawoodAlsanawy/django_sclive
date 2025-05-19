@@ -67,6 +67,19 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-4">
+                        <strong>صلة القرابة:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if companion_leave.relation %}
+                        {{ companion_leave.relation }}
+                        <small class="text-muted">({{ companion_leave.relation_en }})</small>
+                        {% else %}
+                        <span class="text-muted">غير محدد</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
                         <strong>الطبيب:</strong>
                     </div>
                     <div class="col-md-8">
@@ -79,7 +92,7 @@
                         <strong>تاريخ البداية:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ companion_leave.start_date }}
+                        {{ companion_leave.start_date }} <small class="text-muted">({{ companion_leave.start_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -87,7 +100,7 @@
                         <strong>تاريخ النهاية:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ companion_leave.end_date }}
+                        {{ companion_leave.end_date }} <small class="text-muted">({{ companion_leave.end_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -103,7 +116,7 @@
                         <strong>تاريخ الدخول:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ companion_leave.admission_date }}
+                        {{ companion_leave.admission_date }} <small class="text-muted">({{ companion_leave.admission_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -111,7 +124,7 @@
                         <strong>تاريخ الخروج:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ companion_leave.discharge_date }}
+                        {{ companion_leave.discharge_date }} <small class="text-muted">({{ companion_leave.discharge_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -119,7 +132,7 @@
                         <strong>تاريخ الإصدار:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ companion_leave.issue_date }}
+                        {{ companion_leave.issue_date }} <small class="text-muted">({{ companion_leave.issue_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">

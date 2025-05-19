@@ -41,7 +41,7 @@ def patient_create_ajax(request):
             })
 
         # إنشاء المريض
-        patient = Patient.objects.create(
+        patient = Patient(
             national_id=national_id,
             name=name,
             phone=phone,
@@ -50,6 +50,8 @@ def patient_create_ajax(request):
             nationality=nationality,
             email=email
         )
+        # استخدام دالة save() لتفعيل الترجمة التلقائية
+        patient.save()
 
         # إرجاع استجابة ناجحة
         return JsonResponse({

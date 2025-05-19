@@ -74,13 +74,25 @@ class HospitalForm(forms.ModelForm):
     """نموذج إنشاء وتعديل المستشفى"""
     class Meta:
         model = Hospital
-        fields = ('name', 'address', 'contact_info', 'logo')
+        fields = ('name', 'name_en', 'address', 'address_en', 'contact_info', 'logo')
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المستشفى'}),
+            'name_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المستشفى'}),
+            'address_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'contact_info': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل معلومات الاتصال'}),
             'logo': forms.FileInput(attrs={'class': 'form-control'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # جعل حقول الترجمة الإنجليزية غير مطلوبة
+        self.fields['name_en'].required = False
+        self.fields['address_en'].required = False
+
+        # إضافة تلميحات للمستخدم
+        self.fields['name_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
+        self.fields['address_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
 
     def clean_logo(self):
         """التحقق من صحة ملف الشعار"""
@@ -113,45 +125,91 @@ class DoctorForm(forms.ModelForm):
     """نموذج إنشاء وتعديل الطبيب"""
     class Meta:
         model = Doctor
-        fields = ('national_id', 'name', 'position', 'hospital', 'phone', 'email')
+        fields = ('national_id', 'name', 'name_en', 'position', 'position_en', 'hospital', 'phone', 'email')
         widgets = {
             'national_id': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'name_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'position': forms.TextInput(attrs={'class': 'form-control'}),
+            'position_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'hospital': forms.Select(attrs={'class': 'form-control'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # جعل حقول الترجمة الإنجليزية غير مطلوبة
+        self.fields['name_en'].required = False
+        self.fields['position_en'].required = False
+
+        # إضافة تلميحات للمستخدم
+        self.fields['name_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
+        self.fields['position_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
 
 
 class PatientForm(forms.ModelForm):
     """نموذج إنشاء وتعديل المريض"""
     class Meta:
         model = Patient
-        fields = ('national_id', 'name', 'nationality', 'employer_name', 'phone', 'email', 'address')
+        fields = ('national_id', 'name', 'name_en', 'nationality', 'nationality_en',
+                 'employer_name', 'employer_name_en', 'phone', 'email', 'address', 'address_en')
         widgets = {
             'national_id': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'name_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'nationality': forms.TextInput(attrs={'class': 'form-control'}),
+            'nationality_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'employer_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'employer_name_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'address': forms.TextInput(attrs={'class': 'form-control'})
+            'address': forms.TextInput(attrs={'class': 'form-control'}),
+            'address_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # جعل حقول الترجمة الإنجليزية غير مطلوبة
+        self.fields['name_en'].required = False
+        self.fields['nationality_en'].required = False
+        self.fields['employer_name_en'].required = False
+        self.fields['address_en'].required = False
+
+        # إضافة تلميحات للمستخدم
+        self.fields['name_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
+        self.fields['nationality_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
+        self.fields['employer_name_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
+        self.fields['address_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
 
 
 class ClientForm(forms.ModelForm):
     """نموذج إنشاء وتعديل العميل"""
     class Meta:
         model = Client
-        fields = ('name', 'phone', 'email', 'address', 'notes')
+        fields = ('name', 'name_en', 'phone', 'email', 'address', 'address_en', 'notes', 'notes_en')
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'name_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'address': forms.TextInput(attrs={'class': 'form-control'}),
-            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+            'address_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'notes_en': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # جعل حقول الترجمة الإنجليزية غير مطلوبة
+        self.fields['name_en'].required = False
+        self.fields['address_en'].required = False
+        self.fields['notes_en'].required = False
+
+        # إضافة تلميحات للمستخدم
+        self.fields['name_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
+        self.fields['address_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
+        self.fields['notes_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
 
 
 class LeavePriceForm(forms.ModelForm):
@@ -206,17 +264,53 @@ class SickLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المريض الجديد'})
     )
+    new_patient_name_en = forms.CharField(
+        label='اسم المريض الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_patient_phone = forms.CharField(
         label='رقم هاتف المريض الجديد',
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هاتف المريض الجديد'})
     )
+    new_patient_nationality = forms.CharField(
+        label='جنسية المريض الجديد',
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل جنسية المريض الجديد'})
+    )
+    new_patient_nationality_en = forms.CharField(
+        label='جنسية المريض الجديد (بالإنجليزية)',
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_patient_employer_name = forms.CharField(
         label='جهة عمل المريض الجديد',
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل جهة عمل المريض الجديد'})
+    )
+    new_patient_employer_name_en = forms.CharField(
+        label='جهة عمل المريض الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+    new_patient_address = forms.CharField(
+        label='عنوان المريض الجديد',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المريض الجديد'})
+    )
+    new_patient_address_en = forms.CharField(
+        label='عنوان المريض الجديد (بالإنجليزية)',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     # حقول إضافة طبيب جديد
@@ -232,11 +326,29 @@ class SickLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم الطبيب الجديد'})
     )
+    new_doctor_name_en = forms.CharField(
+        label='اسم الطبيب الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+    new_doctor_phone = forms.CharField(
+        label='رقم هاتف الطبيب الجديد',
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هاتف الطبيب الجديد'})
+    )
     new_doctor_position = forms.CharField(
         label='منصب الطبيب الجديد',
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل منصب الطبيب الجديد'})
+    )
+    new_doctor_position_en = forms.CharField(
+        label='منصب الطبيب الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
     new_doctor_hospital = forms.ModelChoiceField(
         label='مستشفى الطبيب الجديد',
@@ -252,11 +364,23 @@ class SickLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المستشفى الجديد'})
     )
+    new_hospital_name_en = forms.CharField(
+        label='اسم المستشفى الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_hospital_address = forms.CharField(
         label='عنوان المستشفى الجديد',
         max_length=200,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المستشفى الجديد'})
+    )
+    new_hospital_address_en = forms.CharField(
+        label='عنوان المستشفى الجديد (بالإنجليزية)',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     # حقل إضافة فاتورة - مخفي ومحدد افتراضياً
@@ -275,17 +399,24 @@ class SickLeaveForm(forms.ModelForm):
 
     class Meta:
         model = SickLeave
-        fields = ('leave_id', 'patient', 'doctor', 'start_date', 'end_date',
-                  'admission_date', 'discharge_date', 'issue_date', 'status')
+        fields = ('leave_id', 'prefix', 'patient', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
+                  'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
+                  'issue_date', 'issue_date_hijri', 'status')
         widgets = {
             'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'prefix': forms.Select(attrs={'class': 'form-control'}),
             'patient': forms.Select(attrs={'class': 'form-control select2-patient'}),
             'doctor': forms.Select(attrs={'class': 'form-control select2-doctor'}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'start_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'end_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'admission_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'admission_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'discharge_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
+            'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'status': forms.Select(attrs={'class': 'form-control'})
         }
 
@@ -295,6 +426,13 @@ class SickLeaveForm(forms.ModelForm):
         self.fields['admission_date'].required = False
         self.fields['discharge_date'].required = False
         self.fields['status'].required = False
+
+        # جعل حقول التواريخ الهجرية غير مطلوبة
+        self.fields['start_date_hijri'].required = False
+        self.fields['end_date_hijri'].required = False
+        self.fields['admission_date_hijri'].required = False
+        self.fields['discharge_date_hijri'].required = False
+        self.fields['issue_date_hijri'].required = False
 
         # جعل حقول المريض والطبيب غير مطلوبة لتمكين إضافة بيانات جديدة
         self.fields['patient'].required = False
@@ -306,11 +444,14 @@ class SickLeaveForm(forms.ModelForm):
         self.fields['client'].help_text = 'اختر العميل لإنشاء فاتورة'
         self.fields['patient'].help_text = 'اختر مريض موجود أو أضف مريض جديد أدناه'
         self.fields['doctor'].help_text = 'اختر طبيب موجود أو أضف طبيب جديد أدناه'
+        self.fields['start_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
+        self.fields['end_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
+        self.fields['admission_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
+        self.fields['discharge_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
+        self.fields['issue_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
 
         # تعيين قيم افتراضية
         if not self.instance.pk:  # إذا كان إنشاء جديد وليس تعديل
-            import datetime
-
             from django.utils import timezone
 
             from core.utils import generate_unique_number
@@ -403,11 +544,29 @@ class SickLeaveWithInvoiceForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم الطبيب الجديد'})
     )
+    new_doctor_name_en = forms.CharField(
+        label='اسم الطبيب الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+    new_doctor_phone = forms.CharField(
+        label='رقم هاتف الطبيب الجديد',
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هاتف الطبيب الجديد'})
+    )
     new_doctor_position = forms.CharField(
         label='منصب الطبيب الجديد',
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل منصب الطبيب الجديد'})
+    )
+    new_doctor_position_en = forms.CharField(
+        label='منصب الطبيب الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
     new_doctor_hospital = forms.ModelChoiceField(
         label='مستشفى الطبيب الجديد',
@@ -423,11 +582,23 @@ class SickLeaveWithInvoiceForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المستشفى الجديد'})
     )
+    new_hospital_name_en = forms.CharField(
+        label='اسم المستشفى الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_hospital_address = forms.CharField(
         label='عنوان المستشفى الجديد',
         max_length=200,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المستشفى الجديد'})
+    )
+    new_hospital_address_en = forms.CharField(
+        label='عنوان المستشفى الجديد (بالإنجليزية)',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     # حقول الإجازة
@@ -483,17 +654,53 @@ class CompanionLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المريض الجديد'})
     )
+    new_patient_name_en = forms.CharField(
+        label='اسم المريض الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_patient_phone = forms.CharField(
         label='رقم هاتف المريض الجديد',
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هاتف المريض الجديد'})
     )
+    new_patient_nationality = forms.CharField(
+        label='جنسية المريض الجديد',
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل جنسية المريض الجديد'})
+    )
+    new_patient_nationality_en = forms.CharField(
+        label='جنسية المريض الجديد (بالإنجليزية)',
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_patient_employer_name = forms.CharField(
         label='جهة عمل المريض الجديد',
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل جهة عمل المريض الجديد'})
+    )
+    new_patient_employer_name_en = forms.CharField(
+        label='جهة عمل المريض الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+    new_patient_address = forms.CharField(
+        label='عنوان المريض الجديد',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المريض الجديد'})
+    )
+    new_patient_address_en = forms.CharField(
+        label='عنوان المريض الجديد (بالإنجليزية)',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     # حقول إضافة مرافق جديد
@@ -509,17 +716,65 @@ class CompanionLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المرافق الجديد'})
     )
+    new_companion_name_en = forms.CharField(
+        label='اسم المرافق الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_companion_phone = forms.CharField(
         label='رقم هاتف المرافق الجديد',
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هاتف المرافق الجديد'})
     )
+    new_companion_nationality = forms.CharField(
+        label='جنسية المرافق الجديد',
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل جنسية المرافق الجديد'})
+    )
+    new_companion_nationality_en = forms.CharField(
+        label='جنسية المرافق الجديد (بالإنجليزية)',
+        max_length=50,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+    new_companion_relation = forms.CharField(
+        label='صلة قرابة المرافق الجديد',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل صلة قرابة المرافق الجديد'})
+    )
+    new_companion_relation_en = forms.CharField(
+        label='صلة قرابة المرافق الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_companion_employer_name = forms.CharField(
         label='جهة عمل المرافق الجديد',
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل جهة عمل المرافق الجديد'})
+    )
+    new_companion_employer_name_en = forms.CharField(
+        label='جهة عمل المرافق الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+    new_companion_address = forms.CharField(
+        label='عنوان المرافق الجديد',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المرافق الجديد'})
+    )
+    new_companion_address_en = forms.CharField(
+        label='عنوان المرافق الجديد (بالإنجليزية)',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     # حقول إضافة طبيب جديد
@@ -535,11 +790,29 @@ class CompanionLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم الطبيب الجديد'})
     )
+    new_doctor_name_en = forms.CharField(
+        label='اسم الطبيب الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+    new_doctor_phone = forms.CharField(
+        label='رقم هاتف الطبيب الجديد',
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هاتف الطبيب الجديد'})
+    )
     new_doctor_position = forms.CharField(
         label='منصب الطبيب الجديد',
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل منصب الطبيب الجديد'})
+    )
+    new_doctor_position_en = forms.CharField(
+        label='منصب الطبيب الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
     new_doctor_hospital = forms.ModelChoiceField(
         label='مستشفى الطبيب الجديد',
@@ -555,11 +828,23 @@ class CompanionLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المستشفى الجديد'})
     )
+    new_hospital_name_en = forms.CharField(
+        label='اسم المستشفى الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_hospital_address = forms.CharField(
         label='عنوان المستشفى الجديد',
         max_length=200,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المستشفى الجديد'})
+    )
+    new_hospital_address_en = forms.CharField(
+        label='عنوان المستشفى الجديد (بالإنجليزية)',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     # حقل إضافة فاتورة - مخفي ومحدد افتراضياً
@@ -576,20 +861,41 @@ class CompanionLeaveForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-control select2-client'})
     )
 
+    # حقل صلة القرابة
+    relation = forms.CharField(
+        label='صلة القرابة',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل صلة القرابة'})
+    )
+    relation_en = forms.CharField(
+        label='صلة القرابة (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+
     class Meta:
         model = CompanionLeave
-        fields = ('leave_id', 'patient', 'companion', 'doctor', 'start_date', 'end_date',
-                  'admission_date', 'discharge_date', 'issue_date', 'status')
+        fields = ('leave_id', 'prefix', 'patient', 'companion', 'relation', 'relation_en', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
+                  'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
+                  'issue_date', 'issue_date_hijri', 'status')
         widgets = {
             'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'prefix': forms.Select(attrs={'class': 'form-control'}),
             'patient': forms.Select(attrs={'class': 'form-control select2-patient'}),
             'companion': forms.Select(attrs={'class': 'form-control select2-companion'}),
             'doctor': forms.Select(attrs={'class': 'form-control select2-doctor'}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'start_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'end_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'admission_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'admission_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'discharge_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
+            'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'status': forms.Select(attrs={'class': 'form-control'})
         }
 
@@ -599,6 +905,13 @@ class CompanionLeaveForm(forms.ModelForm):
         self.fields['admission_date'].required = False
         self.fields['discharge_date'].required = False
         self.fields['status'].required = False
+
+        # جعل حقول التواريخ الهجرية غير مطلوبة
+        self.fields['start_date_hijri'].required = False
+        self.fields['end_date_hijri'].required = False
+        self.fields['admission_date_hijri'].required = False
+        self.fields['discharge_date_hijri'].required = False
+        self.fields['issue_date_hijri'].required = False
 
         # جعل حقول المريض والمرافق والطبيب غير مطلوبة لتمكين إضافة بيانات جديدة
         self.fields['patient'].required = False
@@ -612,6 +925,11 @@ class CompanionLeaveForm(forms.ModelForm):
         self.fields['companion'].help_text = 'اختر مرافق موجود أو أضف مرافق جديد أدناه'
         self.fields['doctor'].help_text = 'اختر طبيب موجود أو أضف طبيب جديد أدناه'
         self.fields['client'].help_text = 'اختر العميل لإنشاء فاتورة'
+        self.fields['start_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
+        self.fields['end_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
+        self.fields['admission_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
+        self.fields['discharge_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
+        self.fields['issue_date_hijri'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ'
 
         # تعيين قيم افتراضية
         if not self.instance.pk:  # إذا كان إنشاء جديد وليس تعديل
@@ -686,6 +1004,12 @@ class CompanionLeaveWithInvoiceForm(forms.Form):
         max_length=100,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+    patient_name_en = forms.CharField(
+        label='اسم المريض (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     patient_phone = forms.CharField(
         label='رقم هاتف المريض',
         max_length=20,
@@ -704,11 +1028,29 @@ class CompanionLeaveWithInvoiceForm(forms.Form):
         max_length=100,
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
+    companion_name_en = forms.CharField(
+        label='اسم المرافق (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     companion_phone = forms.CharField(
         label='رقم هاتف المرافق',
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    relation = forms.CharField(
+        label='صلة القرابة',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل صلة القرابة'})
+    )
+    relation_en = forms.CharField(
+        label='صلة القرابة (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     # حقول الطبيب
@@ -731,11 +1073,29 @@ class CompanionLeaveWithInvoiceForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم الطبيب الجديد'})
     )
+    new_doctor_name_en = forms.CharField(
+        label='اسم الطبيب الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+    new_doctor_phone = forms.CharField(
+        label='رقم هاتف الطبيب الجديد',
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هاتف الطبيب الجديد'})
+    )
     new_doctor_position = forms.CharField(
         label='منصب الطبيب الجديد',
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل منصب الطبيب الجديد'})
+    )
+    new_doctor_position_en = forms.CharField(
+        label='منصب الطبيب الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
     new_doctor_hospital = forms.ModelChoiceField(
         label='مستشفى الطبيب الجديد',
@@ -751,11 +1111,23 @@ class CompanionLeaveWithInvoiceForm(forms.Form):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل اسم المستشفى الجديد'})
     )
+    new_hospital_name_en = forms.CharField(
+        label='اسم المستشفى الجديد (بالإنجليزية)',
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
     new_hospital_address = forms.CharField(
         label='عنوان المستشفى الجديد',
         max_length=200,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل عنوان المستشفى الجديد'})
+    )
+    new_hospital_address_en = forms.CharField(
+        label='عنوان المستشفى الجديد (بالإنجليزية)',
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     # حقول الإجازة

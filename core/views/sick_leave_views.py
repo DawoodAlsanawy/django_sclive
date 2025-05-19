@@ -10,7 +10,8 @@ from django.utils import timezone
 from core.forms import SickLeaveForm, SickLeaveWithInvoiceForm
 from core.models import (Doctor, Hospital, LeaveInvoice, LeavePrice, Patient,
                          SickLeave)
-from core.utils import generate_sick_leave_id, generate_unique_number
+from core.utils import (convert_to_hijri, generate_sick_leave_id,
+                        generate_unique_number, translate_text)
 
 
 @login_required
@@ -188,6 +189,23 @@ def sick_leave_create(request):
 
             # تعيين رقم الإجازة في النموذج
             form.instance.leave_id = leave_id
+            form.instance.prefix = prefix
+
+            # تحويل التواريخ الميلادية إلى هجرية
+            if form.instance.start_date:
+                form.instance.start_date_hijri = convert_to_hijri(form.instance.start_date)
+
+            if form.instance.end_date:
+                form.instance.end_date_hijri = convert_to_hijri(form.instance.end_date)
+
+            if form.instance.admission_date:
+                form.instance.admission_date_hijri = convert_to_hijri(form.instance.admission_date)
+
+            if form.instance.discharge_date:
+                form.instance.discharge_date_hijri = convert_to_hijri(form.instance.discharge_date)
+
+            if form.instance.issue_date:
+                form.instance.issue_date_hijri = convert_to_hijri(form.instance.issue_date)
 
             sick_leave = form.save()
 
@@ -330,14 +348,24 @@ def sick_leave_create_with_invoice(request):
 
             # إنشاء الإجازة المرضية
             leave_id = generate_sick_leave_id(prefix)
+
+            # تحويل التواريخ الميلادية إلى هجرية
+            start_date_hijri = convert_to_hijri(start_date)
+            end_date_hijri = convert_to_hijri(end_date)
+            issue_date_hijri = convert_to_hijri(issue_date)
+
             sick_leave = SickLeave.objects.create(
                 leave_id=leave_id,
+                prefix=prefix,
                 patient=patient,
                 doctor=doctor,
                 start_date=start_date,
+                start_date_hijri=start_date_hijri,
                 end_date=end_date,
+                end_date_hijri=end_date_hijri,
                 duration_days=duration_days,
-                issue_date=issue_date
+                issue_date=issue_date,
+                issue_date_hijri=issue_date_hijri
             )
 
             # إنشاء فاتورة تلقائياً دائماً
@@ -512,6 +540,22 @@ def sick_leave_edit(request, sick_leave_id):
 
             # الحصول على العميل الجديد من النموذج
             new_client = form.cleaned_data.get('client')
+
+            # تحويل التواريخ الميلادية إلى هجرية
+            if form.instance.start_date:
+                form.instance.start_date_hijri = convert_to_hijri(form.instance.start_date)
+
+            if form.instance.end_date:
+                form.instance.end_date_hijri = convert_to_hijri(form.instance.end_date)
+
+            if form.instance.admission_date:
+                form.instance.admission_date_hijri = convert_to_hijri(form.instance.admission_date)
+
+            if form.instance.discharge_date:
+                form.instance.discharge_date_hijri = convert_to_hijri(form.instance.discharge_date)
+
+            if form.instance.issue_date:
+                form.instance.issue_date_hijri = convert_to_hijri(form.instance.issue_date)
 
             # حفظ التغييرات
             updated_sick_leave = form.save()

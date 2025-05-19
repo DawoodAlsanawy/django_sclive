@@ -35,6 +35,7 @@
                     <p><strong>رقم الهوية:</strong> {{ companion_leave.companion.national_id }}</p>
                     <p><strong>الجنسية:</strong> {{ companion_leave.companion.nationality }}</p>
                     <p><strong>جهة العمل:</strong> {{ companion_leave.companion.employer_name|default:"غير محدد" }}</p>
+                    <p><strong>صلة القرابة:</strong> {{ companion_leave.relation|default:"غير محدد" }}</p>
                 </div>
             </div>
         </div>
@@ -62,15 +63,15 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6">
-                            <p><strong>تاريخ البداية:</strong> {{ companion_leave.start_date }}</p>
-                            <p><strong>تاريخ النهاية:</strong> {{ companion_leave.end_date }}</p>
+                            <p><strong>تاريخ البداية:</strong> {{ companion_leave.start_date }} ({{ companion_leave.start_date_hijri }})</p>
+                            <p><strong>تاريخ النهاية:</strong> {{ companion_leave.end_date }} ({{ companion_leave.end_date_hijri }})</p>
                             <p><strong>المدة (أيام):</strong> {{ companion_leave.duration_days }}</p>
-                            <p><strong>تاريخ الإصدار:</strong> {{ companion_leave.issue_date }}</p>
+                            <p><strong>تاريخ الإصدار:</strong> {{ companion_leave.issue_date }} ({{ companion_leave.issue_date_hijri }})</p>
                         </div>
                         <div class="col-6">
-                            <p><strong>تاريخ الدخول:</strong> {{ companion_leave.admission_date }}</p>
-                            <p><strong>تاريخ الخروج:</strong> {{ companion_leave.discharge_date }}</p>
-                            <p><strong>الحالة:</strong> 
+                            <p><strong>تاريخ الدخول:</strong> {{ companion_leave.admission_date }} ({{ companion_leave.admission_date_hijri }})</p>
+                            <p><strong>تاريخ الخروج:</strong> {{ companion_leave.discharge_date }} ({{ companion_leave.discharge_date_hijri }})</p>
+                            <p><strong>الحالة:</strong>
                                 {% if companion_leave.status == 'active' %}
                                 <span class="badge bg-success">نشطة</span>
                                 {% elif companion_leave.status == 'cancelled' %}

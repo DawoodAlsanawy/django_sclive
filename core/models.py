@@ -66,7 +66,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Hospital(models.Model):
     """نموذج المستشفى"""
     name = models.CharField(max_length=100, verbose_name='اسم المستشفى')
+    name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم المستشفى (بالإنجليزية)')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
+    address_en = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان (بالإنجليزية)')
     contact_info = models.CharField(max_length=100, blank=True, null=True, verbose_name='معلومات الاتصال')
     logo = models.ImageField(upload_to='hospitals/logos/', blank=True, null=True, verbose_name='شعار المستشفى')
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
@@ -82,6 +84,29 @@ class Hospital(models.Model):
     def get_doctors_count(self):
         """الحصول على عدد الأطباء المرتبطين بالمستشفى"""
         return self.doctors.count()
+
+    def save(self, *args, **kwargs):
+        """حفظ المستشفى مع ترجمة البيانات تلقائيًا"""
+        # ترجمة الاسم والعنوان إلى الإنجليزية إذا كانت فارغة
+        if self.name and not self.name_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.name, src='ar', dest='en')
+                self.name_en = translation.text
+            except Exception:
+                pass
+
+        if self.address and not self.address_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.address, src='ar', dest='en')
+                self.address_en = translation.text
+            except Exception:
+                pass
+
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         """حذف المستشفى وملف الشعار المرتبط به"""
@@ -114,7 +139,9 @@ class Doctor(models.Model):
     """نموذج الطبيب"""
     national_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم الطبيب')
+    name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم الطبيب (بالإنجليزية)')
     position = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب')
+    position_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب (بالإنجليزية)')
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', verbose_name='المستشفى')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
@@ -128,16 +155,43 @@ class Doctor(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        """حفظ الطبيب مع ترجمة البيانات تلقائيًا"""
+        # ترجمة الاسم والمنصب إلى الإنجليزية إذا كانت فارغة
+        if self.name and not self.name_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.name, src='ar', dest='en')
+                self.name_en = translation.text
+            except Exception:
+                pass
+
+        if self.position and not self.position_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.position, src='ar', dest='en')
+                self.position_en = translation.text
+            except Exception:
+                pass
+
+        super().save(*args, **kwargs)
+
 
 class Patient(models.Model):
     """نموذج المريض"""
     national_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم المريض')
+    name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم المريض (بالإنجليزية)')
     nationality = models.CharField(max_length=50, blank=True, null=True, verbose_name='الجنسية')
+    nationality_en = models.CharField(max_length=50, blank=True, null=True, verbose_name='الجنسية (بالإنجليزية)')
     employer_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='جهة العمل')
+    employer_name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='جهة العمل (بالإنجليزية)')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
+    address_en = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان (بالإنجليزية)')
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
@@ -148,14 +202,58 @@ class Patient(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        """حفظ المريض مع ترجمة البيانات تلقائيًا"""
+        # ترجمة الاسم والجنسية وجهة العمل والعنوان إلى الإنجليزية إذا كانت فارغة
+        if self.name and not self.name_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.name, src='ar', dest='en')
+                self.name_en = translation.text
+            except Exception:
+                pass
+
+        if self.nationality and not self.nationality_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.nationality, src='ar', dest='en')
+                self.nationality_en = translation.text
+            except Exception:
+                pass
+
+        if self.employer_name and not self.employer_name_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.employer_name, src='ar', dest='en')
+                self.employer_name_en = translation.text
+            except Exception:
+                pass
+
+        if self.address and not self.address_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.address, src='ar', dest='en')
+                self.address_en = translation.text
+            except Exception:
+                pass
+
+        super().save(*args, **kwargs)
+
 
 class Client(models.Model):
     """نموذج العميل"""
     name = models.CharField(max_length=100, verbose_name='اسم العميل')
+    name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم العميل (بالإنجليزية)')
     phone = models.CharField(max_length=20, unique=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
+    address_en = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان (بالإنجليزية)')
     notes = models.TextField(blank=True, null=True, verbose_name='ملاحظات')
+    notes_en = models.TextField(blank=True, null=True, verbose_name='ملاحظات (بالإنجليزية)')
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
@@ -165,6 +263,38 @@ class Client(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        """حفظ العميل مع ترجمة البيانات تلقائيًا"""
+        # ترجمة الاسم والعنوان والملاحظات إلى الإنجليزية إذا كانت فارغة
+        if self.name and not self.name_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.name, src='ar', dest='en')
+                self.name_en = translation.text
+            except Exception:
+                pass
+
+        if self.address and not self.address_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.address, src='ar', dest='en')
+                self.address_en = translation.text
+            except Exception:
+                pass
+
+        if self.notes and not self.notes_en:
+            try:
+                from googletrans import Translator
+                translator = Translator()
+                translation = translator.translate(self.notes, src='ar', dest='en')
+                self.notes_en = translation.text
+            except Exception:
+                pass
+
+        super().save(*args, **kwargs)
 
     def get_balance(self):
         """حساب رصيد العميل"""
@@ -195,45 +325,7 @@ class LeavePrice(models.Model):
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
-    @staticmethod
-    def get_price(leave_type, duration_days, client=None):
-        """
-        حساب سعر الإجازة بناءً على نوعها ومدتها والعميل
-        """
-        from decimal import Decimal
-
-        # البحث عن سعر محدد للعميل والمدة
-        if client:
-            client_price = LeavePrice.objects.filter(
-                leave_type=leave_type,
-                duration_days=duration_days,
-                client=client,
-                is_active=True
-            ).first()
-
-            if client_price:
-                if client_price.pricing_type == 'fixed':
-                    return client_price.price
-                else:  # per_day
-                    return client_price.price * duration_days
-
-        # البحث عن سعر عام للمدة (بدون تحديد عميل)
-        general_price = LeavePrice.objects.filter(
-            leave_type=leave_type,
-            duration_days=duration_days,
-            client__isnull=True,
-            is_active=True
-        ).first()
-
-        if general_price:
-            if general_price.pricing_type == 'fixed':
-                return general_price.price
-            else:  # per_day
-                return general_price.price * duration_days
-
-        # إذا لم يتم العثور على سعر محدد، استخدم السعر الافتراضي
-        default_price = Decimal('5.00')  # سعر افتراضي لليوم الواحد
-        return default_price * duration_days
+    # تم حذف الدالة الثابتة get_price لتجنب التضارب مع الدالة الأخرى
 
     class Meta:
         verbose_name = 'سعر الإجازة'
@@ -365,14 +457,20 @@ class LeavePrice(models.Model):
 class SickLeave(models.Model):
     """نموذج الإجازة المرضية"""
     leave_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الإجازة')
+    prefix = models.CharField(max_length=3, choices=[('PSL', 'PSL'), ('GSL', 'GSL')], default='PSL', verbose_name='بادئة الإجازة')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='sick_leaves', verbose_name='المريض')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='sick_leaves', verbose_name='الطبيب')
     start_date = models.DateField(verbose_name='تاريخ البداية')
+    start_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ البداية (هجري)')
     end_date = models.DateField(verbose_name='تاريخ النهاية')
+    end_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ النهاية (هجري)')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
     admission_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الدخول')
+    admission_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الدخول (هجري)')
     discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
+    discharge_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الخروج (هجري)')
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
+    issue_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الإصدار (هجري)')
     status = models.CharField(max_length=20, choices=[
         ('active', 'نشطة'),
         ('cancelled', 'ملغية'),
@@ -404,6 +502,89 @@ class SickLeave(models.Model):
             else:
                 self.status = 'active'
 
+        # تحويل التواريخ الميلادية إلى هجرية
+        from hijri_converter import Gregorian
+        if self.start_date and not self.start_date_hijri:
+            g_date = Gregorian(self.start_date.year, self.start_date.month, self.start_date.day)
+            hijri_date = g_date.to_hijri()
+            self.start_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        if self.end_date and not self.end_date_hijri:
+            g_date = Gregorian(self.end_date.year, self.end_date.month, self.end_date.day)
+            hijri_date = g_date.to_hijri()
+            self.end_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        if self.admission_date and not self.admission_date_hijri:
+            g_date = Gregorian(self.admission_date.year, self.admission_date.month, self.admission_date.day)
+            hijri_date = g_date.to_hijri()
+            self.admission_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        if self.discharge_date and not self.discharge_date_hijri:
+            g_date = Gregorian(self.discharge_date.year, self.discharge_date.month, self.discharge_date.day)
+            hijri_date = g_date.to_hijri()
+            self.discharge_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        if self.issue_date and not self.issue_date_hijri:
+            g_date = Gregorian(self.issue_date.year, self.issue_date.month, self.issue_date.day)
+            hijri_date = g_date.to_hijri()
+            self.issue_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        # ملء حقول الترجمة الإنجليزية للمريض والطبيب إذا كانت فارغة
+        from googletrans import Translator
+        translator = Translator()
+
+        # ترجمة بيانات المريض
+        if self.patient:
+            if self.patient.name and not self.patient.name_en:
+                try:
+                    translation = translator.translate(self.patient.name, src='ar', dest='en')
+                    self.patient.name_en = translation.text
+                    self.patient.save(update_fields=['name_en'])
+                except Exception:
+                    pass
+
+            if self.patient.nationality and not self.patient.nationality_en:
+                try:
+                    translation = translator.translate(self.patient.nationality, src='ar', dest='en')
+                    self.patient.nationality_en = translation.text
+                    self.patient.save(update_fields=['nationality_en'])
+                except Exception:
+                    pass
+
+            if self.patient.employer_name and not self.patient.employer_name_en:
+                try:
+                    translation = translator.translate(self.patient.employer_name, src='ar', dest='en')
+                    self.patient.employer_name_en = translation.text
+                    self.patient.save(update_fields=['employer_name_en'])
+                except Exception:
+                    pass
+
+            if self.patient.address and not self.patient.address_en:
+                try:
+                    translation = translator.translate(self.patient.address, src='ar', dest='en')
+                    self.patient.address_en = translation.text
+                    self.patient.save(update_fields=['address_en'])
+                except Exception:
+                    pass
+
+        # ترجمة بيانات الطبيب
+        if self.doctor:
+            if self.doctor.name and not self.doctor.name_en:
+                try:
+                    translation = translator.translate(self.doctor.name, src='ar', dest='en')
+                    self.doctor.name_en = translation.text
+                    self.doctor.save(update_fields=['name_en'])
+                except Exception:
+                    pass
+
+            if self.doctor.position and not self.doctor.position_en:
+                try:
+                    translation = translator.translate(self.doctor.position, src='ar', dest='en')
+                    self.doctor.position_en = translation.text
+                    self.doctor.save(update_fields=['position_en'])
+                except Exception:
+                    pass
+
         super().save(*args, **kwargs)
 
     def update_status(self):
@@ -424,15 +605,23 @@ class SickLeave(models.Model):
 class CompanionLeave(models.Model):
     """نموذج إجازة المرافق"""
     leave_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الإجازة')
+    prefix = models.CharField(max_length=3, choices=[('PSL', 'PSL'), ('GSL', 'GSL')], default='PSL', verbose_name='بادئة الإجازة')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='companion_leaves_as_patient', verbose_name='المريض')
     companion = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='companion_leaves_as_companion', verbose_name='المرافق')
+    relation = models.CharField(max_length=100, blank=True, null=True, verbose_name='صلة القرابة')
+    relation_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='صلة القرابة (بالإنجليزية)')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='companion_leaves', verbose_name='الطبيب')
     start_date = models.DateField(verbose_name='تاريخ البداية')
+    start_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ البداية (هجري)')
     end_date = models.DateField(verbose_name='تاريخ النهاية')
+    end_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ النهاية (هجري)')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
     admission_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الدخول')
+    admission_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الدخول (هجري)')
     discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
+    discharge_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الخروج (هجري)')
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
+    issue_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الإصدار (هجري)')
     status = models.CharField(max_length=20, choices=[
         ('active', 'نشطة'),
         ('cancelled', 'ملغية'),
@@ -463,6 +652,131 @@ class CompanionLeave(models.Model):
                 self.status = 'expired'
             else:
                 self.status = 'active'
+
+        # تحويل التواريخ الميلادية إلى هجرية
+        from hijri_converter import Gregorian
+        if self.start_date and not self.start_date_hijri:
+            g_date = Gregorian(self.start_date.year, self.start_date.month, self.start_date.day)
+            hijri_date = g_date.to_hijri()
+            self.start_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        if self.end_date and not self.end_date_hijri:
+            g_date = Gregorian(self.end_date.year, self.end_date.month, self.end_date.day)
+            hijri_date = g_date.to_hijri()
+            self.end_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        if self.admission_date and not self.admission_date_hijri:
+            g_date = Gregorian(self.admission_date.year, self.admission_date.month, self.admission_date.day)
+            hijri_date = g_date.to_hijri()
+            self.admission_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        if self.discharge_date and not self.discharge_date_hijri:
+            g_date = Gregorian(self.discharge_date.year, self.discharge_date.month, self.discharge_date.day)
+            hijri_date = g_date.to_hijri()
+            self.discharge_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        if self.issue_date and not self.issue_date_hijri:
+            g_date = Gregorian(self.issue_date.year, self.issue_date.month, self.issue_date.day)
+            hijri_date = g_date.to_hijri()
+            self.issue_date_hijri = f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+
+        # ملء حقول الترجمة الإنجليزية للمريض والمرافق والطبيب إذا كانت فارغة
+        from googletrans import Translator
+        translator = Translator()
+
+        # ترجمة بيانات المريض
+        if self.patient:
+            if self.patient.name and not self.patient.name_en:
+                try:
+                    translation = translator.translate(self.patient.name, src='ar', dest='en')
+                    self.patient.name_en = translation.text
+                    self.patient.save(update_fields=['name_en'])
+                except Exception:
+                    pass
+
+            if self.patient.nationality and not self.patient.nationality_en:
+                try:
+                    translation = translator.translate(self.patient.nationality, src='ar', dest='en')
+                    self.patient.nationality_en = translation.text
+                    self.patient.save(update_fields=['nationality_en'])
+                except Exception:
+                    pass
+
+            if self.patient.employer_name and not self.patient.employer_name_en:
+                try:
+                    translation = translator.translate(self.patient.employer_name, src='ar', dest='en')
+                    self.patient.employer_name_en = translation.text
+                    self.patient.save(update_fields=['employer_name_en'])
+                except Exception:
+                    pass
+
+            if self.patient.address and not self.patient.address_en:
+                try:
+                    translation = translator.translate(self.patient.address, src='ar', dest='en')
+                    self.patient.address_en = translation.text
+                    self.patient.save(update_fields=['address_en'])
+                except Exception:
+                    pass
+
+        # ترجمة بيانات المرافق
+        if self.companion:
+            if self.companion.name and not self.companion.name_en:
+                try:
+                    translation = translator.translate(self.companion.name, src='ar', dest='en')
+                    self.companion.name_en = translation.text
+                    self.companion.save(update_fields=['name_en'])
+                except Exception:
+                    pass
+
+            if self.companion.nationality and not self.companion.nationality_en:
+                try:
+                    translation = translator.translate(self.companion.nationality, src='ar', dest='en')
+                    self.companion.nationality_en = translation.text
+                    self.companion.save(update_fields=['nationality_en'])
+                except Exception:
+                    pass
+
+            if self.companion.employer_name and not self.companion.employer_name_en:
+                try:
+                    translation = translator.translate(self.companion.employer_name, src='ar', dest='en')
+                    self.companion.employer_name_en = translation.text
+                    self.companion.save(update_fields=['employer_name_en'])
+                except Exception:
+                    pass
+
+            if self.companion.address and not self.companion.address_en:
+                try:
+                    translation = translator.translate(self.companion.address, src='ar', dest='en')
+                    self.companion.address_en = translation.text
+                    self.companion.save(update_fields=['address_en'])
+                except Exception:
+                    pass
+
+        # ترجمة بيانات الطبيب
+        if self.doctor:
+            if self.doctor.name and not self.doctor.name_en:
+                try:
+                    translation = translator.translate(self.doctor.name, src='ar', dest='en')
+                    self.doctor.name_en = translation.text
+                    self.doctor.save(update_fields=['name_en'])
+                except Exception:
+                    pass
+
+            if self.doctor.position and not self.doctor.position_en:
+                try:
+                    translation = translator.translate(self.doctor.position, src='ar', dest='en')
+                    self.doctor.position_en = translation.text
+                    self.doctor.save(update_fields=['position_en'])
+                except Exception:
+                    pass
+
+        # ترجمة صلة القرابة
+        if self.relation and not self.relation_en:
+            try:
+                translation = translator.translate(self.relation, src='ar', dest='en')
+                self.relation_en = translation.text
+            except Exception:
+                pass
 
         super().save(*args, **kwargs)
 

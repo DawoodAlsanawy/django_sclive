@@ -38,13 +38,15 @@ def client_create_ajax(request):
             })
 
         # إنشاء العميل
-        client = Client.objects.create(
+        client = Client(
             name=name,
             phone=phone,
             email=email,
             address=address,
             notes=notes
         )
+        # استخدام دالة save() لتفعيل الترجمة التلقائية
+        client.save()
 
         # إرجاع استجابة ناجحة
         return JsonResponse({
