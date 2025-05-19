@@ -3235,25 +3235,7 @@ def doctor_create_ajax(request):
             'errors': form.errors
         })
 
-@login_required
-@require_POST
-def hospital_create_ajax(request):
-    """إنشاء مستشفى جديد عبر AJAX"""
-    form = HospitalForm(request.POST)
-    if form.is_valid():
-        hospital = form.save()
-        return JsonResponse({
-            'success': True,
-            'hospital': {
-                'id': hospital.id,
-                'name': hospital.name
-            }
-        })
-    else:
-        return JsonResponse({
-            'success': False,
-            'errors': form.errors
-        })
+# تم نقل وظيفة hospital_create_ajax إلى ملف hospital_ajax_views.py
 
 @login_required
 @require_POST
