@@ -18,18 +18,18 @@
             <p><strong>ملاحظة:</strong> هذا الطبيب مرتبط بـ {{ sick_leaves_count }} إجازة مرضية و {{ companion_leaves_count }} إجازة مرافق. سيؤدي حذف الطبيب إلى تأثر هذه البيانات.</p>
             {% endif %}
         </div>
-        
+
         <div class="mb-4">
             <h5>بيانات الطبيب:</h5>
             <ul>
                 <li><strong>الاسم:</strong> {{ doctor.name }}</li>
-                <li><strong>التخصص:</strong> {{ doctor.position }}</li>
-                <li><strong>المستشفى:</strong> {{ doctor.hospital.name }}</li>
+                <li><strong>التخصص:</strong> {{ doctor.position|default:"-" }}</li>
+                <li><strong>المستشفى:</strong> {% if doctor.hospital %}{{ doctor.hospital.name }}{% else %}-{% endif %}</li>
                 <li><strong>رقم الهاتف:</strong> {{ doctor.phone|default:"-" }}</li>
                 <li><strong>البريد الإلكتروني:</strong> {{ doctor.email|default:"-" }}</li>
             </ul>
         </div>
-        
+
         <form method="post">
             {% csrf_token %}
             <div class="mt-4">

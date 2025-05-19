@@ -22,8 +22,8 @@ def doctor_search_api(request):
         results.append({
             'id': doctor.id,
             'display': doctor.name,
-            'national_id': doctor.national_id,
-            'position': doctor.position,
+            'national_id': doctor.national_id or '',
+            'position': doctor.position or '',
             'hospital': doctor.hospital.name if doctor.hospital else '',
             'phone': doctor.phone or '',
             'email': doctor.email or ''

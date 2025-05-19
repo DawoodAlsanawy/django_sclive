@@ -130,13 +130,14 @@ class DoctorForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # جعل حقول الترجمة الإنجليزية غير مطلوبة
+        # جعل جميع الحقول اختيارية ما عدا اسم الطبيب
+        self.fields['national_id'].required = False
+        self.fields['position'].required = False
+        self.fields['hospital'].required = False
         self.fields['name_en'].required = False
         self.fields['position_en'].required = False
-
-        # إضافة تلميحات للمستخدم
-        self.fields['name_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
-        self.fields['position_en'].help_text = 'سيتم ملء هذا الحقل تلقائيًا عند الحفظ، يمكنك تعديله إذا كانت الترجمة غير دقيقة'
+        self.fields['phone'].required = False
+        self.fields['email'].required = False
 
 
 class PatientForm(forms.ModelForm):

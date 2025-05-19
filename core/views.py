@@ -3152,7 +3152,7 @@ def doctor_create_ajax(request):
             'doctor': {
                 'id': doctor.id,
                 'name': doctor.name,
-                'national_id': doctor.national_id
+                'national_id': doctor.national_id if doctor.national_id else ''
             }
         })
     else:

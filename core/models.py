@@ -141,12 +141,12 @@ class Employer(models.Model):
 
 class Doctor(models.Model):
     """نموذج الطبيب"""
-    national_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الهوية')
+    national_id = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم الطبيب')
     name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم الطبيب (بالإنجليزية)')
     position = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب')
     position_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب (بالإنجليزية)')
-    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', verbose_name='المستشفى')
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', blank=True, null=True, verbose_name='المستشفى')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
