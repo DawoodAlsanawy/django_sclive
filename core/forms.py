@@ -3,9 +3,9 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from .models import (Client, CompanionLeave, Doctor, Employer, Hospital,
-                     LeaveInvoice, LeavePrice, Patient, Payment, PaymentDetail,
-                     SickLeave, User)
+from .models import (Client, CompanionLeave, Doctor, Hospital, LeaveInvoice,
+                     LeavePrice, Patient, Payment, PaymentDetail, SickLeave,
+                     User)
 
 
 class LoginForm(AuthenticationForm):
@@ -109,16 +109,7 @@ class HospitalForm(forms.ModelForm):
         return logo
 
 
-class EmployerForm(forms.ModelForm):
-    """نموذج إنشاء وتعديل جهة العمل"""
-    class Meta:
-        model = Employer
-        fields = ('name', 'address', 'contact_info')
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'address': forms.TextInput(attrs={'class': 'form-control'}),
-            'contact_info': forms.TextInput(attrs={'class': 'form-control'})
-        }
+# تم إزالة نموذج EmployerForm
 
 
 class DoctorForm(forms.ModelForm):

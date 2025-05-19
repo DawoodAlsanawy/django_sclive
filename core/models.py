@@ -120,7 +120,11 @@ class Hospital(models.Model):
 
 
 class Employer(models.Model):
-    """نموذج جهة العمل"""
+    """
+    نموذج جهة العمل
+    ملاحظة: تم الاستغناء عن استخدام هذا النموذج واستبداله بحقول في نموذج المريض والمرافق
+    تم الاحتفاظ به لتجنب مشاكل الترحيل
+    """
     name = models.CharField(max_length=100, verbose_name='اسم جهة العمل')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     contact_info = models.CharField(max_length=100, blank=True, null=True, verbose_name='معلومات الاتصال')

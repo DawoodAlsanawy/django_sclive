@@ -5,7 +5,8 @@ try:
     from .api_views import *
     from .api_views import (api_client_unpaid_invoices, client_search_api,
                             companion_leave_search_api, doctor_search_api,
-                            generate_companion_leave_id_api, generate_sick_leave_id_api,
+                            generate_companion_leave_id_api,
+                            generate_sick_leave_id_api,
                             leave_price_api_get_price, patient_search_api,
                             sick_leave_search_api)
     # Auth views
@@ -18,7 +19,7 @@ try:
     from .companion_leave_views import *
     from .doctor_ajax_views import *
     from .doctor_views import *
-    from .employer_views import *
+    # تم إزالة وظائف جهات العمل
     from .hospital_ajax_views import *
     from .hospital_views import *
     from .leave_invoice_views import *

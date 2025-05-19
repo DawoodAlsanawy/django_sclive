@@ -22,8 +22,8 @@
             min-height: 100vh;
             background-color: #343a40;
             color: #fff;
-            
-            
+
+
         }
 
         .sidebar .nav-link {
@@ -157,12 +157,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link {% if '/employers/' in request.path %}active{% endif %}" href="{% url 'core:employer_list' %}">
-                                <i class="fas fa-building"></i>
-                                جهات العمل
-                            </a>
-                        </li>
+                        <!-- تم إزالة رابط جهات العمل -->
 
                         <li class="nav-item">
                             <a class="nav-link {% if '/leave-prices/' in request.path %}active{% endif %}" href="{% url 'core:leave_price_list' %}">

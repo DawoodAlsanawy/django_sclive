@@ -2,7 +2,7 @@
 from django.urls import include, path
 
 from . import (ajax_urls, api_urls, auth_urls, base_urls, client_urls,
-               companion_leave_urls, doctor_urls, employer_urls, hospital_urls,
+               companion_leave_urls, doctor_urls, hospital_urls,
                leave_invoice_urls, leave_price_urls, patient_urls,
                payment_urls, report_urls, sick_leave_urls, user_urls)
 
@@ -20,9 +20,6 @@ urlpatterns = [
 
     # إدارة المستشفيات
     path('', include(hospital_urls.urlpatterns)),
-
-    # إدارة جهات العمل
-    path('', include(employer_urls.urlpatterns)),
 
     # إدارة الأطباء
     path('', include(doctor_urls.urlpatterns)),
