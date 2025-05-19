@@ -199,9 +199,13 @@ class ClientForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # جعل حقول الترجمة الإنجليزية غير مطلوبة
+        # جعل جميع الحقول اختيارية ما عدا اسم العميل
+        self.fields['phone'].required = False
         self.fields['name_en'].required = False
+        self.fields['email'].required = False
+        self.fields['address'].required = False
         self.fields['address_en'].required = False
+        self.fields['notes'].required = False
         self.fields['notes_en'].required = False
 
         # إضافة تلميحات للمستخدم

@@ -252,7 +252,7 @@ class Client(models.Model):
     """نموذج العميل"""
     name = models.CharField(max_length=100, verbose_name='اسم العميل')
     name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم العميل (بالإنجليزية)')
-    phone = models.CharField(max_length=20, unique=True, verbose_name='رقم الهاتف')
+    phone = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     address_en = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان (بالإنجليزية)')

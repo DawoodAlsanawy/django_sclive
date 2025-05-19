@@ -76,11 +76,12 @@ def client_search_api(request):
 
     results = []
     for client in clients:
+        phone_display = f" ({client.phone})" if client.phone else ""
         results.append({
             'id': client.id,
-            'text': f"{client.name} ({client.phone})",
+            'text': f"{client.name}{phone_display}",
             'display': client.name,
-            'phone': client.phone,
+            'phone': client.phone or '',
             'email': client.email or '',
             'address': client.address or '',
             'balance': client.get_balance()

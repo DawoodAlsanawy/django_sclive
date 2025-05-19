@@ -27,7 +27,7 @@ def client_create_ajax(request):
                 }
             })
 
-        # التحقق مما إذا كان هناك عميل بنفس رقم الهاتف
+        # التحقق مما إذا كان هناك عميل بنفس رقم الهاتف (فقط إذا تم إدخال رقم هاتف)
         if phone and Client.objects.filter(phone=phone).exists():
             return JsonResponse({
                 'success': False,
