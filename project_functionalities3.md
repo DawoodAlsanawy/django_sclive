@@ -119,3 +119,7 @@
 هذه هي الوظائف الرئيسية والفرعية في المشروع. يتميز المشروع بتكامل وظائف إدارة الإجازات المرضية وإجازات المرافقين مع وظائف الفوترة والمدفوعات، بالإضافة إلى استخدام تقنيات الذكاء الاصطناعي لمعالجة طلبات الإجازات واستخراج المعلومات منها تلقائيًا
 
 [vscode Auth Url](vscode://augment.vscode-augment/auth/result?code=_5031d6128af9e22aef6c87587b9290fc&state=68221de7-4c68-43a9-b532-843f8e7ace75&tenant_url=https%3A%2F%2Fd11.api.augmentcode.com%2F)
+
+
+
+<div class="results-inquiery row"><div class="col-md-6"><span>الاسم: </span>أمل احمد محمد قيسي</div><div class="col-md-6"><span>تاريخ إصدار تقرير الإجازة:</span> 2025-04-14</div><div class="col-md-6"><span>تبدأ من:</span> 2025-04-13</div><div class="col-md-6"><span>وحتى:</span> 2025-04-13</div><div class="col-md-6"><span>المدة بالأيام:</span> 1</div><div class="col-md-6"><span>اسم الطبيب:</span> مصطفى سيد محمد</div><div class="col-md-6"><span>المسمى الوظيفي:</span> طب بشري</div></div>

@@ -7,10 +7,64 @@
     <title>SickLeaves</title>
     <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{%static "fonts/Cairo-Regular.ttf"%}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{%static "fonts/Cairo-Bold.ttf"%}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{%static "fonts/Cairo-Black.ttf"%}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('/fonts/Cairo-ExtraBold.ttf') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+        }
         @page {
             size: 210mm 297mm;
             margin: 0;
             padding: 0;
+        }
+        @font-face {
+            font-family: 'Calibri';
+            src: url('{% static "fonts/calibri-regular.ttf" %}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Calibri';
+            src: url('{% static "fonts/calibri-Bold.ttf" %}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Calibri';
+            src: url('{% static "fonts/calibri-italic.ttf" %}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Calibri';
+            src: url('{% static "fonts/calibri-bold-italic.ttf" %}') format('truetype');
+            font-weight: 800;
+            font-style: normal;
         }
 
         * {
@@ -475,8 +529,8 @@
         }
 
         .qr-code {
-            width: 80px;
-            height: 90px;
+            width: 100px;
+            height: auto;
             margin-right: 120px;
             margin-top:-10px;
             margin-bottom: 5px;
@@ -488,7 +542,8 @@
             margin-right: 15px;
         }
         .arabic-text {
-            font-family: 'Calibri', sans-serif !important;
+            font-family: 'Dubai', serif !important;
+            font-weight:normal;
         }
 
         .english-text {
@@ -568,7 +623,7 @@
                     <span class="arabic-text">{{ sick_leave.patient.employer_name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px;overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text">{{ sick_leave.patient.employer_name_en|upper }}</span>
+                    <span class="english-text"></span>
                 </td>
             </tr>
             <tr style="height: 60px;">
@@ -600,27 +655,31 @@
     <div class="footer-section">
         <div class="row">
             <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:180px;">
-                <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
+                <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo"></img>
+                <br>
+                
                 <p class="arabic-text" style="margin-top: 2px ;
-                margin-left:30px">{{ sick_leave.doctor.hospital.name }}</p>
+                margin-left:30px; font-weight:bold; font-size:12px;">{{ sick_leave.doctor.hospital.name }}</p>
                <p class="english-text" style="margin-top: -2px ; font-size:12px;
-                margin-left:30px">{{ sick_leave.doctor.hospital.name_en|capitalize }}</p>
+                margin-left:30px; font-weight:bold; font-size:11px;">{{ sick_leave.doctor.hospital.name_en|capitalize }}</p>
                  <p class="arabic-text" style="margin-top: 2px ; font-size:12px;
-                margin-left:30px">   رقـم  الـــترخيص :     14101535512860  </p>
+                margin-left:30px; font-weight:bold; font-size:12px;">   رقـم  الـــترخيص :     14101535512860  </p>
 
             </div>
 
             <div class="text-center col-6 qr-code-section">
                 <div class="qr-code">
-                    <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="qr-image">
+                    <img src="{% generate_qrcode 'https://sahafaty.site/quiries/slenquiry' 300 %}" alt="QR Code" class="qr-image">
                 </div>
              <p class="text-gray-700 qr-text" style="line-height: 2.2;">
-            <span class="arabic-text" style="font-size: 12px;font-weight:700;">للتحقق من بيانات التقرير، يرجى التأكد من زيارة موقع منصة صحة </span>
-            <br> <span class="arabic-text" style="font-size: 12px;font-weight:700;">الرسمي</span>
-             <span class="english-text" style="display: block; margin-top: -2px;font-size: 10px;font-weight: 200;">To check the report data, please visit Seha's official website</span>
-             <a href="https://sahafaty.site/quiries/quiry" class="underline english-text" style="color:#0000ffc2; text-decoration: underline #0000ffc2; border-bottom: none; box-shadow: none; -webkit-text-decoration-color: #0000ffc2;">
+            <p class="arabic-text" style="font-size: 10px;font-weight:700;">للتحقق من بيانات التقرير، يرجى التأكد من زيارة موقع منصة صحة </p>
+             <p class="arabic-text" style="font-size: 10px;font-weight:700;">الرسمي</p>
+             <p class="english-text" style="display: block; margin-top: -2px;font-size: 10px;font-weight: 200; font-family: 'Cairo', sans-serif !important;">To check the report data, please visit Seha's official website</p>
+             <p class="english-text" style="display: block; margin-top: -2px;font-size: 10px;font-weight: 200; font-family: 'Cairo', sans-serif !important;">
+             <a href="https://sahafaty.site/quiries/quiry" class="underline english-text" style="color:#0000ff; text-decoration: underline #0000ffc2; border-bottom: none; box-shadow: none; -webkit-text-decoration-color: #0000ffc2;">
                 www.seha.sa/#/inquiries/slenquiry
             </a>
+        </p>
             </p>
             </div>
         </div>
@@ -669,4 +728,4 @@
     </script>
 
 
-</body></html>nts
+</body></html>

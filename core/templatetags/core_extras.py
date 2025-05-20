@@ -1,8 +1,11 @@
+import base64
 import datetime
 import os
 import re
 from datetime import date
+from io import BytesIO
 
+import qrcode
 from django import template
 from django.conf import settings
 from django.contrib.staticfiles import finders
@@ -198,7 +201,7 @@ def to_uppercase(value):
         return str(value).upper()
     except Exception:
         return value
-    
+
 @register.filter
 def capitalize(value):
     """
@@ -265,3 +268,42 @@ def first_word(value):
     if not value:
         return ''
     return value.split()[0] if value.split() else ''
+
+@register.simple_tag
+def generate_qrcode(url, size=200, border=4, fill_color="black", back_color="white"):
+    """
+    إنشاء QR code لرابط معين
+
+    الاستخدام:
+    {% generate_qrcode "https://example.com" %}
+
+    المعلمات:
+    - url: الرابط المراد تحويله إلى QR code
+    - size: حجم الصورة (افتراضي: 200)
+    - border: حجم الحدود (افتراضي: 4)
+    - fill_color: لون QR code (افتراضي: أسود)
+    - back_color: لون الخلفية (افتراضي: أبيض)
+
+    يعيد:
+    - صورة QR code بتنسيق base64 يمكن استخدامها في وسم img
+    """
+    # حساب حجم المربع بناءً على الحجم المطلوب
+    box_size = max(1, int(size / 25))
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=box_size,
+        border=border,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color=fill_color, back_color=back_color)
+
+    # تحويل الصورة إلى base64
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+
+    return f"data:image/png;base64,{img_str}"
