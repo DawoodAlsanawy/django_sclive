@@ -259,7 +259,10 @@ def leave_invoice_detail(request, leave_invoice_id):
             pass
 
     # الحصول على تفاصيل المدفوعات المرتبطة بالفاتورة
-    payment_details = invoice.payment_details.all().select_related('payment').order_by('-payment__payment_date')
+    payment_details = invoice.get_payments()
+
+    # طباعة عدد المدفوعات للتأكد من استدعائها بشكل صحيح
+    print(f"عدد المدفوعات المرتبطة بالفاتورة: {payment_details.count()}")
 
     # حساب المبلغ المدفوع والمتبقي باستخدام الدوال المعرفة في النموذج
     paid_amount = invoice.get_total_paid()
@@ -303,7 +306,7 @@ def leave_invoice_delete(request, leave_invoice_id):
     invoice = get_object_or_404(LeaveInvoice, id=leave_invoice_id)
 
     # التحقق من وجود مدفوعات مرتبطة بالفاتورة
-    payment_details = invoice.payment_details.all()
+    payment_details = invoice.get_payments()
 
     if request.method == 'POST':
         invoice_number = invoice.invoice_number  # حفظ رقم الفاتورة قبل الحذف
@@ -367,7 +370,7 @@ def leave_invoice_print(request, leave_invoice_id):
             pass
 
     # الحصول على تفاصيل المدفوعات المرتبطة بالفاتورة
-    payment_details = invoice.payment_details.all().select_related('payment').order_by('-payment__payment_date')
+    payment_details = invoice.get_payments()
 
     # حساب المبلغ المدفوع والمتبقي باستخدام الدوال المعرفة في النموذج
     paid_amount = invoice.get_total_paid()

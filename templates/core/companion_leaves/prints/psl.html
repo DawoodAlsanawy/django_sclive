@@ -358,7 +358,7 @@
                     <tr>
                         <th class="gray-backgraound">أسم المرافق</th>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.name }}</td>
-                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.name|translate_to_english|upper }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.name_en|upper }}</td>
                         <th class="gray-backgraound">Name</th>
                     </tr>
                     <tr>
@@ -369,7 +369,7 @@
                     <tr>
                         <th class="gray-backgraound">الجنسية</th>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality|capitalize }}</td>
-                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality|translate_to_english|upper }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality_en|upper }}</td>
                         <th class="gray-backgraound">Nationality</th>
                     </tr>
                     <tr>
@@ -381,19 +381,19 @@
                     <tr>
                         <th class="white-backgraound">جهة العمل</th>
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.employer_name }}</td>
-                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.employer_name|translate_to_english|upper }}</td>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.employer_name_en|upper }}</td>
                         <th class="white-backgraound">Employer</th>
                     </tr>
                     <tr>
                         <th class="gray-backgraound">اسم الطبيب المعالج</th>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.name }}</td>
-                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.name|translate_to_english|upper }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.name_en|upper }}</td>
                         <th class="gray-backgraound">Physician Name</th>
                     </tr>
                     <tr>
                         <th class="white-backgraound">المسمى الوظيفي</th>
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position }}</td>
-                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position|translate_to_english|capitalize|first_word }}</td>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position_en|capitalize|first_word }}</td>
                         <th class="white-backgraound">Position</th>
                     </tr>
                 </tbody>
@@ -406,7 +406,7 @@
                 <div class="text-center col-6 medical-logo-name" style="border-left: 2px solid lightgray;height:150px;">
                     <img src="{{ companion_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
                     <p style="margin-top: -2px ;
-                    margin-left:30px" class="text-xs text-gray-500 medical-name">{{ companion_leave.doctor.hospital.name }} <br>{{ companion_leave.doctor.hospital.name|translate_to_english|capitalize }}</p>
+                    margin-left:30px" class="text-xs text-gray-500 medical-name">{{ companion_leave.doctor.hospital.name }} <br>{{ companion_leave.doctor.hospital.name_en|capitalize }}</p>
                 </div>
 
                 <div class="text-center col-6 qr-code-section">

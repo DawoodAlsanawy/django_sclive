@@ -334,7 +334,21 @@ class LeavePrice(models.Model):
     class Meta:
         verbose_name = 'سعر الإجازة'
         verbose_name_plural = 'أسعار الإجازات'
-        unique_together = ['leave_type', 'duration_days', 'client', 'pricing_type']
+        # تعديل قيود الفريد لتكون مناسبة لطريقة التسعير
+        constraints = [
+            # للسعر اليومي، يجب أن تكون المجموعة (نوع الإجازة، المدة، العميل، طريقة التسعير) فريدة
+            models.UniqueConstraint(
+                fields=['leave_type', 'duration_days', 'client', 'pricing_type'],
+                condition=models.Q(pricing_type='per_day'),
+                name='unique_per_day_price'
+            ),
+            # للسعر الثابت، يجب أن تكون المجموعة (نوع الإجازة، العميل، طريقة التسعير) فريدة
+            models.UniqueConstraint(
+                fields=['leave_type', 'client', 'pricing_type'],
+                condition=models.Q(pricing_type='fixed'),
+                name='unique_fixed_price'
+            ),
+        ]
 
     def __str__(self):
         leave_type_display = dict([('sick_leave', 'إجازة مرضية'), ('companion_leave', 'إجازة مرافق')])
@@ -363,19 +377,15 @@ class LeavePrice(models.Model):
         يعيد:
         - سعر الإجازة
         """
-        # 1. البحث عن سعر ثابت مخصص للعميل
-        if client:
-            # البحث عن سعر ثابت للإجازة مخصص للعميل
-            fixed_price = cls.objects.filter(
-                leave_type=leave_type,
-                client=client,
-                pricing_type='fixed',
-                is_active=True
-            ).first()
-            if fixed_price:
-                return fixed_price.price
+        from decimal import Decimal
 
-            # 2. البحث عن سعر يومي مخصص للعميل بمدة مطابقة تمامًا
+        # التحقق من صحة المدخلات
+        if not leave_type or not isinstance(duration_days, (int, float)) or duration_days <= 0:
+            return Decimal('0')
+
+        # أولاً: البحث عن أسعار مخصصة للعميل
+        if client:
+            # 1. البحث عن سعر يومي مخصص للعميل بمدة مطابقة تمامًا
             price = cls.objects.filter(
                 leave_type=leave_type,
                 duration_days=duration_days,
@@ -386,20 +396,30 @@ class LeavePrice(models.Model):
             if price:
                 return price.price
 
-            # 3. البحث عن أقرب سعر يومي مخصص للعميل (أقل مدة أكبر من المدة المطلوبة)
+            # 2. البحث عن سعر ثابت مخصص للعميل
+            fixed_price = cls.objects.filter(
+                leave_type=leave_type,
+                client=client,
+                pricing_type='fixed',
+                is_active=True
+            ).first()
+            if fixed_price:
+                return fixed_price.price
+
+            # 3. البحث عن أقرب سعر يومي مخصص للعميل (أقل مدة أو تساوي المدة المطلوبة)
             price = cls.objects.filter(
                 leave_type=leave_type,
-                duration_days__lt=duration_days,
+                duration_days__lte=duration_days,
                 client=client,
                 pricing_type='per_day',
                 is_active=True
             ).order_by('-duration_days').first()
-            if price:
+            if price and price.duration_days > 0:
                 # حساب السعر بناءً على السعر اليومي
                 daily_price = price.price / price.duration_days
-                return daily_price * duration_days
+                return daily_price * Decimal(str(duration_days))
 
-            # 4. البحث عن أقرب سعر يومي مخصص للعميل (أكبر مدة أقل من المدة المطلوبة)
+            # 4. البحث عن أقرب سعر يومي مخصص للعميل (أكبر مدة من المدة المطلوبة)
             price = cls.objects.filter(
                 leave_type=leave_type,
                 duration_days__gt=duration_days,
@@ -407,20 +427,13 @@ class LeavePrice(models.Model):
                 pricing_type='per_day',
                 is_active=True
             ).order_by('duration_days').first()
-            if price:
-                return price.price
+            if price and price.duration_days > 0:
+                # حساب السعر بناءً على السعر اليومي
+                daily_price = price.price / price.duration_days
+                return daily_price * Decimal(str(duration_days))
 
-        # 5. البحث عن سعر ثابت عام
-        fixed_price = cls.objects.filter(
-            leave_type=leave_type,
-            client__isnull=True,
-            pricing_type='fixed',
-            is_active=True
-        ).first()
-        if fixed_price:
-            return fixed_price.price
-
-        # 6. البحث عن سعر يومي عام بمدة مطابقة تمامًا
+        # ثانياً: البحث عن أسعار عامة
+        # 5. البحث عن سعر يومي عام بمدة مطابقة تمامًا
         price = cls.objects.filter(
             leave_type=leave_type,
             duration_days=duration_days,
@@ -431,20 +444,30 @@ class LeavePrice(models.Model):
         if price:
             return price.price
 
-        # 7. البحث عن أقرب سعر يومي عام (أقل مدة أكبر من المدة المطلوبة)
+        # 6. البحث عن سعر ثابت عام
+        fixed_price = cls.objects.filter(
+            leave_type=leave_type,
+            client__isnull=True,
+            pricing_type='fixed',
+            is_active=True
+        ).first()
+        if fixed_price:
+            return fixed_price.price
+
+        # 7. البحث عن أقرب سعر يومي عام (أقل مدة أو تساوي المدة المطلوبة)
         price = cls.objects.filter(
             leave_type=leave_type,
-            duration_days__lt=duration_days,
+            duration_days__lte=duration_days,
             client__isnull=True,
             pricing_type='per_day',
             is_active=True
         ).order_by('-duration_days').first()
-        if price:
+        if price and price.duration_days > 0:
             # حساب السعر بناءً على السعر اليومي
             daily_price = price.price / price.duration_days
-            return daily_price * duration_days
+            return daily_price * Decimal(str(duration_days))
 
-        # 8. البحث عن أقرب سعر يومي عام (أكبر مدة أقل من المدة المطلوبة)
+        # 8. البحث عن أقرب سعر يومي عام (أكبر مدة من المدة المطلوبة)
         price = cls.objects.filter(
             leave_type=leave_type,
             duration_days__gt=duration_days,
@@ -452,10 +475,12 @@ class LeavePrice(models.Model):
             pricing_type='per_day',
             is_active=True
         ).order_by('duration_days').first()
-        if price:
-            return price.price
+        if price and price.duration_days > 0:
+            # حساب السعر بناءً على السعر اليومي
+            daily_price = price.price / price.duration_days
+            return daily_price * Decimal(str(duration_days))
 
-        return 0  # لا يوجد سعر مناسب
+        return Decimal('0')  # لا يوجد سعر مناسب
 
 
 class SickLeave(models.Model):
@@ -834,11 +859,17 @@ class LeaveInvoice(models.Model):
     def get_total_paid(self):
         """إجمالي المبلغ المدفوع للفاتورة"""
         from django.db.models import Sum
-        return self.payment_details.aggregate(Sum('amount'))['amount__sum'] or 0
+        total = self.payment_details.aggregate(Sum('amount'))['amount__sum'] or 0
+        print(f"إجمالي المبلغ المدفوع للفاتورة {self.invoice_number}: {total}")
+        return total
 
     def get_remaining(self):
         """المبلغ المتبقي للفاتورة"""
         return self.amount - self.get_total_paid()
+
+    def get_payments(self):
+        """الحصول على المدفوعات المرتبطة بالفاتورة"""
+        return self.payment_details.all().select_related('payment').order_by('-payment__payment_date')
 
     def update_status(self):
         """تحديث حالة الفاتورة بناءً على المدفوعات"""

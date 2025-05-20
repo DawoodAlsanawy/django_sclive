@@ -184,6 +184,10 @@ def sick_leave_create(request):
             # الحصول على البادئة المختارة
             prefix = form.cleaned_data.get('prefix', 'PSL')
 
+            # التأكد من أن البادئة هي PSL أو GSL
+            if prefix not in ['PSL', 'GSL']:
+                prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+
             # توليد رقم إجازة تلقائي باستخدام البادئة المختارة
             leave_id = generate_sick_leave_id(prefix)
 
@@ -345,6 +349,10 @@ def sick_leave_create_with_invoice(request):
 
             # الحصول على البادئة المختارة
             prefix = form.cleaned_data.get('prefix', 'PSL')
+
+            # التأكد من أن البادئة هي PSL أو GSL
+            if prefix not in ['PSL', 'GSL']:
+                prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
 
             # إنشاء الإجازة المرضية
             leave_id = generate_sick_leave_id(prefix)
@@ -538,6 +546,12 @@ def sick_leave_edit(request, sick_leave_id):
                 form.add_error('doctor', 'يجب اختيار طبيب موجود أو إدخال بيانات طبيب جديد')
                 return render(request, 'core/sick_leaves/edit.html', {'form': form, 'sick_leave': sick_leave})
 
+            # التحقق من البادئة وتحديثها إذا لزم الأمر
+            prefix = form.cleaned_data.get('prefix')
+            if prefix and prefix not in ['PSL', 'GSL']:
+                prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+                form.instance.prefix = prefix
+
             # الحصول على العميل الجديد من النموذج
             new_client = form.cleaned_data.get('client')
 
@@ -666,12 +680,16 @@ def sick_leave_print(request, sick_leave_id):
     # الحصول على البادئة من الطلب أو استخراجها من رقم الإجازة
     prefix = request.GET.get('prefix')
     if not prefix:
-        # استخراج البادئة من رقم الإجازة
-        prefix = 'PSL'  # القيمة الافتراضية
-        if sick_leave.leave_id.startswith('GSL'):
-            prefix = 'GSL'
-        elif sick_leave.leave_id.startswith('PSL'):
-            prefix = 'PSL'
+        # استخراج البادئة من رقم الإجازة أو من حقل prefix في النموذج
+        if hasattr(sick_leave, 'prefix') and sick_leave.prefix in ['PSL', 'GSL']:
+            prefix = sick_leave.prefix
+        else:
+            # استخراج البادئة من رقم الإجازة
+            prefix = 'PSL'  # القيمة الافتراضية
+            if sick_leave.leave_id.startswith('GSL'):
+                prefix = 'GSL'
+            elif sick_leave.leave_id.startswith('PSL'):
+                prefix = 'PSL'
 
     # تحديد قالب الطباعة المناسب
     template_path = 'core/sick_leaves/print.html'  # القالب الافتراضي

@@ -118,35 +118,76 @@ def leave_price_api_get_price(request):
     # الحصول على معلومات إضافية
     leave_type_display = 'إجازة مرضية' if leave_type == 'sick_leave' else 'إجازة مرافق'
 
-    # البحث عن سعر مطابق تمامًا للعميل
-    exact_price = None
+    # تحديد نوع السعر (ثابت أو يومي) ومصدر السعر
+    price_source = "غير محدد"
+    price_type = "per_day"  # افتراضي
+
+    # 1. البحث عن سعر يومي مخصص للعميل بمدة مطابقة تمامًا
     if client:
         exact_price = LeavePrice.objects.filter(
             leave_type=leave_type,
             duration_days=duration_days,
             client=client,
+            pricing_type='per_day',
             is_active=True
         ).first()
 
+        if exact_price:
+            price_type = 'per_day'
+            price_source = "سعر يومي مخصص للعميل"
+        else:
+            # 2. البحث عن سعر ثابت مخصص للعميل
+            fixed_price = LeavePrice.objects.filter(
+                leave_type=leave_type,
+                client=client,
+                pricing_type='fixed',
+                is_active=True
+            ).first()
+
+            if fixed_price:
+                price_type = 'fixed'
+                price_source = "سعر ثابت مخصص للعميل"
+
     # إذا لم يتم العثور على سعر مخصص للعميل، ابحث عن السعر العام
-    if not exact_price:
+    if price_source == "غير محدد":
+        # 3. البحث عن سعر يومي عام بمدة مطابقة تمامًا
         exact_price = LeavePrice.objects.filter(
             leave_type=leave_type,
             duration_days=duration_days,
             client__isnull=True,
+            pricing_type='per_day',
             is_active=True
         ).first()
 
-    price_type = 'exact' if exact_price else 'calculated'
-    daily_price = float(price) / duration_days if duration_days > 0 else 0
+        if exact_price:
+            price_type = 'per_day'
+            price_source = "سعر يومي عام"
+        else:
+            # 4. البحث عن سعر ثابت عام
+            fixed_price = LeavePrice.objects.filter(
+                leave_type=leave_type,
+                client__isnull=True,
+                pricing_type='fixed',
+                is_active=True
+            ).first()
+
+            if fixed_price:
+                price_type = 'fixed'
+                price_source = "سعر ثابت عام"
+            else:
+                price_source = "سعر محسوب"
+
+    # حساب السعر اليومي
+    daily_price = float(price) / duration_days if duration_days > 0 and price else 0
 
     return JsonResponse({
         'success': True,
-        'price': float(price),
+        'price': float(price) if price else 0,
         'leave_type': leave_type,
         'leave_type_display': leave_type_display,
         'duration_days': duration_days,
         'price_type': price_type,
+        'price_source': price_source,
         'daily_price': daily_price,
         'client_id': client.id if client else None,
         'client_name': client.name if client else None

@@ -547,7 +547,7 @@
                     <span class="arabic-text" style="display: block; white-space: wrap;font-size: 14px; overflow: hidden; text-overflow: ellipsis;">{{ sick_leave.patient.name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px; height:35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; height: 35px; max-height: 35px;">
-                    <span class="english-text" style="display: block; white-space: wrap;  text-overflow: ellipsis;">{{ sick_leave.patient.name|translate_to_english|upper }}</span>
+                    <span class="english-text" style="display: block; white-space: wrap;  text-overflow: ellipsis;">{{ sick_leave.patient.name_en|upper }}</span>
                 </td>
             </tr>
             <tr style="height: 35px;">
@@ -560,7 +560,7 @@
                     <span class="arabic-text">{{ sick_leave.patient.nationality }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text">{{ sick_leave.patient.nationality|translate_to_english|capitalize }}</span>
+                    <span class="english-text">{{ sick_leave.patient.nationality_en|capitalize }}</span>
                 </td>
             </tr>
             <tr style="height: 35px;">
@@ -568,7 +568,7 @@
                     <span class="arabic-text">{{ sick_leave.patient.employer_name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px;overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text">{{ sick_leave.patient.employer_name|translate_to_english|upper }}</span>
+                    <span class="english-text">{{ sick_leave.patient.employer_name_en|upper }}</span>
                 </td>
             </tr>
             <tr style="height: 60px;">
@@ -576,7 +576,7 @@
                     <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200; width: 209px;max-height:60px;height:60px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.name|translate_to_english|upper }}</span>
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.name_en|upper }}</span>
                 </td>
             </tr>
             <tr style="height: 35px;">
@@ -584,7 +584,7 @@
                     <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.position }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px;  width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position|translate_to_english|capitalize|first_word }}</span>
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position_en|capitalize|first_word }}</span>
                 </td>
             </tr>
           </tbody></table>
@@ -604,7 +604,7 @@
                 <p class="arabic-text" style="margin-top: 2px ;
                 margin-left:30px">{{ sick_leave.doctor.hospital.name }}</p>
                <p class="english-text" style="margin-top: -2px ; font-size:12px;
-                margin-left:30px">{{ sick_leave.doctor.hospital.name|translate_to_english|capitalize }}</p>
+                margin-left:30px">{{ sick_leave.doctor.hospital.name_en|capitalize }}</p>
                  <p class="arabic-text" style="margin-top: 2px ; font-size:12px;
                 margin-left:30px">   رقـم  الـــترخيص :     14101535512860  </p>
 

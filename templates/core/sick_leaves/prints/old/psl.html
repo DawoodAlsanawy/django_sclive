@@ -537,19 +537,19 @@
             </tr>
                             <tr>
                     <td class="highlight" style="padding-top:15px;">
-                                                {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date|hijri_date }} الى {{ sick_leave.end_date|hijri_date }})
+                                                {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date_hijri_date }} الى {{ sick_leave.end_date_hijri }})
                     </td>
                     <td class="highlight" dir="ltr" style="padding-top:15px;">
                         {{ sick_leave.duration_days }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.start_date|date:"d-m-Y" }} to {{ sick_leave.end_date|date:"d-m-Y" }})
                     </td>
                 </tr>
                         <tr>
-            <td style="color:#2c3e77 ;font-weight: 300 ;padding-top:15px;"> {{ sick_leave.admission_date|hijri_date }}</td>
+            <td style="color:#2c3e77 ;font-weight: 300 ;padding-top:15px;"> {{ sick_leave.admission_date_hijri }}</td>
             <td style="color:#2c3e77 ;font-weight: 300;padding-top:15px;">  {{ sick_leave.admission_date|date:"d-m-Y" }}</td>
 
             </tr>
             <tr>
-            <td style="color:#2c3e77 ;font-weight: 300;padding-top:15px;">  {{ sick_leave.discharge_date|hijri_date }}</td>
+            <td style="color:#2c3e77 ;font-weight: 300;padding-top:15px;">  {{ sick_leave.discharge_date_hijri_date }}</td>
             <td style="color:#2c3e77 ;font-weight: 300;padding-top:15px;">  {{ sick_leave.discharge_date|date:"d-m-Y" }}</td>
             </tr>
             <tr>
@@ -559,26 +559,26 @@
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:14px;">{{ sick_leave.patient.name }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:14px;"> {{ sick_leave.patient.name|translate_to_english|upper }}</td>
+            <td style="color:#2c3e77 ;font-weight: 200;padding-top:14px;"> {{ sick_leave.patient.name_en|upper }}</td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:14px;" colspan="2">{{ sick_leave.patient.national_id }}</td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality|translate_to_english|capitalize }}</td>
+            <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality_en|capitalize }}</td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.employer_name }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200">{{ sick_leave.patient.employer_name|translate_to_english|upper }}</td>
+            <td style="color:#2c3e77 ;font-weight: 200">{{ sick_leave.patient.employer_name_en|upper }}</td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:19px;">{{ sick_leave.doctor.name }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:19px;">{{ sick_leave.doctor.name|translate_to_english|upper }}</td>
+            <td style="color:#2c3e77 ;font-weight: 200;padding-top:19px;">{{ sick_leave.doctor.name_en|upper }}</td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position|translate_to_english|capitalize|first_word }}</td>
+            <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position_en|capitalize|first_word }}</td>
             </tr>
           </tbody></table>
             <div class="body-image">
@@ -595,7 +595,7 @@
             <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:140px;">
                 <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
                 <p style="margin-top: -2px ;
-                margin-left:30px" class="text-xs text-gray-500 medical-name">{{ sick_leave.doctor.hospital.name }} <br>{{ sick_leave.doctor.hospital.name|translate_to_english|capitalize }} <br>رقـم الـترخيص  :    14101535512860
+                margin-left:30px" class="text-xs text-gray-500 medical-name">{{ sick_leave.doctor.hospital.name }} <br>{{ sick_leave.doctor.hospital.name_en|capitalize }} <br>رقـم الـترخيص  :    14101535512860
                 </p>
             </div>
 

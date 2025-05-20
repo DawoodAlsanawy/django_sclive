@@ -16,6 +16,14 @@
         <form method="post">
             {% csrf_token %}
 
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="row">
                 <div class="col-md-3">
                     {{ form.leave_type|as_crispy_field }}
@@ -62,6 +70,14 @@
     $(document).ready(function() {
         // تنفيذ الدالة عند تحميل الصفحة لتطبيق الحالة الأولية
         toggleDurationField($('#id_pricing_type').val());
+
+        // إضافة مستمع حدث لتقديم النموذج
+        $('form').on('submit', function() {
+            // التأكد من تعيين قيمة المدة بشكل صحيح قبل تقديم النموذج
+            if ($('#id_pricing_type').val() === 'fixed') {
+                $('#id_duration_days').val(1);
+            }
+        });
     });
 
     // دالة لإخفاء/إظهار حقل المدة بالأيام حسب طريقة التسعير
@@ -73,7 +89,18 @@
         } else {
             // إذا كان السعر يومي، نظهر حقل المدة
             $('#duration_days_container').show();
+            // إذا كانت القيمة 1 (القيمة الافتراضية للسعر الثابت)، نفرغها ليدخل المستخدم قيمة جديدة
+            if ($('#id_duration_days').val() === '1' && $('#id_pricing_type').data('previous-value') === 'fixed') {
+                $('#id_duration_days').val('');
+            }
         }
+        // حفظ القيمة الحالية لاستخدامها لاحقًا
+        $('#id_pricing_type').data('previous-value', pricingType);
     }
+
+    // إضافة مستمع حدث لتغيير طريقة التسعير
+    $('#id_pricing_type').change(function() {
+        toggleDurationField($(this).val());
+    });
 </script>
 {% endblock %}

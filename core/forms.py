@@ -222,7 +222,7 @@ class LeavePriceForm(forms.ModelForm):
         widgets = {
             'leave_type': forms.Select(attrs={'class': 'form-control'}),
             'pricing_type': forms.Select(attrs={'class': 'form-control'}),
-            'duration_days': forms.NumberInput(attrs={'class': 'form-control'}),
+            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_duration_days'}),
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
             'client': forms.Select(attrs={'class': 'form-control'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'})
@@ -239,8 +239,90 @@ class LeavePriceForm(forms.ModelForm):
 
         # إضافة مستمع JavaScript لإخفاء/إظهار حقل المدة بالأيام حسب طريقة التسعير
         self.fields['pricing_type'].widget.attrs.update({
-            'onchange': 'toggleDurationField(this.value)'
+            'onchange': 'toggleDurationField(this.value)',
+            'id': 'id_pricing_type'
         })
+
+        # إضافة معرف للحاوية التي تحتوي على حقل المدة بالأيام
+        self.fields['duration_days'].widget.attrs.update({
+            'data-container': 'duration_days_container'
+        })
+
+        # تعيين قيمة افتراضية للمدة (1 يوم) إذا كان السعر ثابتًا
+        if 'pricing_type' in self.data and self.data['pricing_type'] == 'fixed':
+            # إذا كان النموذج مقدمًا وطريقة التسعير هي "سعر ثابت"، نضع قيمة 1 للمدة
+            self.data = self.data.copy()  # نسخ البيانات لتجنب خطأ "QueryDict is immutable"
+            self.data['duration_days'] = 1
+        elif self.instance.pk and self.instance.pricing_type == 'fixed':
+            # إذا كان تعديل لسجل موجود وطريقة التسعير هي "سعر ثابت"، نضع قيمة 1 للمدة
+            self.initial['duration_days'] = 1
+
+    def clean(self):
+        """التحقق من صحة البيانات المدخلة"""
+        cleaned_data = super().clean()
+
+        # التحقق من قيمة السعر
+        price = cleaned_data.get('price')
+        if price is not None and price <= 0:
+            self.add_error('price', 'يجب أن يكون السعر أكبر من صفر')
+
+        # التحقق من قيمة المدة بالأيام
+        duration_days = cleaned_data.get('duration_days')
+        pricing_type = cleaned_data.get('pricing_type')
+
+        # إذا كان السعر ثابتًا، نضع قيمة 1 للمدة بالأيام
+        if pricing_type == 'fixed':
+            # تعيين قيمة المدة إلى 1 مباشرة في البيانات المنظفة
+            cleaned_data['duration_days'] = 1
+            # تعيين قيمة المدة في البيانات الأصلية أيضًا
+            if hasattr(self, 'data') and isinstance(self.data, dict):
+                self.data['duration_days'] = 1
+            # تحديث قيمة الحقل في النموذج
+            self.instance.duration_days = 1
+        elif pricing_type == 'per_day' and (duration_days is None or duration_days <= 0):
+            self.add_error('duration_days', 'يجب أن تكون المدة بالأيام أكبر من صفر للسعر اليومي')
+
+        # التحقق من عدم وجود سعر مكرر
+        leave_type = cleaned_data.get('leave_type')
+        client = cleaned_data.get('client')
+        duration_days = cleaned_data.get('duration_days', 1)  # استخدام القيمة المحدثة
+
+        if leave_type and pricing_type:
+            # البحث عن سعر مطابق
+            existing_price = LeavePrice.objects.filter(
+                leave_type=leave_type,
+                pricing_type=pricing_type,
+                client=client
+            )
+
+            # إذا كان السعر يوميًا، نضيف شرط المدة
+            if pricing_type == 'per_day':
+                existing_price = existing_price.filter(duration_days=duration_days)
+
+            # استثناء السعر الحالي في حالة التعديل
+            if self.instance.pk:
+                existing_price = existing_price.exclude(pk=self.instance.pk)
+
+            if existing_price.exists():
+                client_text = f" للعميل {client.name}" if client else " العام"
+                price_type_text = "يومي" if pricing_type == 'per_day' else "ثابت"
+                duration_text = f" بمدة {duration_days} يوم" if pricing_type == 'per_day' else ""
+                self.add_error(None, f'يوجد بالفعل سعر {price_type_text} لـ {leave_type}{duration_text}{client_text}')
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        """حفظ النموذج مع التأكد من تعيين قيمة المدة بشكل صحيح"""
+        instance = super().save(commit=False)
+
+        # إذا كان السعر ثابتًا، نتأكد من أن المدة هي 1
+        if instance.pricing_type == 'fixed':
+            instance.duration_days = 1
+
+        if commit:
+            instance.save()
+
+        return instance
 
 
 class SickLeaveForm(forms.ModelForm):
@@ -456,11 +538,15 @@ class SickLeaveForm(forms.ModelForm):
         if not self.instance.pk:  # إذا كان إنشاء جديد وليس تعديل
             from django.utils import timezone
 
-            from core.utils import generate_unique_number
+            from core.utils import generate_sick_leave_id
 
-            # توليد رقم إجازة تلقائي
+            # توليد رقم إجازة تلقائي باستخدام البادئة المختارة
+            prefix = self.initial.get('prefix', 'PSL')
+            if prefix not in ['PSL', 'GSL']:
+                prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+
             if not self.initial.get('leave_id'):
-                self.initial['leave_id'] = generate_unique_number('SL', SickLeave)
+                self.initial['leave_id'] = generate_sick_leave_id(prefix)
 
             # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
             if not self.initial.get('issue_date'):
@@ -937,11 +1023,15 @@ class CompanionLeaveForm(forms.ModelForm):
         if not self.instance.pk:  # إذا كان إنشاء جديد وليس تعديل
             from django.utils import timezone
 
-            from core.utils import generate_unique_number
+            from core.utils import generate_companion_leave_id
 
-            # توليد رقم إجازة تلقائي
+            # توليد رقم إجازة تلقائي باستخدام البادئة المختارة
+            prefix = self.initial.get('prefix', 'PSL')
+            if prefix not in ['PSL', 'GSL']:
+                prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+
             if not self.initial.get('leave_id'):
-                self.initial['leave_id'] = generate_unique_number('CL', CompanionLeave)
+                self.initial['leave_id'] = generate_companion_leave_id(prefix)
 
             # تعيين تاريخ اليوم كتاريخ افتراضي للإصدار
             if not self.initial.get('issue_date'):

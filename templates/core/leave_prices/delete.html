@@ -12,10 +12,12 @@
 
 <div class="card">
     <div class="card-body">
-        <div class="alert alert-danger">
-            <p><strong>تحذير:</strong> سيتم حذف سعر الإجازة نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
+        <div class="alert {% if invoices_count > 0 %}alert-warning{% else %}alert-danger{% endif %}">
             {% if invoices_count > 0 %}
-            <p><strong>ملاحظة:</strong> هذا السعر مرتبط بـ {{ invoices_count }} فاتورة. سيؤدي حذف السعر إلى تأثر هذه الفواتير.</p>
+            <p><strong>تحذير:</strong> هذا السعر مستخدم في {{ invoices_count }} فاتورة.</p>
+            <p>سيتم <strong>تعطيل</strong> هذا السعر بدلاً من حذفه للحفاظ على سجلات الفواتير المرتبطة به.</p>
+            {% else %}
+            <p><strong>تحذير:</strong> سيتم حذف سعر الإجازة نهائيًا ولا يمكن التراجع عن هذا الإجراء.</p>
             {% endif %}
         </div>
 
@@ -29,8 +31,23 @@
                     إجازة مرافق
                     {% endif %}
                 </li>
+                <li><strong>طريقة التسعير:</strong>
+                    {% if leave_price.pricing_type == 'fixed' %}
+                    سعر ثابت
+                    {% elif leave_price.pricing_type == 'per_day' %}
+                    سعر يومي
+                    {% endif %}
+                </li>
                 <li><strong>المدة (أيام):</strong> {{ leave_price.duration_days }}</li>
                 <li><strong>السعر:</strong> {{ leave_price.price }} ريال</li>
+                {% if leave_price.pricing_type == 'per_day' and leave_price.duration_days > 0 %}
+                <li><strong>السعر اليومي:</strong> {{ leave_price.price|floatformat:2|default:"0" }} ÷ {{ leave_price.duration_days }} = {{ leave_price.price|divisibleby:leave_price.duration_days|floatformat:2 }} ريال/يوم</li>
+                {% endif %}
+                {% if leave_price.client %}
+                <li><strong>العميل:</strong> {{ leave_price.client.name }}</li>
+                {% else %}
+                <li><strong>العميل:</strong> <span class="text-muted">سعر عام (لجميع العملاء)</span></li>
+                {% endif %}
                 <li><strong>الحالة:</strong>
                     {% if leave_price.is_active %}
                     <span class="badge bg-success">نشط</span>
@@ -46,7 +63,13 @@
         <form method="post">
             {% csrf_token %}
             <div class="mt-4">
-                <button type="submit" class="btn btn-danger">تأكيد الحذف</button>
+                <button type="submit" class="btn btn-danger">
+                    {% if invoices_count > 0 %}
+                    تعطيل السعر
+                    {% else %}
+                    تأكيد الحذف
+                    {% endif %}
+                </button>
                 <a href="{% url 'core:leave_price_list' %}" class="btn btn-secondary">إلغاء</a>
             </div>
         </form>
