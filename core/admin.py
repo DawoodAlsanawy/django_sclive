@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models import (Client, CompanionLeave, Doctor, Employer, Hospital,
-                     LeaveInvoice, LeavePrice, Patient, Payment, PaymentDetail,
-                     SickLeave, User)
+from .models import (Client, CompanionLeave, Doctor, Hospital, LeaveInvoice,
+                     LeavePrice, Patient, Payment, PaymentDetail, SickLeave,
+                     User)
 
 
 @admin.register(User)
@@ -35,12 +35,13 @@ class HospitalAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
 
 
-@admin.register(Employer)
-class EmployerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address', 'contact_info')
-    search_fields = ('name', 'address', 'contact_info')
-    list_filter = ('created_at',)
-    readonly_fields = ('created_at', 'updated_at')
+# تم إزالة تسجيل نموذج Employer في لوحة الإدارة
+# @admin.register(Employer)
+# class EmployerAdmin(admin.ModelAdmin):
+#     list_display = ('name', 'address', 'contact_info')
+#     search_fields = ('name', 'address', 'contact_info')
+#     list_filter = ('created_at',)
+#     readonly_fields = ('created_at', 'updated_at')
 
 
 @admin.register(Doctor)

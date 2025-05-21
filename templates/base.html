@@ -22,8 +22,13 @@
             min-height: 100vh;
             background-color: #343a40;
             color: #fff;
+<<<<<<< HEAD
             
             
+=======
+
+
+>>>>>>> settings
         }
 
         .sidebar .nav-link {
@@ -157,12 +162,7 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link {% if '/employers/' in request.path %}active{% endif %}" href="{% url 'core:employer_list' %}">
-                                <i class="fas fa-building"></i>
-                                جهات العمل
-                            </a>
-                        </li>
+                        <!-- تم إزالة رابط جهات العمل -->
 
                         <li class="nav-item">
                             <a class="nav-link {% if '/leave-prices/' in request.path %}active{% endif %}" href="{% url 'core:leave_price_list' %}">
@@ -195,10 +195,13 @@
                         </li>
 
                         <li class="nav-item mt-3">
-                            <a class="nav-link" href="{% url 'logout' %}">
+                            <form id="logout" method="post" action="{% url 'logout' %}">
+                                
+                                {%csrf_token%}
+                            <button class="nav-link" onclick="window.logout.submet();" >
                                 <i class="fas fa-sign-out-alt"></i>
-                                تسجيل الخروج
-                            </a>
+                                 تسجيل الخروج
+                            </button>
                         </li>
                     </ul>
                 </div>

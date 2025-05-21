@@ -51,7 +51,11 @@
                         <strong>المستشفى:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ doctor.hospital.name }}
+                        {% if doctor.hospital %}
+                            {{ doctor.hospital.name }}
+                        {% else %}
+                            غير محدد
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -89,7 +93,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">

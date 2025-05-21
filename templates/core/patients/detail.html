@@ -59,8 +59,8 @@
                         <strong>جهة العمل:</strong>
                     </div>
                     <div class="col-md-8">
-                        {% if patient.employer %}
-                        <a href="{% url 'core:employer_detail' patient.employer.id %}">{{ patient.employer.name }}</a>
+                        {% if patient.employer_name %}
+                        {{ patient.employer_name }}
                         {% else %}
                         غير محدد
                         {% endif %}

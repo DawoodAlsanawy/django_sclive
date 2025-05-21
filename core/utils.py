@@ -1,8 +1,20 @@
 import datetime
 import random
+import re
+
+<<<<<<< HEAD
+from core.models import (CompanionLeave, LeaveInvoice, LeavePrice, Payment,
+                         SickLeave)
+=======
+from googletrans import Translator
+from hijri_converter import Gregorian
 
 from core.models import (CompanionLeave, LeaveInvoice, LeavePrice, Payment,
                          SickLeave)
+
+# إنشاء كائن المترجم
+translator = Translator()
+>>>>>>> settings
 
 
 def generate_unique_number(prefix, model=None):
@@ -26,11 +38,28 @@ def generate_unique_number(prefix, model=None):
 
     # استخدام نطاق أكبر من الأرقام العشوائية لتقليل احتمالية التكرار
     if is_leave_prefix:
+<<<<<<< HEAD
         # للإجازات، نستخدم 4 أرقام عشوائية لتكملة الرقم المكون من 10 أرقام بعد البادئة
         # (8 أرقام من التاريخ + 2 أرقام من الوقت + 4 أرقام عشوائية = 14 رقم)
         random_num = str(random.randint(1000, 9999))
         timestamp = datetime.datetime.now().strftime('%H%M')
         unique_number = f'{prefix}{date_string}{timestamp[:2]}{random_num}'
+=======
+        # للإجازات، نستخدم تنسيق PSL/GSL متبوعًا بـ 10 أرقام بدون فواصل
+        # نستخدم تاريخ اليوم (YYYYMMDD) متبوعًا بـ 2 أرقام عشوائية
+        date_part = today.strftime('%Y%m%d')
+        random_num = str(random.randint(10, 99))
+        unique_number = f'{prefix}{date_part}{random_num}'
+
+        # التأكد من أن طول الرقم بعد البادئة هو 10 أرقام بالضبط
+        digits_after_prefix = unique_number[len(prefix):]
+        if len(digits_after_prefix) < 10:
+            # إضافة أصفار للوصول إلى 10 أرقام
+            unique_number = f'{prefix}{digits_after_prefix.zfill(10)}'
+        elif len(digits_after_prefix) > 10:
+            # اقتطاع الأرقام الزائدة للوصول إلى 10 أرقام
+            unique_number = f'{prefix}{digits_after_prefix[:10]}'
+>>>>>>> settings
     else:
         # للفواتير والمدفوعات، نستخدم التنسيق القديم
         random_num = str(random.randint(10000, 99999))
@@ -56,6 +85,7 @@ def generate_unique_number(prefix, model=None):
                 timestamp = datetime.datetime.now().strftime('%H%M%S')
 
                 if is_leave_prefix:
+<<<<<<< HEAD
                     # للإجازات، نستخدم تنسيق بدون فواصل
                     random_num = str(random.randint(1000, 9999))
                     unique_number = f'{prefix}{date_string}{timestamp[:2]}{random_num}'
@@ -63,6 +93,25 @@ def generate_unique_number(prefix, model=None):
                     # للفواتير والمدفوعات، نستخدم التنسيق القديم
                     random_num = str(random.randint(10000, 99999))
                     unique_number = f'{prefix}-{date_string}-{timestamp[:2]}{random_num}'
+=======
+                    # للإجازات، نستخدم تنسيق PSL/GSL متبوعًا بـ 10 أرقام بدون فواصل
+                    date_part = today.strftime('%Y%m%d')
+                    random_num = str(random.randint(10, 99))
+                    unique_number = f'{prefix}{date_part}{random_num}'
+
+                    # التأكد من أن طول الرقم بعد البادئة هو 10 أرقام بالضبط
+                    digits_after_prefix = unique_number[len(prefix):]
+                    if len(digits_after_prefix) < 10:
+                        # إضافة أصفار للوصول إلى 10 أرقام
+                        unique_number = f'{prefix}{digits_after_prefix.zfill(10)}'
+                    elif len(digits_after_prefix) > 10:
+                        # اقتطاع الأرقام الزائدة للوصول إلى 10 أرقام
+                        unique_number = f'{prefix}{digits_after_prefix[:10]}'
+                else:
+                    # للفواتير والمدفوعات، نستخدم التنسيق القديم
+                    random_num = str(random.randint(10000, 99999))
+                    unique_number = f'{prefix}-{date_string}-{random_num}'
+>>>>>>> settings
 
                 attempts += 1
 
@@ -108,6 +157,13 @@ def generate_sick_leave_id(prefix='PSL'):
     المعلمات:
     - prefix: بادئة الرقم (PSL أو GSL)
     """
+<<<<<<< HEAD
+=======
+    # التأكد من أن البادئة هي PSL أو GSL
+    if prefix not in ['PSL', 'GSL']:
+        prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+
+>>>>>>> settings
     return generate_unique_number(prefix, SickLeave)
 
 
@@ -118,6 +174,13 @@ def generate_companion_leave_id(prefix='PSL'):
     المعلمات:
     - prefix: بادئة الرقم (PSL أو GSL)
     """
+<<<<<<< HEAD
+=======
+    # التأكد من أن البادئة هي PSL أو GSL
+    if prefix not in ['PSL', 'GSL']:
+        prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+
+>>>>>>> settings
     return generate_unique_number(prefix, CompanionLeave)
 
 
@@ -135,6 +198,62 @@ def generate_payment_number():
     return generate_unique_number('PAY', Payment)
 
 
+<<<<<<< HEAD
+=======
+def translate_text(text, src='ar', dest='en'):
+    """
+    ترجمة نص من لغة إلى أخرى
+
+    المعلمات:
+    - text: النص المراد ترجمته
+    - src: لغة المصدر (افتراضيًا: العربية)
+    - dest: لغة الهدف (افتراضيًا: الإنجليزية)
+
+    يعيد:
+    - النص المترجم
+    """
+    if not text:
+        return ""
+
+    try:
+        # التحقق من أن النص يحتوي على أحرف من لغة المصدر
+        if src == 'ar':
+            # التحقق من وجود أحرف عربية
+            arabic_pattern = re.compile(r'[\u0600-\u06FF]+')
+            if not arabic_pattern.search(str(text)):
+                return text
+
+        # ترجمة النص
+        translation = translator.translate(str(text), src=src, dest=dest)
+        return translation.text
+    except Exception as e:
+        print(f"خطأ في الترجمة: {e}")
+        return text
+
+
+def convert_to_hijri(date_obj):
+    """
+    تحويل تاريخ ميلادي إلى تاريخ هجري
+
+    المعلمات:
+    - date_obj: كائن تاريخ ميلادي (datetime.date)
+
+    يعيد:
+    - سلسلة نصية تمثل التاريخ الهجري بتنسيق "YYYY-MM-DD"
+    """
+    if not date_obj:
+        return ""
+
+    try:
+        g_date = Gregorian(date_obj.year, date_obj.month, date_obj.day)
+        hijri_date = g_date.to_hijri()
+        return f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+    except Exception as e:
+        print(f"خطأ في تحويل التاريخ إلى هجري: {e}")
+        return ""
+
+
+>>>>>>> settings
 def get_leave_price(leave_type, duration, client=None):
     """
     الحصول على سعر الإجازة بناءً على نوعها ومدتها والعميل
@@ -147,6 +266,7 @@ def get_leave_price(leave_type, duration, client=None):
     يعيد:
     - سعر الإجازة
     """
+<<<<<<< HEAD
     from decimal import Decimal
 
     # البحث عن سعر ثابت خاص بالعميل
@@ -197,3 +317,8 @@ def get_leave_price(leave_type, duration, client=None):
 
     # إذا لم يتم العثور على أي سعر
     return Decimal('0')
+=======
+    # استخدام دالة get_price من نموذج LeavePrice
+    from core.models import LeavePrice
+    return LeavePrice.get_price(leave_type, duration, client)
+>>>>>>> settings

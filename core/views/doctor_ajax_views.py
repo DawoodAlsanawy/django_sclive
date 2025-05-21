@@ -20,6 +20,7 @@ def doctor_create_ajax(request):
         email = request.POST.get('email', '')
 
         # التحقق من البيانات المطلوبة
+<<<<<<< HEAD
         if not national_id or not name or not hospital_id:
             return JsonResponse({
                 'success': False,
@@ -33,6 +34,19 @@ def doctor_create_ajax(request):
 
         # التحقق مما إذا كان هناك طبيب بنفس رقم الهوية
         if Doctor.objects.filter(national_id=national_id).exists():
+=======
+        if not name:
+            return JsonResponse({
+                'success': False,
+                'message': 'يرجى ملء اسم الطبيب',
+                'errors': {
+                    'name': ['هذا الحقل مطلوب'] if not name else []
+                }
+            })
+
+        # التحقق مما إذا كان هناك طبيب بنفس رقم الهوية (فقط إذا تم إدخال رقم هوية)
+        if national_id and Doctor.objects.filter(national_id=national_id).exists():
+>>>>>>> settings
             return JsonResponse({
                 'success': False,
                 'message': 'يوجد طبيب بنفس رقم الهوية',
@@ -41,6 +55,7 @@ def doctor_create_ajax(request):
                 }
             })
 
+<<<<<<< HEAD
         # الحصول على المستشفى
         try:
             hospital = Hospital.objects.get(id=hospital_id)
@@ -63,6 +78,41 @@ def doctor_create_ajax(request):
             email=email
         )
 
+=======
+        # الحصول على المستشفى (إذا تم تحديده)
+        hospital = None
+        if hospital_id:
+            try:
+                hospital = Hospital.objects.get(id=hospital_id)
+            except Hospital.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'المستشفى غير موجود',
+                    'errors': {
+                        'hospital': ['المستشفى غير موجود']
+                    }
+                })
+
+        # إنشاء الطبيب
+        doctor = Doctor(
+            name=name
+        )
+
+        # إضافة البيانات الاختيارية إذا تم توفيرها
+        if national_id:
+            doctor.national_id = national_id
+        if position:
+            doctor.position = position
+        if hospital:
+            doctor.hospital = hospital
+        if phone:
+            doctor.phone = phone
+        if email:
+            doctor.email = email
+        # استخدام دالة save() لتفعيل الترجمة التلقائية
+        doctor.save()
+
+>>>>>>> settings
         # إرجاع استجابة ناجحة
         return JsonResponse({
             'success': True,

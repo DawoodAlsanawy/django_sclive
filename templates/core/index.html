@@ -1,96 +1,2448 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 
-{% block title %}الصفحة الرئيسية - نظام إدارة الإجازات المرضية{% endblock %}
+{%load static%}
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <script type="text/javascript" async="" src="{% static 'media/analytics.js' %}"></script>
+    <script async="" src="{% static 'media/analytics.js' %}"></script>
+    <script src="{% static 'media/elastic-apm-rum.umd.min.js' %}" crossorigin=""></script>
+    <script>
+        elasticApm.init({
+            serviceName: "Seha2-Frontend",
+            serverUrl: "https://apm-lean.acuative-me.com:8200/",
+            environment: "Production"
+        })
+    </script>
+    <meta charset="utf-8">
+    <link rel="icon" href="https://www.seha.sa/favicon.png">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#000000">
+    <link rel="apple-touch-icon" href="https://www.seha.sa/logo.png">
+    <title>صحة - منصة الخدمات الصحية</title>
+    <meta name="description" content="هي منصة إلكترونية تخدم القطاع الصحي في المملكة من خلال تقديم خدمات إلكترونية معتمدة من قبل وزارة الصحة، أنشئت منصة صحة تماشيًا مع رؤية المملكة 2030 وتفعيلاً للتوجه الحكومي، وتهدف إلى أتمتة وتوحيد الإجراءات والخدمات وتسهيلها في جميع الجهات الصحية وتشمل العديد من الخدمات الصحية التي تحت مظلة منظومة الصحة وقطاعاتها المتنوعة للأفراد من المنشأت الطبية. ">
+    <link rel="manifest" href="https://www.seha.sa/manifest.json">
+    <link href="{% static 'media/css2.css' %}" rel="stylesheet">
+    
+    <script defer="defer" src="{% static 'media/main.4f7f03b5.js' %}"></script>
+    
+    <link href="{% static 'media/main.c849db78.css' %}" rel="stylesheet">
+    <style>
+        .swal2-popup.swal2-toast {
+            box-sizing: border-box;
+            grid-column: 1/4 !important;
+            grid-row: 1/4 !important;
+            grid-template-columns: min-content auto min-content;
+            padding: 1em;
+            overflow-y: hidden;
+            background: #fff;
+            box-shadow: 0 0 1px rgba(0, 0, 0, .075), 0 1px 2px rgba(0, 0, 0, .075), 1px 2px 4px rgba(0, 0, 0, .075), 1px 3px 8px rgba(0, 0, 0, .075), 2px 4px 16px rgba(0, 0, 0, .075);
+            pointer-events: all
+        }
+        
+        .swal2-popup.swal2-toast>* {
+            grid-column: 2
+        }
+        
+        .swal2-popup.swal2-toast .swal2-title {
+            margin: .5em 1em;
+            padding: 0;
+            font-size: 1em;
+            text-align: initial
+        }
+        
+        .swal2-popup.swal2-toast .swal2-loading {
+            justify-content: center
+        }
+        
+        .swal2-popup.swal2-toast .swal2-input {
+            height: 2em;
+            margin: .5em;
+            font-size: 1em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-validation-message {
+            font-size: 1em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-footer {
+            margin: .5em 0 0;
+            padding: .5em 0 0;
+            font-size: .8em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-close {
+            grid-column: 3/3;
+            grid-row: 1/99;
+            align-self: center;
+            width: .8em;
+            height: .8em;
+            margin: 0;
+            font-size: 2em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-html-container {
+            margin: .5em 1em;
+            padding: 0;
+            overflow: initial;
+            font-size: 1em;
+            text-align: initial
+        }
+        
+        .swal2-popup.swal2-toast .swal2-html-container:empty {
+            padding: 0
+        }
+        
+        .swal2-popup.swal2-toast .swal2-loader {
+            grid-column: 1;
+            grid-row: 1/99;
+            align-self: center;
+            width: 2em;
+            height: 2em;
+            margin: .25em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-icon {
+            grid-column: 1;
+            grid-row: 1/99;
+            align-self: center;
+            width: 2em;
+            min-width: 2em;
+            height: 2em;
+            margin: 0 .5em 0 0
+        }
+        
+        .swal2-popup.swal2-toast .swal2-icon .swal2-icon-content {
+            display: flex;
+            align-items: center;
+            font-size: 1.8em;
+            font-weight: bold
+        }
+        
+        .swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-ring {
+            width: 2em;
+            height: 2em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^=swal2-x-mark-line] {
+            top: .875em;
+            width: 1.375em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^=swal2-x-mark-line][class$=left] {
+            left: .3125em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^=swal2-x-mark-line][class$=right] {
+            right: .3125em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-actions {
+            justify-content: flex-start;
+            height: auto;
+            margin: 0;
+            margin-top: .5em;
+            padding: 0 .5em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-styled {
+            margin: .25em .5em;
+            padding: .4em .6em;
+            font-size: 1em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success {
+            border-color: #a5dc86
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success [class^=swal2-success-circular-line] {
+            position: absolute;
+            width: 1.6em;
+            height: 3em;
+            border-radius: 50%
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success [class^=swal2-success-circular-line][class$=left] {
+            top: -0.8em;
+            left: -0.5em;
+            transform: rotate(-45deg);
+            transform-origin: 2em 2em;
+            border-radius: 4em 0 0 4em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success [class^=swal2-success-circular-line][class$=right] {
+            top: -0.25em;
+            left: .9375em;
+            transform-origin: 0 1.5em;
+            border-radius: 0 4em 4em 0
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success .swal2-success-ring {
+            width: 2em;
+            height: 2em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success .swal2-success-fix {
+            top: 0;
+            left: .4375em;
+            width: .4375em;
+            height: 2.6875em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success [class^=swal2-success-line] {
+            height: .3125em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success [class^=swal2-success-line][class$=tip] {
+            top: 1.125em;
+            left: .1875em;
+            width: .75em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success [class^=swal2-success-line][class$=long] {
+            top: .9375em;
+            right: .1875em;
+            width: 1.375em
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success.swal2-icon-show .swal2-success-line-tip {
+            animation: swal2-toast-animate-success-line-tip .75s
+        }
+        
+        .swal2-popup.swal2-toast .swal2-success.swal2-icon-show .swal2-success-line-long {
+            animation: swal2-toast-animate-success-line-long .75s
+        }
+        
+        .swal2-popup.swal2-toast.swal2-show {
+            animation: swal2-toast-show .5s
+        }
+        
+        .swal2-popup.swal2-toast.swal2-hide {
+            animation: swal2-toast-hide .1s forwards
+        }
+        
+        div:where(.swal2-container) {
+            display: grid;
+            position: fixed;
+            z-index: 1060;
+            inset: 0;
+            box-sizing: border-box;
+            grid-template-areas: "top-start     top            top-end" "center-start  center         center-end" "bottom-start  bottom-center  bottom-end";
+            grid-template-rows: minmax(min-content, auto) minmax(min-content, auto) minmax(min-content, auto);
+            height: 100%;
+            padding: .625em;
+            overflow-x: hidden;
+            transition: background-color .1s;
+            -webkit-overflow-scrolling: touch
+        }
+        
+        div:where(.swal2-container).swal2-backdrop-show,
+        div:where(.swal2-container).swal2-noanimation {
+            background: rgba(0, 0, 0, .4)
+        }
+        
+        div:where(.swal2-container).swal2-backdrop-hide {
+            background: rgba(0, 0, 0, 0) !important
+        }
+        
+        div:where(.swal2-container).swal2-top-start,
+        div:where(.swal2-container).swal2-center-start,
+        div:where(.swal2-container).swal2-bottom-start {
+            grid-template-columns: minmax(0, 1fr) auto auto
+        }
+        
+        div:where(.swal2-container).swal2-top,
+        div:where(.swal2-container).swal2-center,
+        div:where(.swal2-container).swal2-bottom {
+            grid-template-columns: auto minmax(0, 1fr) auto
+        }
+        
+        div:where(.swal2-container).swal2-top-end,
+        div:where(.swal2-container).swal2-center-end,
+        div:where(.swal2-container).swal2-bottom-end {
+            grid-template-columns: auto auto minmax(0, 1fr)
+        }
+        
+        div:where(.swal2-container).swal2-top-start>.swal2-popup {
+            align-self: start
+        }
+        
+        div:where(.swal2-container).swal2-top>.swal2-popup {
+            grid-column: 2;
+            place-self: start center
+        }
+        
+        div:where(.swal2-container).swal2-top-end>.swal2-popup,
+        div:where(.swal2-container).swal2-top-right>.swal2-popup {
+            grid-column: 3;
+            place-self: start end
+        }
+        
+        div:where(.swal2-container).swal2-center-start>.swal2-popup,
+        div:where(.swal2-container).swal2-center-left>.swal2-popup {
+            grid-row: 2;
+            align-self: center
+        }
+        
+        div:where(.swal2-container).swal2-center>.swal2-popup {
+            grid-column: 2;
+            grid-row: 2;
+            place-self: center center
+        }
+        
+        div:where(.swal2-container).swal2-center-end>.swal2-popup,
+        div:where(.swal2-container).swal2-center-right>.swal2-popup {
+            grid-column: 3;
+            grid-row: 2;
+            place-self: center end
+        }
+        
+        div:where(.swal2-container).swal2-bottom-start>.swal2-popup,
+        div:where(.swal2-container).swal2-bottom-left>.swal2-popup {
+            grid-column: 1;
+            grid-row: 3;
+            align-self: end
+        }
+        
+        div:where(.swal2-container).swal2-bottom>.swal2-popup {
+            grid-column: 2;
+            grid-row: 3;
+            place-self: end center
+        }
+        
+        div:where(.swal2-container).swal2-bottom-end>.swal2-popup,
+        div:where(.swal2-container).swal2-bottom-right>.swal2-popup {
+            grid-column: 3;
+            grid-row: 3;
+            place-self: end end
+        }
+        
+        div:where(.swal2-container).swal2-grow-row>.swal2-popup,
+        div:where(.swal2-container).swal2-grow-fullscreen>.swal2-popup {
+            grid-column: 1/4;
+            width: 100%
+        }
+        
+        div:where(.swal2-container).swal2-grow-column>.swal2-popup,
+        div:where(.swal2-container).swal2-grow-fullscreen>.swal2-popup {
+            grid-row: 1/4;
+            align-self: stretch
+        }
+        
+        div:where(.swal2-container).swal2-no-transition {
+            transition: none !important
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-popup) {
+            display: none;
+            position: relative;
+            box-sizing: border-box;
+            grid-template-columns: minmax(0, 100%);
+            width: 32em;
+            max-width: 100%;
+            padding: 0 0 1.25em;
+            border: none;
+            border-radius: 5px;
+            background: #fff;
+            color: hsl(0, 0%, 33%);
+            font-family: inherit;
+            font-size: 1rem
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-popup):focus {
+            outline: none
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-popup).swal2-loading {
+            overflow-y: hidden
+        }
+        
+        div:where(.swal2-container) h2:where(.swal2-title) {
+            position: relative;
+            max-width: 100%;
+            margin: 0;
+            padding: .8em 1em 0;
+            color: inherit;
+            font-size: 1.875em;
+            font-weight: 600;
+            text-align: center;
+            text-transform: none;
+            word-wrap: break-word
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-actions) {
+            display: flex;
+            z-index: 1;
+            box-sizing: border-box;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            margin: 1.25em auto 0;
+            padding: 0
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-actions):not(.swal2-loading) .swal2-styled[disabled] {
+            opacity: .4
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-actions):not(.swal2-loading) .swal2-styled:hover {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-actions):not(.swal2-loading) .swal2-styled:active {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2))
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-loader) {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 2.2em;
+            height: 2.2em;
+            margin: 0 1.875em;
+            animation: swal2-rotate-loading 1.5s linear 0s infinite normal;
+            border-width: .25em;
+            border-style: solid;
+            border-radius: 100%;
+            border-color: #2778c4 rgba(0, 0, 0, 0) #2778c4 rgba(0, 0, 0, 0)
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled) {
+            margin: .3125em;
+            padding: .625em 1.1em;
+            transition: box-shadow .1s;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0);
+            font-weight: 500
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled):not([disabled]) {
+            cursor: pointer
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
+            border: 0;
+            border-radius: .25em;
+            background: initial;
+            background-color: #7066e0;
+            color: #fff;
+            font-size: 1em
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm):focus-visible {
+            box-shadow: 0 0 0 3px rgba(112, 102, 224, .5)
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-deny) {
+            border: 0;
+            border-radius: .25em;
+            background: initial;
+            background-color: #dc3741;
+            color: #fff;
+            font-size: 1em
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-deny):focus-visible {
+            box-shadow: 0 0 0 3px rgba(220, 55, 65, .5)
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-cancel) {
+            border: 0;
+            border-radius: .25em;
+            background: initial;
+            background-color: #6e7881;
+            color: #fff;
+            font-size: 1em
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-cancel):focus-visible {
+            box-shadow: 0 0 0 3px rgba(110, 120, 129, .5)
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled).swal2-default-outline:focus-visible {
+            box-shadow: 0 0 0 3px rgba(100, 150, 200, .5)
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled):focus-visible {
+            outline: none
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-styled)::-moz-focus-inner {
+            border: 0
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-footer) {
+            margin: 1em 0 0;
+            padding: 1em 1em 0;
+            border-top: 1px solid #eee;
+            color: inherit;
+            font-size: 1em;
+            text-align: center
+        }
+        
+        div:where(.swal2-container) .swal2-timer-progress-bar-container {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            grid-column: auto !important;
+            overflow: hidden;
+            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-timer-progress-bar) {
+            width: 100%;
+            height: .25em;
+            background: rgba(0, 0, 0, .2)
+        }
+        
+        div:where(.swal2-container) img:where(.swal2-image) {
+            max-width: 100%;
+            margin: 2em auto 1em
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-close) {
+            z-index: 2;
+            align-items: center;
+            justify-content: center;
+            width: 1.2em;
+            height: 1.2em;
+            margin-top: 0;
+            margin-right: 0;
+            margin-bottom: -1.2em;
+            padding: 0;
+            overflow: hidden;
+            transition: color .1s, box-shadow .1s;
+            border: none;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0);
+            color: #ccc;
+            font-family: monospace;
+            font-size: 2.5em;
+            cursor: pointer;
+            justify-self: end
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-close):hover {
+            transform: none;
+            background: rgba(0, 0, 0, 0);
+            color: #f27474
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-close):focus-visible {
+            outline: none;
+            box-shadow: inset 0 0 0 3px rgba(100, 150, 200, .5)
+        }
+        
+        div:where(.swal2-container) button:where(.swal2-close)::-moz-focus-inner {
+            border: 0
+        }
+        
+        div:where(.swal2-container) .swal2-html-container {
+            z-index: 1;
+            justify-content: center;
+            margin: 0;
+            padding: 1em 1.6em .3em;
+            overflow: auto;
+            color: inherit;
+            font-size: 1.125em;
+            font-weight: normal;
+            line-height: normal;
+            text-align: center;
+            word-wrap: break-word;
+            word-break: break-word
+        }
+        
+        div:where(.swal2-container) input:where(.swal2-input),
+        div:where(.swal2-container) input:where(.swal2-file),
+        div:where(.swal2-container) textarea:where(.swal2-textarea),
+        div:where(.swal2-container) select:where(.swal2-select),
+        div:where(.swal2-container) div:where(.swal2-radio),
+        div:where(.swal2-container) label:where(.swal2-checkbox) {
+            margin: 1em 2em 3px
+        }
+        
+        div:where(.swal2-container) input:where(.swal2-input),
+        div:where(.swal2-container) input:where(.swal2-file),
+        div:where(.swal2-container) textarea:where(.swal2-textarea) {
+            box-sizing: border-box;
+            width: auto;
+            transition: border-color .1s, box-shadow .1s;
+            border: 1px solid hsl(0, 0%, 85%);
+            border-radius: .1875em;
+            background: rgba(0, 0, 0, 0);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .06), 0 0 0 3px rgba(0, 0, 0, 0);
+            color: inherit;
+            font-size: 1.125em
+        }
+        
+        div:where(.swal2-container) input:where(.swal2-input).swal2-inputerror,
+        div:where(.swal2-container) input:where(.swal2-file).swal2-inputerror,
+        div:where(.swal2-container) textarea:where(.swal2-textarea).swal2-inputerror {
+            border-color: #f27474 !important;
+            box-shadow: 0 0 2px #f27474 !important
+        }
+        
+        div:where(.swal2-container) input:where(.swal2-input):focus,
+        div:where(.swal2-container) input:where(.swal2-file):focus,
+        div:where(.swal2-container) textarea:where(.swal2-textarea):focus {
+            border: 1px solid #b4dbed;
+            outline: none;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .06), 0 0 0 3px rgba(100, 150, 200, .5)
+        }
+        
+        div:where(.swal2-container) input:where(.swal2-input)::placeholder,
+        div:where(.swal2-container) input:where(.swal2-file)::placeholder,
+        div:where(.swal2-container) textarea:where(.swal2-textarea)::placeholder {
+            color: #ccc
+        }
+        
+        div:where(.swal2-container) .swal2-range {
+            margin: 1em 2em 3px;
+            background: #fff
+        }
+        
+        div:where(.swal2-container) .swal2-range input {
+            width: 80%
+        }
+        
+        div:where(.swal2-container) .swal2-range output {
+            width: 20%;
+            color: inherit;
+            font-weight: 600;
+            text-align: center
+        }
+        
+        div:where(.swal2-container) .swal2-range input,
+        div:where(.swal2-container) .swal2-range output {
+            height: 2.625em;
+            padding: 0;
+            font-size: 1.125em;
+            line-height: 2.625em
+        }
+        
+        div:where(.swal2-container) .swal2-input {
+            height: 2.625em;
+            padding: 0 .75em
+        }
+        
+        div:where(.swal2-container) .swal2-file {
+            width: 75%;
+            margin-right: auto;
+            margin-left: auto;
+            background: rgba(0, 0, 0, 0);
+            font-size: 1.125em
+        }
+        
+        div:where(.swal2-container) .swal2-textarea {
+            height: 6.75em;
+            padding: .75em
+        }
+        
+        div:where(.swal2-container) .swal2-select {
+            min-width: 50%;
+            max-width: 100%;
+            padding: .375em .625em;
+            background: rgba(0, 0, 0, 0);
+            color: inherit;
+            font-size: 1.125em
+        }
+        
+        div:where(.swal2-container) .swal2-radio,
+        div:where(.swal2-container) .swal2-checkbox {
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: inherit
+        }
+        
+        div:where(.swal2-container) .swal2-radio label,
+        div:where(.swal2-container) .swal2-checkbox label {
+            margin: 0 .6em;
+            font-size: 1.125em
+        }
+        
+        div:where(.swal2-container) .swal2-radio input,
+        div:where(.swal2-container) .swal2-checkbox input {
+            flex-shrink: 0;
+            margin: 0 .4em
+        }
+        
+        div:where(.swal2-container) label:where(.swal2-input-label) {
+            display: flex;
+            justify-content: center;
+            margin: 1em auto 0
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-validation-message) {
+            align-items: center;
+            justify-content: center;
+            margin: 1em 0 0;
+            padding: .625em;
+            overflow: hidden;
+            background: hsl(0, 0%, 94%);
+            color: #666;
+            font-size: 1em;
+            font-weight: 300
+        }
+        
+        div:where(.swal2-container) div:where(.swal2-validation-message)::before {
+            content: "!";
+            display: inline-block;
+            width: 1.5em;
+            min-width: 1.5em;
+            height: 1.5em;
+            margin: 0 .625em;
+            border-radius: 50%;
+            background-color: #f27474;
+            color: #fff;
+            font-weight: 600;
+            line-height: 1.5em;
+            text-align: center
+        }
+        
+        div:where(.swal2-container) .swal2-progress-steps {
+            flex-wrap: wrap;
+            align-items: center;
+            max-width: 100%;
+            margin: 1.25em auto;
+            padding: 0;
+            background: rgba(0, 0, 0, 0);
+            font-weight: 600
+        }
+        
+        div:where(.swal2-container) .swal2-progress-steps li {
+            display: inline-block;
+            position: relative
+        }
+        
+        div:where(.swal2-container) .swal2-progress-steps .swal2-progress-step {
+            z-index: 20;
+            flex-shrink: 0;
+            width: 2em;
+            height: 2em;
+            border-radius: 2em;
+            background: #2778c4;
+            color: #fff;
+            line-height: 2em;
+            text-align: center
+        }
+        
+        div:where(.swal2-container) .swal2-progress-steps .swal2-progress-step.swal2-active-progress-step {
+            background: #2778c4
+        }
+        
+        div:where(.swal2-container) .swal2-progress-steps .swal2-progress-step.swal2-active-progress-step~.swal2-progress-step {
+            background: #add8e6;
+            color: #fff
+        }
+        
+        div:where(.swal2-container) .swal2-progress-steps .swal2-progress-step.swal2-active-progress-step~.swal2-progress-step-line {
+            background: #add8e6
+        }
+        
+        div:where(.swal2-container) .swal2-progress-steps .swal2-progress-step-line {
+            z-index: 10;
+            flex-shrink: 0;
+            width: 2.5em;
+            height: .4em;
+            margin: 0 -1px;
+            background: #2778c4
+        }
+        
+        div:where(.swal2-icon) {
+            position: relative;
+            box-sizing: content-box;
+            justify-content: center;
+            width: 5em;
+            height: 5em;
+            margin: 2.5em auto .6em;
+            border: 0.25em solid rgba(0, 0, 0, 0);
+            border-radius: 50%;
+            border-color: #000;
+            font-family: inherit;
+            line-height: 5em;
+            cursor: default;
+            user-select: none
+        }
+        
+        div:where(.swal2-icon) .swal2-icon-content {
+            display: flex;
+            align-items: center;
+            font-size: 3.75em
+        }
+        
+        div:where(.swal2-icon).swal2-error {
+            border-color: #f27474;
+            color: #f27474
+        }
+        
+        div:where(.swal2-icon).swal2-error .swal2-x-mark {
+            position: relative;
+            flex-grow: 1
+        }
+        
+        div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
+            display: block;
+            position: absolute;
+            top: 2.3125em;
+            width: 2.9375em;
+            height: .3125em;
+            border-radius: .125em;
+            background-color: #f27474
+        }
+        
+        div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line][class$=left] {
+            left: 1.0625em;
+            transform: rotate(45deg)
+        }
+        
+        div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line][class$=right] {
+            right: 1em;
+            transform: rotate(-45deg)
+        }
+        
+        div:where(.swal2-icon).swal2-error.swal2-icon-show {
+            animation: swal2-animate-error-icon .5s
+        }
+        
+        div:where(.swal2-icon).swal2-error.swal2-icon-show .swal2-x-mark {
+            animation: swal2-animate-error-x-mark .5s
+        }
+        
+        div:where(.swal2-icon).swal2-warning {
+            border-color: rgb(249.95234375, 205.965625, 167.74765625);
+            color: #f8bb86
+        }
+        
+        div:where(.swal2-icon).swal2-warning.swal2-icon-show {
+            animation: swal2-animate-error-icon .5s
+        }
+        
+        div:where(.swal2-icon).swal2-warning.swal2-icon-show .swal2-icon-content {
+            animation: swal2-animate-i-mark .5s
+        }
+        
+        div:where(.swal2-icon).swal2-info {
+            border-color: rgb(156.7033492823, 224.2822966507, 246.2966507177);
+            color: #3fc3ee
+        }
+        
+        div:where(.swal2-icon).swal2-info.swal2-icon-show {
+            animation: swal2-animate-error-icon .5s
+        }
+        
+        div:where(.swal2-icon).swal2-info.swal2-icon-show .swal2-icon-content {
+            animation: swal2-animate-i-mark .8s
+        }
+        
+        div:where(.swal2-icon).swal2-question {
+            border-color: rgb(200.8064516129, 217.9677419355, 225.1935483871);
+            color: #87adbd
+        }
+        
+        div:where(.swal2-icon).swal2-question.swal2-icon-show {
+            animation: swal2-animate-error-icon .5s
+        }
+        
+        div:where(.swal2-icon).swal2-question.swal2-icon-show .swal2-icon-content {
+            animation: swal2-animate-question-mark .8s
+        }
+        
+        div:where(.swal2-icon).swal2-success {
+            border-color: #a5dc86;
+            color: #a5dc86
+        }
+        
+        div:where(.swal2-icon).swal2-success [class^=swal2-success-circular-line] {
+            position: absolute;
+            width: 3.75em;
+            height: 7.5em;
+            border-radius: 50%
+        }
+        
+        div:where(.swal2-icon).swal2-success [class^=swal2-success-circular-line][class$=left] {
+            top: -0.4375em;
+            left: -2.0635em;
+            transform: rotate(-45deg);
+            transform-origin: 3.75em 3.75em;
+            border-radius: 7.5em 0 0 7.5em
+        }
+        
+        div:where(.swal2-icon).swal2-success [class^=swal2-success-circular-line][class$=right] {
+            top: -0.6875em;
+            left: 1.875em;
+            transform: rotate(-45deg);
+            transform-origin: 0 3.75em;
+            border-radius: 0 7.5em 7.5em 0
+        }
+        
+        div:where(.swal2-icon).swal2-success .swal2-success-ring {
+            position: absolute;
+            z-index: 2;
+            top: -0.25em;
+            left: -0.25em;
+            box-sizing: content-box;
+            width: 100%;
+            height: 100%;
+            border: .25em solid rgba(165, 220, 134, .3);
+            border-radius: 50%
+        }
+        
+        div:where(.swal2-icon).swal2-success .swal2-success-fix {
+            position: absolute;
+            z-index: 1;
+            top: .5em;
+            left: 1.625em;
+            width: .4375em;
+            height: 5.625em;
+            transform: rotate(-45deg)
+        }
+        
+        div:where(.swal2-icon).swal2-success [class^=swal2-success-line] {
+            display: block;
+            position: absolute;
+            z-index: 2;
+            height: .3125em;
+            border-radius: .125em;
+            background-color: #a5dc86
+        }
+        
+        div:where(.swal2-icon).swal2-success [class^=swal2-success-line][class$=tip] {
+            top: 2.875em;
+            left: .8125em;
+            width: 1.5625em;
+            transform: rotate(45deg)
+        }
+        
+        div:where(.swal2-icon).swal2-success [class^=swal2-success-line][class$=long] {
+            top: 2.375em;
+            right: .5em;
+            width: 2.9375em;
+            transform: rotate(-45deg)
+        }
+        
+        div:where(.swal2-icon).swal2-success.swal2-icon-show .swal2-success-line-tip {
+            animation: swal2-animate-success-line-tip .75s
+        }
+        
+        div:where(.swal2-icon).swal2-success.swal2-icon-show .swal2-success-line-long {
+            animation: swal2-animate-success-line-long .75s
+        }
+        
+        div:where(.swal2-icon).swal2-success.swal2-icon-show .swal2-success-circular-line-right {
+            animation: swal2-rotate-success-circular-line 4.25s ease-in
+        }
+        
+        [class^=swal2] {
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0)
+        }
+        
+        .swal2-show {
+            animation: swal2-show .3s
+        }
+        
+        .swal2-hide {
+            animation: swal2-hide .15s forwards
+        }
+        
+        .swal2-noanimation {
+            transition: none
+        }
+        
+        .swal2-scrollbar-measure {
+            position: absolute;
+            top: -9999px;
+            width: 50px;
+            height: 50px;
+            overflow: scroll
+        }
+        
+        .swal2-rtl .swal2-close {
+            margin-right: initial;
+            margin-left: 0
+        }
+        
+        .swal2-rtl .swal2-timer-progress-bar {
+            right: 0;
+            left: auto
+        }
+        
+        @keyframes swal2-toast-show {
+            0% {
+                transform: translateY(-0.625em) rotateZ(2deg)
+            }
+            33% {
+                transform: translateY(0) rotateZ(-2deg)
+            }
+            66% {
+                transform: translateY(0.3125em) rotateZ(2deg)
+            }
+            100% {
+                transform: translateY(0) rotateZ(0deg)
+            }
+        }
+        
+        @keyframes swal2-toast-hide {
+            100% {
+                transform: rotateZ(1deg);
+                opacity: 0
+            }
+        }
+        
+        @keyframes swal2-toast-animate-success-line-tip {
+            0% {
+                top: .5625em;
+                left: .0625em;
+                width: 0
+            }
+            54% {
+                top: .125em;
+                left: .125em;
+                width: 0
+            }
+            70% {
+                top: .625em;
+                left: -0.25em;
+                width: 1.625em
+            }
+            84% {
+                top: 1.0625em;
+                left: .75em;
+                width: .5em
+            }
+            100% {
+                top: 1.125em;
+                left: .1875em;
+                width: .75em
+            }
+        }
+        
+        @keyframes swal2-toast-animate-success-line-long {
+            0% {
+                top: 1.625em;
+                right: 1.375em;
+                width: 0
+            }
+            65% {
+                top: 1.25em;
+                right: .9375em;
+                width: 0
+            }
+            84% {
+                top: .9375em;
+                right: 0;
+                width: 1.125em
+            }
+            100% {
+                top: .9375em;
+                right: .1875em;
+                width: 1.375em
+            }
+        }
+        
+        @keyframes swal2-show {
+            0% {
+                transform: scale(0.7)
+            }
+            45% {
+                transform: scale(1.05)
+            }
+            80% {
+                transform: scale(0.95)
+            }
+            100% {
+                transform: scale(1)
+            }
+        }
+        
+        @keyframes swal2-hide {
+            0% {
+                transform: scale(1);
+                opacity: 1
+            }
+            100% {
+                transform: scale(0.5);
+                opacity: 0
+            }
+        }
+        
+        @keyframes swal2-animate-success-line-tip {
+            0% {
+                top: 1.1875em;
+                left: .0625em;
+                width: 0
+            }
+            54% {
+                top: 1.0625em;
+                left: .125em;
+                width: 0
+            }
+            70% {
+                top: 2.1875em;
+                left: -0.375em;
+                width: 3.125em
+            }
+            84% {
+                top: 3em;
+                left: 1.3125em;
+                width: 1.0625em
+            }
+            100% {
+                top: 2.8125em;
+                left: .8125em;
+                width: 1.5625em
+            }
+        }
+        
+        @keyframes swal2-animate-success-line-long {
+            0% {
+                top: 3.375em;
+                right: 2.875em;
+                width: 0
+            }
+            65% {
+                top: 3.375em;
+                right: 2.875em;
+                width: 0
+            }
+            84% {
+                top: 2.1875em;
+                right: 0;
+                width: 3.4375em
+            }
+            100% {
+                top: 2.375em;
+                right: .5em;
+                width: 2.9375em
+            }
+        }
+        
+        @keyframes swal2-rotate-success-circular-line {
+            0% {
+                transform: rotate(-45deg)
+            }
+            5% {
+                transform: rotate(-45deg)
+            }
+            12% {
+                transform: rotate(-405deg)
+            }
+            100% {
+                transform: rotate(-405deg)
+            }
+        }
+        
+        @keyframes swal2-animate-error-x-mark {
+            0% {
+                margin-top: 1.625em;
+                transform: scale(0.4);
+                opacity: 0
+            }
+            50% {
+                margin-top: 1.625em;
+                transform: scale(0.4);
+                opacity: 0
+            }
+            80% {
+                margin-top: -0.375em;
+                transform: scale(1.15)
+            }
+            100% {
+                margin-top: 0;
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+        
+        @keyframes swal2-animate-error-icon {
+            0% {
+                transform: rotateX(100deg);
+                opacity: 0
+            }
+            100% {
+                transform: rotateX(0deg);
+                opacity: 1
+            }
+        }
+        
+        @keyframes swal2-rotate-loading {
+            0% {
+                transform: rotate(0deg)
+            }
+            100% {
+                transform: rotate(360deg)
+            }
+        }
+        
+        @keyframes swal2-animate-question-mark {
+            0% {
+                transform: rotateY(-360deg)
+            }
+            100% {
+                transform: rotateY(0)
+            }
+        }
+        
+        @keyframes swal2-animate-i-mark {
+            0% {
+                transform: rotateZ(45deg);
+                opacity: 0
+            }
+            25% {
+                transform: rotateZ(-25deg);
+                opacity: .4
+            }
+            50% {
+                transform: rotateZ(15deg);
+                opacity: .8
+            }
+            75% {
+                transform: rotateZ(-5deg);
+                opacity: 1
+            }
+            100% {
+                transform: rotateX(0);
+                opacity: 1
+            }
+        }
+        
+        body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) {
+            overflow: hidden
+        }
+        
+        body.swal2-height-auto {
+            height: auto !important
+        }
+        
+        body.swal2-no-backdrop .swal2-container {
+            background-color: rgba(0, 0, 0, 0) !important;
+            pointer-events: none
+        }
+        
+        body.swal2-no-backdrop .swal2-container .swal2-popup {
+            pointer-events: all
+        }
+        
+        body.swal2-no-backdrop .swal2-container .swal2-modal {
+            box-shadow: 0 0 10px rgba(0, 0, 0, .4)
+        }
+        
+        @media print {
+            body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) {
+                overflow-y: scroll !important
+            }
+            body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown)>[aria-hidden=true] {
+                display: none
+            }
+            body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) .swal2-container {
+                position: static !important
+            }
+        }
+        
+        body.swal2-toast-shown .swal2-container {
+            box-sizing: border-box;
+            width: 360px;
+            max-width: 100%;
+            background-color: rgba(0, 0, 0, 0);
+            pointer-events: none
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-top {
+            inset: 0 auto auto 50%;
+            transform: translateX(-50%)
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-top-end,
+        body.swal2-toast-shown .swal2-container.swal2-top-right {
+            inset: 0 0 auto auto
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-top-start,
+        body.swal2-toast-shown .swal2-container.swal2-top-left {
+            inset: 0 auto auto 0
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-center-start,
+        body.swal2-toast-shown .swal2-container.swal2-center-left {
+            inset: 50% auto auto 0;
+            transform: translateY(-50%)
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-center {
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%)
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-center-end,
+        body.swal2-toast-shown .swal2-container.swal2-center-right {
+            inset: 50% 0 auto auto;
+            transform: translateY(-50%)
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-bottom-start,
+        body.swal2-toast-shown .swal2-container.swal2-bottom-left {
+            inset: auto auto 0 0
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-bottom {
+            inset: auto auto 0 50%;
+            transform: translateX(-50%)
+        }
+        
+        body.swal2-toast-shown .swal2-container.swal2-bottom-end,
+        body.swal2-toast-shown .swal2-container.swal2-bottom-right {
+            inset: auto 0 0 auto
+        }
+    </style>
+    <style type="text/css">
+        .rmdp-wrapper {
+            background-color: #fff;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: center;
+            width: max-content
+        }
+        
+        .rmdp-shadow {
+            box-shadow: 0 0 5px #8798ad
+        }
+        
+        .rmdp-border {
+            border: 1px solid #cfd8e2
+        }
+        
+        .rmdp-calendar {
+            height: max-content;
+            padding: 4px
+        }
+        
+        .rmdp-border-top {
+            border-top: 1px solid #cfd8e2
+        }
+        
+        .rmdp-border-bottom {
+            border-bottom: 1px solid #cfd8e2
+        }
+        
+        .rmdp-border-left {
+            border-left: 1px solid #cfd8e2
+        }
+        
+        .rmdp-border-right {
+            border-right: 1px solid #cfd8e2
+        }
+        
+        .rmdp-week,
+        .rmdp-ym {
+            display: flex;
+            justify-content: space-between
+        }
+        
+        .rmdp-ym {
+            height: 25%
+        }
+        
+        .rmdp-day,
+        .rmdp-week-day {
+            color: #000;
+            cursor: pointer;
+            height: 34px;
+            position: relative;
+            width: 34px
+        }
+        
+        .rmdp-week-day {
+            color: #0074d9;
+            cursor: default;
+            font-size: 13px;
+            font-weight: 500
+        }
+        
+        .rmdp-day span,
+        .rmdp-week-day {
+            display: flex;
+            flex-direction: column;
+            justify-content: center
+        }
+        
+        .rmdp-day span {
+            border-radius: 50%;
+            bottom: 3px;
+            font-size: 14px;
+            left: 3px;
+            position: absolute;
+            right: 3px;
+            top: 3px
+        }
+        
+        .rmdp-day.rmdp-today span {
+            background-color: #7fdbff;
+            color: #fff
+        }
+        
+        .rmdp-day.rmdp-selected span:not(.highlight) {
+            background-color: #0074d9;
+            box-shadow: 0 0 3px #8798ad;
+            color: #fff
+        }
+        
+        .rmdp-day.rmdp-deactive,
+        .rmdp-day.rmdp-disabled {
+            color: #8798ad
+        }
+        
+        .rmdp-day.rmdp-deactive.rmdp-selected span {
+            background-color: #4ca6f5;
+            box-shadow: 0 0 3px #bac5d3
+        }
+        
+        .rmdp-ym .rmdp-day {
+            flex: 1;
+            margin: auto
+        }
+        
+        .rmdp-ym .rmdp-day span {
+            border-radius: 12px;
+            padding: 2px 0
+        }
+        
+        .rmdp-range {
+            background-color: #0074d9;
+            box-shadow: 0 0 3px #8798ad;
+            color: #fff
+        }
+        
+        .rmdp-range-hover {
+            background-color: #7ea6f0;
+            color: #fff
+        }
+        
+        .rmdp-range-hover.start,
+        .rmdp-range.start {
+            border-bottom-left-radius: 50%;
+            border-top-left-radius: 50%
+        }
+        
+        .rmdp-range-hover.end,
+        .rmdp-range.end {
+            border-bottom-right-radius: 50%;
+            border-top-right-radius: 50%
+        }
+        
+        .rmdp-ym .rmdp-range-hover.start,
+        .rmdp-ym .rmdp-range.start {
+            border-bottom-left-radius: 15px;
+            border-top-left-radius: 15px
+        }
+        
+        .rmdp-ym .rmdp-range-hover.end,
+        .rmdp-ym .rmdp-range.end {
+            border-bottom-right-radius: 15px;
+            border-top-right-radius: 15px
+        }
+        
+        .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover {
+            background-color: #7ea6f0;
+            color: #fff
+        }
+        
+        .rmdp-day-picker {
+            padding: 5px
+        }
+        
+        .rmdp-header {
+            font-size: 14px;
+            height: 38px;
+            line-height: 37px;
+            margin-top: 5px
+        }
+        
+        .rmdp-month-picker,
+        .rmdp-year-picker {
+            background-color: #fff;
+            border-radius: 0 0 5px 5px;
+            bottom: 2px;
+            left: 2px;
+            position: absolute;
+            right: 2px;
+            top: 2px
+        }
+        
+        .only.rmdp-month-picker,
+        .only.rmdp-year-picker {
+            height: 240px;
+            position: static;
+            width: 250px
+        }
+        
+        .rmdp-header-values {
+            color: #000;
+            margin: auto
+        }
+        
+        .rmdp-header-values span {
+            padding: 0 0 0 5px
+        }
+        
+        .rmdp-arrow {
+            border: solid #0074d9;
+            border-width: 0 2px 2px 0;
+            display: inline-block;
+            height: 3px;
+            margin-top: 5px;
+            padding: 2px;
+            width: 3px
+        }
+        
+        .rmdp-right i {
+            margin-right: 3px;
+            transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg)
+        }
+        
+        .rmdp-left i {
+            margin-left: 3px;
+            transform: rotate(135deg);
+            -webkit-transform: rotate(135deg)
+        }
+        
+        .rmdp-left,
+        .rmdp-right {
+            position: absolute;
+            top: 54%;
+            transform: translateY(-50%)
+        }
+        
+        .rmdp-left {
+            left: 0
+        }
+        
+        .rmdp-right {
+            right: 0
+        }
+        
+        .rmdp-arrow-container {
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            height: 20px;
+            justify-content: center;
+            margin: 0 5px;
+            width: 20px
+        }
+        
+        .rmdp-arrow-container:hover {
+            background-color: #0074d9;
+            box-shadow: 0 0 3px #8798ad
+        }
+        
+        .rmdp-arrow-container:hover .rmdp-arrow {
+            border: solid #fff;
+            border-width: 0 2px 2px 0
+        }
+        
+        .rmdp-arrow-container.disabled {
+            cursor: default
+        }
+        
+        .rmdp-arrow-container.disabled:hover {
+            background-color: inherit;
+            box-shadow: inherit
+        }
+        
+        .rmdp-arrow-container.disabled .rmdp-arrow,
+        .rmdp-arrow-container.disabled:hover .rmdp-arrow {
+            border: solid gray;
+            border-width: 0 2px 2px 0
+        }
+        
+        .rmdp-rtl {
+            direction: rtl
+        }
+        
+        .rmdp-rtl .rmdp-left i {
+            margin-left: 0;
+            margin-right: 3px;
+            transform: rotate(-45deg);
+            -webkit-transform: rotate(-45deg)
+        }
+        
+        .rmdp-rtl .rmdp-right i {
+            margin-left: 3px;
+            margin-right: 0;
+            transform: rotate(135deg);
+            -webkit-transform: rotate(135deg)
+        }
+        
+        .rmdp-rtl .rmdp-right {
+            left: 0;
+            right: auto
+        }
+        
+        .rmdp-rtl .rmdp-left {
+            left: auto;
+            right: 0
+        }
+        
+        .rmdp-rtl .rmdp-range-hover.start,
+        .rmdp-rtl .rmdp-range.start {
+            border-bottom-left-radius: unset;
+            border-bottom-right-radius: 50%;
+            border-top-left-radius: unset;
+            border-top-right-radius: 50%
+        }
+        
+        .rmdp-rtl .rmdp-range-hover.end,
+        .rmdp-rtl .rmdp-range.end {
+            border-bottom-left-radius: 50%;
+            border-bottom-right-radius: unset;
+            border-top-left-radius: 50%;
+            border-top-right-radius: unset
+        }
+        
+        .rmdp-rtl .rmdp-range.start.end {
+            border-radius: 50%
+        }
+        
+        .rmdp-rtl .rmdp-ym .rmdp-range-hover.start,
+        .rmdp-rtl .rmdp-ym .rmdp-range.start {
+            border-bottom-right-radius: 15px;
+            border-top-right-radius: 15px
+        }
+        
+        .rmdp-rtl .rmdp-ym .rmdp-range-hover.end,
+        .rmdp-rtl .rmdp-ym .rmdp-range.end {
+            border-bottom-left-radius: 15px;
+            border-top-left-radius: 15px
+        }
+        
+        .rmdp-day-hidden,
+        .rmdp-day.rmdp-disabled {
+            cursor: default
+        }
+        
+        .rmdp-selected .highlight {
+            box-shadow: 0 0 3px #8798ad
+        }
+        
+        .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) .highlight-red:hover {
+            background-color: #ff6687
+        }
+        
+        .rmdp-day:not(.rmdp-deactive) .highlight-red {
+            color: #cc0303
+        }
+        
+        .rmdp-day.rmdp-deactive .highlight-red {
+            color: #e08e8e
+        }
+        
+        .rmdp-day.rmdp-selected .highlight-red {
+            background-color: #ea0034;
+            color: #fff
+        }
+        
+        .rmdp-day.rmdp-deactive.rmdp-selected .highlight-red {
+            background-color: #e4b0ba;
+            color: #fff
+        }
+        
+        .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) .highlight-green:hover {
+            background-color: #4db6ac
+        }
+        
+        .rmdp-day:not(.rmdp-deactive) .highlight-green {
+            color: #00796b
+        }
+        
+        .rmdp-day.rmdp-deactive .highlight-green {
+            color: #7ab3ac
+        }
+        
+        .rmdp-day.rmdp-selected .highlight-green {
+            background-color: #009688;
+            color: #fff
+        }
+        
+        .rmdp-day.rmdp-deactive.rmdp-selected .highlight-green {
+            background-color: #749c98;
+            color: #fff
+        }
+        
+        .rmdp-day-hidden,
+        .rmdp-day-hidden:hover span {
+            background-color: unset;
+            color: transparent
+        }
+        
+        .rmdp-month-name {
+            cursor: default;
+            font-size: 14px;
+            margin: 3px 0
+        }
+        
+        .rmdp-full-year {
+            grid-template-columns: 1fr 1fr 1fr
+        }
+        
+        @media (max-height:450px),
+        (max-width:450px) {
+            .rmdp-day,
+            .rmdp-week-day {
+                height: 28px;
+                width: 28px
+            }
+            .rmdp-day span {
+                font-size: 12px;
+                padding-left: .5px
+            }
+            .only.rmdp-month-picker,
+            .only.rmdp-year-picker {
+                height: 200px;
+                width: 205px
+            }
+            .rmdp-header {
+                height: 32px;
+                line-height: 32px
+            }
+            .rmdp-header,
+            .rmdp-month-name {
+                font-size: 12px
+            }
+            .rmdp-full-year {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+    </style>
+    <style type="text/css">
+        .rmdp-visible {
+            visibility: visible
+        }
+        
+        .rmdp-invisible {
+            visibility: hidden
+        }
+        
+        .rmdp-input {
+            border: 1px solid #c0c4d6;
+            border-radius: 5px;
+            height: 22px;
+            margin: 1px 0;
+            padding: 2px 5px
+        }
+        
+        .rmdp-input:focus {
+            border: 1px solid #a4b3c5;
+            box-shadow: 0 0 2px #a4b3c5;
+            outline: none!important
+        }
+        
+        .rmdp-button {
+            background-color: #0074d9;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            display: inline-block;
+            padding: 7px 16px;
+            text-align: center;
+            text-decoration: none;
+            transition: .3s
+        }
+        
+        .rmdp-button:hover {
+            background-color: #143ac5;
+            transition: .4s
+        }
+        
+        .rmdp-button:disabled {
+            background-color: #8798ad
+        }
+        
+        .rmdp-action-button {
+            border-radius: unset;
+            color: #2682d3;
+            float: right;
+            font-weight: 700;
+            margin: 15px 10px 15px 0
+        }
+        
+        .rmdp-action-button,
+        .rmdp-action-button:hover {
+            background-color: transparent
+        }
+        
+        .rmdp-ep-arrow {
+            overflow: hidden;
+            will-change: transform
+        }
+        
+        .rmdp-ep-arrow:after {
+            background-color: #fff;
+            content: "";
+            height: 12px;
+            position: absolute;
+            transform: rotate(45deg);
+            width: 12px
+        }
+        
+        .rmdp-ep-shadow:after {
+            box-shadow: 0 0 6px #8798ad
+        }
+        
+        .rmdp-ep-border:after {
+            border: 1px solid #cfd8e2
+        }
+        
+        .rmdp-ep-arrow[direction=top] {
+            border-bottom: 1px solid #fff
+        }
+        
+        .rmdp-ep-arrow[direction=left] {
+            border-right: 1px solid #fff
+        }
+        
+        .rmdp-ep-arrow[direction=right] {
+            border-left: 1px solid #fff;
+            margin-left: -1px
+        }
+        
+        .rmdp-ep-arrow[direction=bottom] {
+            border-top: 1px solid #fff;
+            margin-top: -1.5px
+        }
+        
+        .rmdp-ep-arrow[direction=top]:after {
+            left: 4px;
+            top: 5px
+        }
+        
+        .rmdp-ep-arrow[direction=bottom]:after {
+            left: 4px;
+            top: -6px
+        }
+        
+        .rmdp-ep-arrow[direction=left]:after {
+            left: 5px;
+            top: 3px
+        }
+        
+        .rmdp-ep-arrow[direction=right]:after {
+            left: -6px;
+            top: 3px
+        }
+    </style>
+    <style data-rc-order="append" rc-util-key="-ant-1731527831265-0.25145584175955804-dynamic-theme">
+         :root {
+            --ant-primary-color: rgb(48, 109, 181);
+            --ant-primary-color-disabled: #d3e0e8;
+            --ant-primary-color-hover: #538bc2;
+            --ant-primary-color-active: #1f508f;
+            --ant-primary-color-outline: rgba(48, 109, 181, 0.2);
+            --ant-primary-color-deprecated-bg: #e6eff5;
+            --ant-primary-color-deprecated-border: #a4c4db;
+            --ant-primary-1: #e6eff5;
+            --ant-primary-2: #d3e0e8;
+            --ant-primary-3: #a4c4db;
+            --ant-primary-4: #7aa7cf;
+            --ant-primary-5: #538bc2;
+            --ant-primary-6: #306db5;
+            --ant-primary-7: #1f508f;
+            --ant-primary-8: #123469;
+            --ant-primary-9: #081d42;
+            --ant-primary-10: #030b1c;
+            --ant-primary-color-deprecated-l-35: rgb(174, 201, 234);
+            --ant-primary-color-deprecated-l-20: rgb(114, 161, 217);
+            --ant-primary-color-deprecated-t-20: rgb(89, 138, 196);
+            --ant-primary-color-deprecated-t-50: rgb(152, 182, 218);
+            --ant-primary-color-deprecated-f-12: rgba(48, 109, 181, 0.12);
+            --ant-primary-color-active-deprecated-f-30: rgba(230, 239, 245, 0.3);
+            --ant-primary-color-active-deprecated-d-02: rgb(223, 234, 242);
+        }
+    </style>
+    <meta charset="utf-8" data-react-helmet="true">
+    <meta name="description" content="هي منصة إلكترونية تخدم القطاع الصحي في المملكة من خلال تقديم خدمات إلكترونية معتمدة من قبل وزارة الصحة، أنشئت منصة صحة تماشيًا مع رؤية المملكة 2030 وتفعيلاً للتوجه الحكومي، وتهدف إلى أتمتة وتوحيد الإجراءات والخدمات وتسهيلها في جميع الجهات الصحية وتشمل العديد من الخدمات الصحية التي تحت مظلة منظومة الصحة وقطاعاتها المتنوعة للأفراد من المنشأت الطبية."
+        data-react-helmet="true">
+</head>
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-10">
-        <div class="card">
-            <div class="card-header bg-primary text-white text-center">
-                <h2>نظام إدارة الإجازات المرضية</h2>
+<body><noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root">
+        <div class="App">
+            <main>
+                <div class="landing-section">
+                    <div style="z-index: 99; opacity: 1; transform: none;">
+                        <nav class="header navbar navbar-expand-lg navbar-light">
+                            <div class="nav-container">
+                                <a class="navbar-brand" href="#/"><img src="{% static 'media/seha_logo.4dde29e5c4f38890ccf9787220bcc5be.svg' %}" alt="logo" class="logo"></a>
+                                <div class="d-lg-none d-xl-none justify-content-end menu"><button aria-controls="responsive-navbar-nav" type="button" aria-label="Toggle navigation" class="d-inline-flex menu-img navbar-toggler collapsed"><span class="navbar-toggler-icon"></span></button></div>
+                                <div class="white  justify-content-between navbar-collapse collapse"
+                                    id="responsive-navbar-nav">
+                                    <div class="justify-content-between navbar-nav"><a data-rr-ui-event-key="1" class="link nav-link" href="#/services">الخدمات</a><a  data-rr-ui-event-key="2" class="link nav-link" id="inquiries-link">الاستعلامات</a></div>
+                                    <div class="justify-content-between navbar-nav">
+                                        <a data-rr-ui-event-key="4" class="nav-link" href="#/iamredirection/1">
+                                            <p>إنشاء حساب</p>
+                                        </a>
+                                        <a data-rr-ui-event-key="5" class="login nav-link" href="#/account/login"><img src="{% static 'media/user_o.7825677e64284b06f60f7c30082fed56.svg' %}" alt="logo" class="">
+                                            <p>تسجيل الدخول</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div><button style="display: none;" id="top-button"><svg xmlns="http://www.w3.org/2000/svg" width="14.4" height="18.503" viewBox="0 0 14.4 18.503"><path id="arrow-up-c" d="M8.862,11.37,14.381,6.1a1.7,1.7,0,0,1,2.355,0l5.54,5.272a1.555,1.555,0,0,1,0,2.271,1.738,1.738,0,0,1-2.376,0l-2.649-2.528V22.519a1.684,1.684,0,0,1-3.364,0V11.113l-2.649,2.534a1.738,1.738,0,0,1-2.376,0,1.561,1.561,0,0,1,0-2.276Z" transform="translate(-8.369 -5.625)" fill="#00a1c9"></path></svg></button></nav>
+                    </div>
+                    <div class="">
+                        <div class="main-slider"><object type="image/svg+xml" data="{% static 'media/seha-logo-animation-new.svg' %}" class="background-img"></object>
+                            <div class="text-center main-slider-container">
+                                <div class="swiper swiper-initialized swiper-horizontal swiper-pointer-events swiper-rtl slider-btn-fix swiper-backface-hidden">
+                                    <div class="swiper-wrapper" style="transition-duration: 0ms; transform: translate3d(4648px, 0px, 0px);">
+                                        <div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="7" style="width: 1162px;">
+                                            <h1 class="slide-title">خدمة</h1>
+                                            <h3 class="slide-sub-title">الأشعة الاتصالية</h3>
+                                            <p class="slide-description">هي منصة لتقديم خدمات التشخيص الإشعاعي عن&nbsp;بعد من قبل استشاريين الأشعة ذوي التخصصات الدقيقة. تمثل المنصة حلقة الوصل&nbsp;بين الأطباء المعالجين وأطباء الأشعة، لتمكين الوصول إلى الاستشارة الطبية ورفع&nbsp;جودتها
+                                                وتقليل وقت انتظار المريض لحصوله على التشخيص.&nbsp;</p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">الدخول للخدمة<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide" data-swiper-slide-index="0" style="width: 1162px;">
+                                            <h1 class="slide-title">استبيان رضا المستفيدين</h1>
+                                            <h3 class="slide-sub-title">
+                                                <div style="direction: ltr;"><br></div>
+                                            </h3>
+                                            <p class="slide-description"><span><div style="direction: ltr;">! رضا المستفيد من اهم عوامل نجاح منصة صحة </div>لذلك نقدر تقييماتكم التي تساهم دوما في تطوير خدماتنا المقدمة</span></p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">تعبئة الاستبيان<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide" data-swiper-slide-index="1" style="width: 1162px;">
+                                            <h1 class="slide-title">خدمة</h1>
+                                            <h3 class="slide-sub-title">مؤهل</h3>
+                                            <p class="slide-description"><span>هل تبحث عن ممارس صحي؟<br>خدمة مؤهل تمكن منشأتك الصحية من الوصول إلى الممارس الصحي بسهولة.</span></p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">الدخول للخدمة<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide swiper-slide-prev" data-swiper-slide-index="2" style="width: 1162px;">
+                                            <h1 class="slide-title">خدمة</h1>
+                                            <h3 class="slide-sub-title">ترخيص الترميز الطبي الأسترالي </h3>
+                                            <p class="slide-description">
+                                                الآن يمكنك إصدار ترخيص الترميز الطبي الأسترالي "ICD-10 AM/ACHI" الترميز لطبي هو آلية تحويل الأسماء أو المصطلحات الطبية للأمراض إلى رموز سواء كانت مكونة من أرقام أو حروف لتمكين القطاع الصحي وقطاع التأمين من: • تسهيل وتسريع الإجراءات • المساهمة في رفع مستوى
+                                                جودة البرامج الخاصة بسلامة المرضى • تحسين الرعاية الصحية وفعاليتها </p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">الدخول للخدمة<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="3" style="width: 1162px;">
+                                            <h1 class="slide-title">خدمة</h1>
+                                            <h3 class="slide-sub-title">الشهادات الصحية </h3>
+                                            <p class="slide-description">هي إحدى خدمات التقارير الطبية وتتمثل في الربط الإلكتروني لنتائج الفحص الطبي بحيث يتسنى للمستفيد إجراء الفحص في المنشآت الصحية المرخصة وإرسال نتيجة الفحص إلكترونيا للجهة المسؤولة بما يمكن من الإصدار الإلكتروني
+                                                للشهادات الصحية</p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">الدخول للخدمة<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide swiper-slide-next" data-swiper-slide-index="4" style="width: 1162px;">
+                                            <h1 class="slide-title">خدمة</h1>
+                                            <h3 class="slide-sub-title">التقييم الذاتي </h3>
+                                            <p class="slide-description">هي خدمة تهدف إلى التعريف بحقوق المؤسسات الصحية الخاصة في أنظمة ومعايير وزارة الصحة والإجراءات التصحيحية الواجب اتخاذها لرفع مستويات الجودة والسلامة في الخدمة الصحية المقدمة وتعززي مفهوم الرقابة الذاتية لدى المنشآت
+                                                الصحية.</p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">الدخول للخدمة<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide" data-swiper-slide-index="5" style="width: 1162px;">
+                                            <h1 class="slide-title">خدمة</h1>
+                                            <h3 class="slide-sub-title">الإجازة المرضية </h3>
+                                            <p class="slide-description">هي خدمة تتيح للمنشآت الصحية تسجيل الإجازات المرضية والتحقق من صحة بيانات المرضى، الأطباء، والمنشآت الصحية وموثوقية مصدرها المعتمد، وتتيح للأفراد إمكانية الوصول الى الإجازات المرضية إلكترونيا.</p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">الدخول للخدمة<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide" data-swiper-slide-index="6" style="width: 1162px;">
+                                            <h1 class="slide-title">خدمة</h1>
+                                            <h3 class="slide-sub-title">الوصفة الإلكترونية </h3>
+                                            <p class="slide-description">خدمة تتيح إمكانية صرف الوصفات الطبية إلكترونيا للصيدليات المسجلة في منصة صحة حيث توفر الخدمة إمكانية متابعة عدد الوصفات المصروفة من المنشأة. جميع الوصفات المصدرة إلكترونيا موثوقة المصدر مع إمكانية التواصل مع
+                                                الطبيب المصدر للوصفة الطبية الإلكترونية. هذه الخدمة متوفرة لجميع الصيدليات في كل أنحاء المملكة. يمكنك الآن الاشتراك في الخدمة عبر منصة صحة بشكل فوري.</p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">الدخول للخدمة<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide" data-swiper-slide-index="7" style="width: 1162px;">
+                                            <h1 class="slide-title">خدمة</h1>
+                                            <h3 class="slide-sub-title">الأشعة الاتصالية</h3>
+                                            <p class="slide-description">هي منصة لتقديم خدمات التشخيص الإشعاعي عن&nbsp;بعد من قبل استشاريين الأشعة ذوي التخصصات الدقيقة. تمثل المنصة حلقة الوصل&nbsp;بين الأطباء المعالجين وأطباء الأشعة، لتمكين الوصول إلى الاستشارة الطبية ورفع&nbsp;جودتها
+                                                وتقليل وقت انتظار المريض لحصوله على التشخيص.&nbsp;</p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">الدخول للخدمة<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                        <div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="0" style="width: 1162px;">
+                                            <h1 class="slide-title">استبيان رضا المستفيدين</h1>
+                                            <h3 class="slide-sub-title">
+                                                <div style="direction: ltr;"><br></div>
+                                            </h3>
+                                            <p class="slide-description"><span><div style="direction: ltr;">! رضا المستفيد من اهم عوامل نجاح منصة صحة </div>لذلك نقدر تقييماتكم التي تساهم دوما في تطوير خدماتنا المقدمة</span></p>
+                                            <div class="call-to-action-primary"><button type="button" class="btn btn-primary">تعبئة الاستبيان<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+                                        </div>
+                                    </div>
+                                    <div class="swiper-button-prev"></div>
+                                    <div class="swiper-button-next"></div>
+                                    <div class="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet swiper-pagination-bullet-active"></span>
+                                        <span
+                                            class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span></div>
+                                </div>
+                                <div style="z-index: 99; transform: translateY(0.00763929px) translateZ(0px);">
+                                    <div class="text-center down"><img src="s{% static 'media/group_4716.a225813b4da825a826d2cb9c17cca4f2.svg' %}" alt=""></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="services-container" id="#home-services-section">
+                            <div class="right-column">
+                                <h1 class="heading">الخدمات</h1>
+                                <p class="sub-heading">الخدمات الأكثر استخداما</p><button class="tab-button button-small  active"><p>التراخيص الصحية</p><img alt="arrow-left-white" style="transform: rotate(0deg);" src="{% static 'media/arrow-left-white.da6465b4ceb827da42de0edc6d0e6fa0.svg' %}"></button>
+                                <button
+                                    class="tab-button button-small ">
+                                    <p>التقارير الطبية</p>
+                                    </button><button class="tab-button button-small "><p>قياس الالتزام</p></button><button class="tab-button button-small "><p>خدمات البلاغات</p></button><button class="tab-button button-small "><p>خدمات حصن بلس</p></button>
+                                    <button
+                                        class="tab-button button-small ">
+                                        <p>خدمات أخرى</p>
+                                        </button>
+                                        <div class="categories-wrapper"><img class="scroll-arrow" src="{% static 'media/scroll-arrow-right.3f7021ecfb50c6ea894048634d249ba2.svg' %}">
+                                            <div class="categories-scroll-wrapper">
+                                                <div class="category-wrapper"><input class="btn-check" type="checkbox" autocomplete="off" id="toggle-check" value="1" checked="checked"><label tabindex="0" for="toggle-check" class="selection-btn checked btn btn-outline-primary">التراخيص الصحية<span class="selection-number">3</span></label></div>
+                                                <div
+                                                    class="category-wrapper"><input class="btn-check" type="checkbox" autocomplete="off" id="toggle-check" value="1"><label tabindex="0" for="toggle-check" class="selection-btn  btn btn-outline-primary">التقارير الطبية<span class="selection-number">15</span></label></div>
+                                            <div
+                                                class="category-wrapper"><input class="btn-check" type="checkbox" autocomplete="off" id="toggle-check" value="1"><label tabindex="0" for="toggle-check" class="selection-btn  btn btn-outline-primary">قياس الالتزام<span class="selection-number">3</span></label></div>
+                                        <div
+                                            class="category-wrapper"><input class="btn-check" type="checkbox" autocomplete="off" id="toggle-check" value="1"><label tabindex="0" for="toggle-check" class="selection-btn  btn btn-outline-primary">خدمات البلاغات<span class="selection-number">1</span></label></div>
+                            <div
+                                class="category-wrapper"><input class="btn-check" type="checkbox" autocomplete="off" id="toggle-check" value="1"><label tabindex="0" for="toggle-check" class="selection-btn  btn btn-outline-primary">خدمات حصن بلس<span class="selection-number">4</span></label></div>
+                        <div
+                            class="category-wrapper"><input class="btn-check" type="checkbox" autocomplete="off" id="toggle-check" value="1"><label tabindex="0" for="toggle-check" class="selection-btn  btn btn-outline-primary">خدمات أخرى<span class="selection-number">6</span></label></div>
+                </div><img class="scroll-arrow" src="{% static 'media/scroll-arrow-left.1bb17ec7fba0caa63e4930f79e997f40.svg' %}"></div>
+    </div>
+    <div class="text-center content">
+        <div class="section-header-wrapper">
+            <h3> التراخيص الصحية</h3>
+            <div class="divider"></div>
+        </div>
+        <div class="swiper swiper-initialized swiper-horizontal swiper-pointer-events swiper-rtl large swiper-backface-hidden" dir="rtl">
+            <div class="swiper-wrapper" style="transition-duration: 0ms; transform: translate3d(931px, 0px, 0px);">
+                <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="0" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/health-licenses.9a9f7827f72b3a8e6845.svg' %}">
+                        <p class="slide-title">تراخيص المنشآت الصحية</p>
+                        <p class="slide-sub-title"> تمكن هذه الخدمة المستثمرين ومنشآت القطاع الصحي من اصدار وتجديد وإلغاء وتعديل البيانات لتراخيص المنشآت الصحية بشكل آلي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-next" data-swiper-slide-index="1" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/alt-medicine-license.4634aa3d538d74319d4b.svg' %}">
+                        <p class="slide-title">تراخيص الطب البديل والتكميلي</p>
+                        <p class="slide-sub-title">
+                            هي خدمة تتيح لمنشآت الطب البديل والتكميلي من إصدار وتجديد تراخيص ممارسين الطب البديل والمنشآت وأيضًا من طلب تصنيف الممارسين العاملين لدى المنشأة.
+                        </p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-duplicate swiper-slide-prev" data-swiper-slide-index="2" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/medical-icd-10.2e46312ee7a9cddcf642.svg' %}">
+                        <p class="slide-title">الترميز الطبي ICD-10</p>
+                        <p class="slide-sub-title">
+                            تقديم المنشأة طلب إصدار شهادة الترميز الطبي الأسترالي للنسخة العاشرة من المجلس الصحي السعودي والحصول على الأكواد لاستخدامها في الترميز الطبي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="0" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/health-licenses.9a9f7827f72b3a8e6845.svg' %}">
+                        <p class="slide-title">تراخيص المنشآت الصحية</p>
+                        <p class="slide-sub-title"> تمكن هذه الخدمة المستثمرين ومنشآت القطاع الصحي من اصدار وتجديد وإلغاء وتعديل البيانات لتراخيص المنشآت الصحية بشكل آلي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-next" data-swiper-slide-index="1" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/alt-medicine-license.4634aa3d538d74319d4b.svg' %}">
+                        <p class="slide-title">تراخيص الطب البديل والتكميلي</p>
+                        <p class="slide-sub-title">
+                            هي خدمة تتيح لمنشآت الطب البديل والتكميلي من إصدار وتجديد تراخيص ممارسين الطب البديل والمنشآت وأيضًا من طلب تصنيف الممارسين العاملين لدى المنشأة.
+                        </p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-duplicate-prev" data-swiper-slide-index="2" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/medical-icd-10.2e46312ee7a9cddcf642.svg' %}">
+                        <p class="slide-title">الترميز الطبي ICD-10</p>
+                        <p class="slide-sub-title">
+                            تقديم المنشأة طلب إصدار شهادة الترميز الطبي الأسترالي للنسخة العاشرة من المجلس الصحي السعودي والحصول على الأكواد لاستخدامها في الترميز الطبي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="0" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/health-licenses.9a9f7827f72b3a8e6845.svg' %}">
+                        <p class="slide-title">تراخيص المنشآت الصحية</p>
+                        <p class="slide-sub-title"> تمكن هذه الخدمة المستثمرين ومنشآت القطاع الصحي من اصدار وتجديد وإلغاء وتعديل البيانات لتراخيص المنشآت الصحية بشكل آلي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-next" data-swiper-slide-index="1" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/alt-medicine-license.4634aa3d538d74319d4b.svg' %}">
+                        <p class="slide-title">تراخيص الطب البديل والتكميلي</p>
+                        <p class="slide-sub-title">
+                            هي خدمة تتيح لمنشآت الطب البديل والتكميلي من إصدار وتجديد تراخيص ممارسين الطب البديل والمنشآت وأيضًا من طلب تصنيف الممارسين العاملين لدى المنشأة.
+                        </p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="2" style="width: 210.333px; margin-left: 100px;">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/medical-icd-10.2e46312ee7a9cddcf642.svg' %}">
+                        <p class="slide-title">الترميز الطبي ICD-10</p>
+                        <p class="slide-sub-title">
+                            تقديم المنشأة طلب إصدار شهادة الترميز الطبي الأسترالي للنسخة العاشرة من المجلس الصحي السعودي والحصول على الأكواد لاستخدامها في الترميز الطبي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="text-center mb-4">
-                    {% load static %}
-                    {% load core_extras %}
-                    {% if 'images/moh-logo.png'|static_exists %}
-                        <img src="{% static 'images/moh-logo.png' %}" alt="وزارة الصحة" class="img-fluid" style="max-height: 150px;">
-                    {% else %}
-                        <i class="fas fa-hospital fa-5x text-primary mb-3"></i>
-                        <h3 class="text-primary">نظام إدارة الإجازات المرضية</h3>
-                    {% endif %}
-                </div>
-                <p class="lead text-center">
-                    مرحبًا بك في نظام إدارة الإجازات المرضية وتقارير مرافقة المرضى
-                </p>
-                <p class="text-center">
-                    يتيح هذا النظام للأطباء والموظفين إدارة الإجازات المرضية وتقارير مرافقة المرضى بطريقة سهلة وفعالة.
-                </p>
-
-                <div class="row mt-5">
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-header bg-light">
-                                <h5>للمستخدمين المسجلين</h5>
-                            </div>
-                            <div class="card-body">
-                                <p>إذا كنت مستخدمًا مسجلاً، يمكنك تسجيل الدخول للوصول إلى لوحة التحكم وإدارة الإجازات والتقارير.</p>
-                                <div class="d-grid gap-2">
-                                    <a href="{% url 'login' %}" class="btn btn-primary">تسجيل الدخول</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card mb-3">
-                            <div class="card-header bg-light">
-                                <h5>للزوار</h5>
-                            </div>
-                            <div class="card-body">
-                                <p>يمكنك التحقق من صحة الإجازات المرضية وإجازات المرافقة من خلال إدخال رقم الإجازة.</p>
-                                <div class="d-grid gap-2">
-                                    <a href="{% url 'core:verify' %}" class="btn btn-success">التحقق من صحة الإجازة</a>
-                                </div>
-                            </div>
-                        </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"><span class="swiper-pagination-bullet swiper-pagination-bullet-active"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span></div>
+        </div>
+        <div class="swiper swiper-container swiper-initialized swiper-horizontal swiper-pointer-events swiper-rtl small" dir="rtl">
+            <div class="swiper-wrapper" style="transition-duration: 0ms;">
+                <div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="2">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/medical-icd-10.2e46312ee7a9cddcf642.svg' %}">
+                        <p class="slide-title">الترميز الطبي ICD-10</p>
+                        <p class="slide-sub-title">تقديم المنشأة طلب إصدار شهادة الترميز الطبي الأسترالي للنسخة العاشرة من المجلس الصحي السعودي والحصول على الأكواد لاستخدامها في الترميز الطبي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
                     </div>
                 </div>
-
-                <div class="row mt-4">
-                    <div class="col-md-4">
-                        <div class="card text-center mb-3">
-                            <div class="card-body">
-                                <i class="fas fa-procedures fa-3x text-primary mb-3"></i>
-                                <h5 class="card-title">الإجازات المرضية</h5>
-                                <p class="card-text">إدارة الإجازات المرضية للمرضى بكفاءة وسهولة.</p>
-                            </div>
-                        </div>
+                <div class="swiper-slide" data-swiper-slide-index="0">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/health-licenses.9a9f7827f72b3a8e6845.svg' %}">
+                        <p class="slide-title">تراخيص المنشآت الصحية</p>
+                        <p class="slide-sub-title">تمكن هذه الخدمة المستثمرين ومنشآت القطاع الصحي من اصدار وتجديد وإلغاء وتعديل البيانات لتراخيص المنشآت الصحية بشكل آلي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card text-center mb-3">
-                            <div class="card-body">
-                                <i class="fas fa-user-nurse fa-3x text-success mb-3"></i>
-                                <h5 class="card-title">إجازات المرافقين</h5>
-                                <p class="card-text">إدارة إجازات مرافقي المرضى بطريقة منظمة.</p>
-                            </div>
-                        </div>
+                </div>
+                <div class="swiper-slide" data-swiper-slide-index="1">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/alt-medicine-license.4634aa3d538d74319d4b.svg' %}">
+                        <p class="slide-title">تراخيص الطب البديل والتكميلي</p>
+                        <p class="slide-sub-title">هي خدمة تتيح لمنشآت الطب البديل والتكميلي من إصدار وتجديد تراخيص ممارسين الطب البديل والمنشآت وأيضًا من طلب تصنيف الممارسين العاملين لدى المنشأة.</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card text-center mb-3">
-                            <div class="card-body">
-                                <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
-                                <h5 class="card-title">التقارير والإحصائيات</h5>
-                                <p class="card-text">إنشاء تقارير وإحصائيات متنوعة للإجازات.</p>
+                </div>
+                <div class="swiper-slide" data-swiper-slide-index="2">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/medical-icd-10.2e46312ee7a9cddcf642.svg' %}">
+                        <p class="slide-title">الترميز الطبي ICD-10</p>
+                        <p class="slide-sub-title">تقديم المنشأة طلب إصدار شهادة الترميز الطبي الأسترالي للنسخة العاشرة من المجلس الصحي السعودي والحصول على الأكواد لاستخدامها في الترميز الطبي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+                <div class="swiper-slide swiper-slide-duplicate" data-swiper-slide-index="0">
+                    <div class="service-card"><img alt="service-icon" src="{% static 'media/health-licenses.9a9f7827f72b3a8e6845.svg' %}">
+                        <p class="slide-title">تراخيص المنشآت الصحية</p>
+                        <p class="slide-sub-title">تمكن هذه الخدمة المستثمرين ومنشآت القطاع الصحي من اصدار وتجديد وإلغاء وتعديل البيانات لتراخيص المنشآت الصحية بشكل آلي .</p>
+                        <div class="button-group-wrapper"><button type="button" class="btn btn-primary">ابدأ الخدمة</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"></div>
+        </div>
+        <div class="call-to-action-ghost readmore"><button type="button" class="btn btn-primary"><p>استعراض جميع الخدمات</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+    </div>
+    </div>
+    <div class="text-center seha-eco-container">
+        <h1 class="heading">المنظومة الصحيّة</h1>
+        <div class="swiper swiper-container swiper-initialized swiper-horizontal swiper-pointer-events swiper-rtl swiper-backface-hidden">
+            <div class="swiper-wrapper" style="transform: translate3d(0px, 0px, 0px);">
+                <div class="swiper-slide swiper-slide-active" style="width: 316.667px; margin-left: 30px;">
+                    <div class="echo-card"><img src="{% static 'media/sehaty-large.c96ecc5a37e39448a21a24c2b52840d1.svg' %}" alt="image" class="base-img image-fluid">
+                        <div class="content">
+                            <h1>منصة صحتي</h1>
+                            <p class="description">
+                                صحتي هي منصة المواطن الأولى للأفراد في المملكة العربية السعودية. تتيح المنصة للمستخدم الوصول إلى معلوماته وعدد من الخدمات الصحية من الجهات المختلفة في القطاع الصحي </p>
+                            <div class="d-flex justify-content-around">
+                                <a href="https://apps.apple.com/sa/app/%D8%B5%D8%AD%D8%AA%D9%8A-sehhaty/id1459266578" target="_blank" rel="noreferrer"><img src="{% static 'media/apple.c945af0c3cfb5f55296ed2cb76a9810d.svg' %}" alt="image"></a>
+                                <a href="https://play.google.com/store/apps/details?id=com.lean.sehhaty" target="_blank" rel="noreferrer"><img src="{% static 'media/google_play.aafc6940da89beba046eb2dd11dd92b9.svg' %}" alt="image"></a>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="text-center mt-4">
-                    <a href="{% url 'core:about' %}" class="btn btn-outline-primary">معرفة المزيد عن النظام</a>
+                <div class="swiper-slide swiper-slide-next" style="width: 316.667px; margin-left: 30px;">
+                    <div class="echo-card"><img src="{% static 'media/seha-large.9ce4efcd24cb0072e103e5226b92c857.svg' %}" alt="image" class="base-img image-fluid">
+                        <div class="content">
+                            <h1>منصة صحة</h1>
+                            <p class="description">
+                                منصة صحة هي منصة إلكترونية تهدف إلى تحقيق وتوفير نظام بيئي صحي في المملكة العربية السعودية، ويقدم العديد من الخدمات الصحية الموثوقة والسريعة تحت مظلة منظومة الصحة وقطاعاتها المتنوعة للمنشآت الطبية والأفراد </p>
+                            <div class="d-flex justify-content-around">
+                                <a href="https://seha.sa/" target="_blank" rel="noreferrer"><img src="{% static 'media/ios_globe.e52d8e2c6b5885a125c43d55a9ad6502.svg' %}" alt="image"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide" style="width: 316.667px; margin-left: 30px;">
+                    <div class="echo-card"><img src="{% static 'media/anat-large.ae1dcde0d164ac21bea901d35f260357.svg' %}" alt="image" class="base-img image-fluid">
+                        <div class="content">
+                            <h1>منصة أناة</h1>
+                            <p class="description">
+                                أناة هي منصة تقدم خدمات إلكترونية للممارسين الصحيين (المواطنين والمقيمين) وتسهل طرق التواصل فيما بينهم لتبادل الخبرات العلمية، كما تقوم بوصلهم بالمراجعين لرفع مستوى الخدمات الصحية المقدمة للمرضى </p>
+                            <div class="d-flex justify-content-around">
+                                <a href="https://apps.apple.com/us/app/id1472911277" target="_blank" rel="noreferrer"><img src="{% static 'media/apple.c945af0c3cfb5f55296ed2cb76a9810d.svg' %}" alt="image"></a>
+                                <a href="https://play.google.com/store/apps/details?id=com.lean.practitioner" target="_blank" rel="noreferrer"><img src="{% static 'media/google_play.aafc6940da89beba046eb2dd11dd92b9.svg' %}" alt="image"></a>
+                                <a href="https://anat.sa/" target="_blank" rel="noreferrer"><img src="{% static 'media/ios_globe.e52d8e2c6b5885a125c43d55a9ad6502.svg' %}" alt="image"></a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="swiper swiper-initialized swiper-horizontal swiper-pointer-events swiper-rtl mobile-swiper-container" dir="rtl">
+            <div class="swiper-wrapper" style="transition-duration: 0ms;">
+                <div class="swiper-slide">
+                    <div class="echo-card"><img src="{% static 'media/sehaty-large.c96ecc5a37e39448a21a24c2b52840d1.svg' %}" alt="image" class="base-img image-fluid">
+                        <div class="content">
+                            <h1>منصة صحتي</h1>
+                            <p class="description">
+                                صحتي هي منصة المواطن الأولى للأفراد في المملكة العربية السعودية. تتيح المنصة للمستخدم الوصول إلى معلوماته وعدد من الخدمات الصحية من الجهات المختلفة في القطاع الصحي </p>
+                            <div class="d-flex justify-content-around">
+                                <a href="https://apps.apple.com/sa/app/%D8%B5%D8%AD%D8%AA%D9%8A-sehhaty/id1459266578" target="_blank" rel="noreferrer"><img src="{% static 'media/apple.c945af0c3cfb5f55296ed2cb76a9810d.svg' %}" alt="image"></a>
+                                <a href="https://play.google.com/store/apps/details?id=com.lean.sehhaty" target="_blank" rel="noreferrer"><img src="{% static 'media/google_play.aafc6940da89beba046eb2dd11dd92b9.svg' %}" alt="image"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="echo-card"><img src="{% static 'media/seha-large.9ce4efcd24cb0072e103e5226b92c857.svg' %}" alt="image" class="base-img image-fluid">
+                        <div class="content">
+                            <h1>منصة صحة</h1>
+                            <p class="description">
+                                منصة صحة هي منصة إلكترونية تهدف إلى تحقيق وتوفير نظام بيئي صحي في المملكة العربية السعودية، ويقدم العديد من الخدمات الصحية الموثوقة والسريعة تحت مظلة منظومة الصحة وقطاعاتها المتنوعة للمنشآت الطبية والأفراد </p>
+                            <div class="d-flex justify-content-around">
+                                <a href="https://seha.sa/" target="_blank" rel="noreferrer"><img src="{% static 'media/ios_globe.e52d8e2c6b5885a125c43d55a9ad6502.svg' %}" alt="image"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-slide">
+                    <div class="echo-card"><img src="{% static 'media/anat-large.ae1dcde0d164ac21bea901d35f260357.svg' %}" alt="image" class="base-img image-fluid">
+                        <div class="content">
+                            <h1>منصة أناة</h1>
+                            <p class="description">
+                                أناة هي منصة تقدم خدمات إلكترونية للممارسين الصحيين (المواطنين والمقيمين) وتسهل طرق التواصل فيما بينهم لتبادل الخبرات العلمية، كما تقوم بوصلهم بالمراجعين لرفع مستوى الخدمات الصحية المقدمة للمرضى </p>
+                            <div class="d-flex justify-content-around">
+                                <a href="https://apps.apple.com/us/app/id1472911277" target="_blank" rel="noreferrer"><img src="{% static 'media/apple.c945af0c3cfb5f55296ed2cb76a9810d.svg' %}" alt="image"></a>
+                                <a href="https://play.google.com/store/apps/details?id=com.lean.practitioner" target="_blank" rel="noreferrer"><img src="{% static 'media/google_play.aafc6940da89beba046eb2dd11dd92b9.svg' %}" alt="image"></a>
+                                <a href="https://anat.sa/" target="_blank" rel="noreferrer"><img src="{% static 'media/ios_globe.e52d8e2c6b5885a125c43d55a9ad6502.svg' %}" alt="image"></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"></div>
+        </div>
     </div>
-</div>
-{% endblock %}
+    <div class="text-center partner-container" style="opacity: 0;">
+        <h1 class="heading">شركاء صحة</h1>
+        <div class="swiper swiper-container swiper-initialized swiper-horizontal swiper-pointer-events swiper-rtl">
+            <div class="swiper-wrapper" style="transform: translate3d(0px, 0px, 0px);">
+                <div class="swiper-slide swiper-slide-active" style="width: 252.5px;"><img src="{% static 'media/MOH.3a0baf08598dc7f725b55852e5cdb0f2.svg' %}"></div>
+                <div class="swiper-slide swiper-slide-next" style="width: 252.5px;"><img src="{% static 'media/4.e25e0911630dc466ac8136d81b03f08f.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/MOT.1d8d13baa88f612e8fec7ff0acfa6c20.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/2.161250d495624131e71bd3411ebbce69.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/5.1f6b02941981514b630dca94a9ebbf1a.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/6.195e3f81bd4a845046254ff8b5a6b90f.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/7.430bb3793fd4a6b2fd82ce0a592b5461.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/8.5d1d9f5ad6dc4f7170cf659072b31d13.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/NLogo.19a2d86c23a7fd79db691f779fc9a94a.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/sfda_logo_colored.d4638e0362c7c55f1f43315f770fe72f.svg' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/nccam.93fbc96d3260a5bd3501.png' %}"></div>
+                <div class="swiper-slide" style="width: 252.5px;"><img src="{% static 'media/SHC.4b9e181b4c551840e480.png' %}"></div>
+            </div>
+            <div class="swiper-button-prev swiper-button-disabled"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-pagination swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"><span class="swiper-pagination-bullet swiper-pagination-bullet-active"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span>
+                <span
+                    class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span><span class="swiper-pagination-bullet"></span></div>
+        </div>
+        <div class="mobile-swiper-wrapper">
+            <div class="swiper-slide"><img src="{% static 'media/MOH.3a0baf08598dc7f725b55852e5cdb0f2.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/4.e25e0911630dc466ac8136d81b03f08f.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/MOT.1d8d13baa88f612e8fec7ff0acfa6c20.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/2.161250d495624131e71bd3411ebbce69.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/5.1f6b02941981514b630dca94a9ebbf1a.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/6.195e3f81bd4a845046254ff8b5a6b90f.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/7.430bb3793fd4a6b2fd82ce0a592b5461.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/8.5d1d9f5ad6dc4f7170cf659072b31d13.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/NLogo.19a2d86c23a7fd79db691f779fc9a94a.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/sfda_logo_colored.d4638e0362c7c55f1f43315f770fe72f.svg' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/nccam.93fbc96d3260a5bd3501.png' %}"></div>
+            <div class="swiper-slide"><img src="{% static 'media/SHC.4b9e181b4c551840e480.png' %}"></div>
+        </div>
+    </div>
+    <div class="faq-section-container" style="opacity: 0;">
+        <h1 class="heading">كيف يمكننا مساعدتك</h1>
+        <p class="sub-heading">الأسئلة الأكثر شيوعا</p>
+        <div class="questions-wrapper">
+            <div class="wrapper">
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header"><button type="button" aria-expanded="false" class="accordion-button collapsed">كيف يمكن إضافة المنشاة الصحية</button></h2>
+                        <div class="accordion-collapse collapse">
+                            <div class="accordion-body">يمكن لمدير الحساب من خلال أيقونة "طلبات إضافة منشآت " الوصول الى صفحة إضافة منشأة يقوم المستخدم بالضغط على خيار "إضافة منشأة جديدة" ويقوم بإتباع الخطوات اللازمة.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header"><button type="button" aria-expanded="false" class="accordion-button collapsed">كيف يمكن الحصول على تفويض إضافة منشاة</button></h2>
+                        <div class="accordion-collapse collapse">
+                            <div class="accordion-body">يجب التوجه لصفحة "طلبات اضافة منشأت " وفي اعلى الصفحة يظهر عبارة بين قوسين "(نموذج التسجيل في صحة) " عند الضعط على الكلمة سيتم تحميل المستند.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header"><button type="button" aria-expanded="false" class="accordion-button collapsed">كيف يمكن تغيير مدير الحساب الطبي</button></h2>
+                        <div class="accordion-collapse collapse">
+                            <div class="accordion-body">يجب ارسال طلب تغيير مدير حساب الطبي الى الدعم الفني عن طريق البريد الإلكتروني و إرسال نموذج التفويض (مطابق لنموذج المستعمل في تسجيل المنشات) و صورة من هوية مستخدم المدير الحساب الطبي</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="wrapper">
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header"><button type="button" aria-expanded="false" class="accordion-button collapsed">ماهي صلاحيات مدير المنشأة</button></h2>
+                        <div class="accordion-collapse collapse">
+                            <div class="accordion-body">يمكن لمدير المنشأة إضافة مستخدمين وإسناد أدوار لهم, التحكم برصيد المنشأة, طلب استخدام خدمات منصة صحة للمنشأة, استعراض التقارير الرقابية للمنشأة, واستخدام عدد من الخدمات مثل اصدار تراخيص للمنشأة وللممارسين وغيرها</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header"><button type="button" aria-expanded="false" class="accordion-button collapsed">كيف يمكن شراء باقة</button></h2>
+                        <div class="accordion-collapse collapse">
+                            <div class="accordion-body">يمكن للحساب/المنشأة شراء باقة عن طريق خيار "التحكم بالرصيد" ومن ثم الضغط على خيار "شراء باقة " من أعلى الصفحة ويقوم بعدها المستخدم بإختيار المنشأة التي يرغب بشراء الباقة وتحديد الباقة المراد شراؤها، مع العلم بضرورة شحن الرصيد
+                                قبل شراء الباقة</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header"><button type="button" aria-expanded="false" class="accordion-button collapsed">كيف يمكن تغيير مدير الحساب الطبي</button></h2>
+                        <div class="accordion-collapse collapse">
+                            <div class="accordion-body">يجب ارسال طلب تغيير مدير حساب الطبي الى الدعم الفني عن طريق البريد الإلكتروني و إرسال نموذج التفويض (مطابق لنموذج المستعمل في تسجيل المنشات) و صورة من هوية مستخدم المدير الحساب الطبي</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="call-to-action-ghost readmore"><button type="button" class="btn btn-primary"><p>تصفح جميع الأسئلة</p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg></button></div>
+    </div>
+    </div>
+    <div class="footer-container container-fluid">
+        <div class="footer">
+            <div class="about section"><img src="{% static 'media/logo-white.dda3a9e4f2d901a24b971b812cd897f4.svg' %}">
+                <p class="about">منصة صحة تخدم جميع المنشأت الطبية من خلال تقديم الخدمات الصحية إلكترونياً لجميع المنشأت الطبية وتسعى إلى توحيد وأتمتة الاجراءات والخدمات بما في دوره رفع جودة الاداء وخفض التكاليف.</p>
+            </div>
+            <div class="links section" style="flex: 2 1 0%; align-items: center;">
+                <h3 class="heading">القائمة الرئيسية</h3>
+                <ul class="links-wrapepr">
+                    <li class=""><a data-rr-ui-event-key="1"  class="nav-link" id="inquiries-link">الاستعلامات</a></li>
+                    <li><a class="nav-link" href="#/faq">الأسئلة الشائعة</a></li>
+                    <li><a class="nav-link" href="#/ContactUs">تواصل معنا</a></li>
+                </ul>
+            </div>
+            <div class="section d-none">
+                <h3 class="heading d-none">النشرة البريدية</h3>
+                <p class="about d-none">الاشتراك في الرسائل الإخبارية</p>
+                <form class="d-none">
+                <?php echo getCSRFTokenField(); ?>
+                    <div class="input-wrapper"><input placeholder="البريد الالكتروني" type="email" class="form-control"><button class="button-small">إشترك</button></div>
+                </form>
+            </div>
+            <div class="contact section">
+                <h3 class="heading">تواصل معنا</h3>
+                <div class="contact-wrapper">
+                    <div class="values">
+                        <div class="details"><img alt="phone icon" src="{% static 'media/phone-white.f73aba8a18bf1bea9f77010950228a9a.svg' %}"><a href="tel: 920002005">920002005</a></div>
+                        <div class="details"><img alt="email line" src="{% static 'media/email-line-white.043b423fd781eae5866f389e3112d5a6.svg' %}"><a href="mailto: support@seha.sa">support@seha.sa</a></div>
+                        <div class="details"><img alt="whatsapp" src="{% static 'media/whatsapp-icon.96a9f6c9dad8f701b1015c07572d4fbb.svg' %}" style="width: 16px; height: 16px; opacity: 0.5;"><a href="https://wa.me/920002005" target="_blank" rel="noreferrer">920002005</a></div>
+                        <div
+                            class="timings mt-3"><span style="font-size: 12px;">أوقات العمل: الأحد حتى الخميس 8 ص - 11م</span></div>
+                    <div class="social"><button><a href="https://www.youtube.com/channel/UCb9ZrS2YcriYqIPIHNp9wcQ"><img alt="youtube icon" src="{% static 'media/youtube.7ac140f33841d94e885f0f5dbe8cca27.svg' %}"></a></button><button><a href="https://twitter.com/seha_services"><svg width="14" height="14" viewBox="0 0 1200 1227" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"></path></svg></a></button></div>
+                </div>
+                <div class="contact"><img alt="lean logo" src="{% static 'media/lean-logo.47f1c2c4f559aab0fc8472beba56bb76.svg' %}">
+                    <div class="spacer"></div><img alt="moh logo" src="{% static 'media/MOH-logo.3721a12f98819dbb30527088a659b864.svg' %}"></div>
+            </div>
+            <div class="footer-note-wrapper">
+                <p>منصة صحة معتمدة من قبل وزارة الصحة © 2024 </p>
+                <ul>
+                    <li><a>سياسة الخصوصية وشروط الإستخدام</a></li>
+                    <li><a class="" href="https://www.seha.sa/Content/LandingPages/UserManual.pdf">دليل الاستخدام</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </main>
+    </div>
+    </div>
+    <script defer="defer" src="{% static 'media/vcd15cbe7772f49c399c6a5babf22c1241717689176015' %}" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon="{&quot;rayId&quot;:&quot;8e215409fe4c1680&quot;,&quot;serverTiming&quot;:{&quot;name&quot;:{&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfSpeedBrain&quot;:true,&quot;cfCacheStatus&quot;:true}},&quot;version&quot;:&quot;2024.10.5&quot;,&quot;token&quot;:&quot;e370208f11b34d34bca931ffb6c58056&quot;}"
+        crossorigin="anonymous"></script>
+    <img id="BtnTool" src="{% static 'media/icon.png' %}" style="position: absolute; top: 50%; left: 50%; z-index: 9999; cursor: pointer; display: none;" height="25" width="25"><img id="LoadingGif" src="moz-extension://829f0342-33f4-4525-b4b2-cca65184ef80/icons/loading.gif"
+        style="position: absolute; top: 50%; z-index: 9999; cursor: pointer; display: none;" height="70" width="70"></body>
+     
+    
+
+        
+
+        </html>        
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Add a click event listener for the "الاستعلامات" link
+                document.getElementById("inquiries-link").addEventListener("click", function (e) {
+                    e.preventDefault(); // Prevent default anchor behavior
+                    window.location.hash = "/inquiries"; // Update the hash in the URL
+                    
+                });
+            });
+            // Listen for changes in the browser history (e.g., pushState, replaceState, back/forward)
+        window.addEventListener('popstate', () => {
+            if (window.location.hash==='#/inquiries/slenquiry'){
+                    let hash = window.location.hash;
+                    let segments = hash.substring(1).split("/")
+                    console.log('Current Path (pushState):', window.location.hash);
+                     document.location = "execusessystem" + hash.substring(1);
+                }
+            console.log('Current Path:', window.location.pathname);
+        });
+        window.addEventListener('popstate', () => {
+   
+    if (window.location.hash==='#/inquiries/slenquiry'){
+                    let hash = window.location.hash;
+                    let segments = hash.substring(1).split("/")
+                   
+                     document.location = "execusessystem" + hash.substring(1);
+                }
+});
+
+        // Optional: Hook into pushState and replaceState to detect programmatic navigation
+        (function(history) {
+            const originalPushState = history.pushState;
+            const originalReplaceState = history.replaceState;
+        
+            history.pushState = function(...args) {
+                originalPushState.apply(history, args);
+                if (window.location.hash==='#/inquiries/slenquiry'){
+                    let hash = window.location.hash;
+                    let segments = hash.substring(1).split("/")
+                    
+                     document.location = "/execusessystem" + hash.substring(1);
+                }
+            };
+        
+            history.replaceState = function(...args) {
+                originalReplaceState.apply(history, args);
+                if (window.location.hash==='#/inquiries/slenquiry'){
+
+                    let hash = window.location.hash;
+                    let segments = hash.substring(1).split("/")
+                    
+                     document.location = "/execusessystem" + hash.substring(1);
+                }
+
+            };
+        })(window.history);
+     
+        
+        </script>

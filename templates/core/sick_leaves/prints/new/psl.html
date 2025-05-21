@@ -7,11 +7,71 @@
     <title>SickLeaves</title>
     <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet">
     <style>
+<<<<<<< HEAD
+=======
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{%static "fonts/Cairo-Regular.ttf"%}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{%static "fonts/Cairo-Bold.ttf"%}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('{%static "fonts/Cairo-Black.ttf"%}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            src: url('/fonts/Cairo-ExtraBold.ttf') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+        }
+>>>>>>> settings
         @page {
             size: 210mm 297mm;
             margin: 0;
             padding: 0;
         }
+<<<<<<< HEAD
+=======
+        @font-face {
+            font-family: 'Calibri';
+            src: url('{% static "fonts/calibri-regular.ttf" %}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Calibri';
+            src: url('{% static "fonts/calibri-Bold.ttf" %}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Calibri';
+            src: url('{% static "fonts/calibri-italic.ttf" %}') format('truetype');
+            font-weight: 900;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Calibri';
+            src: url('{% static "fonts/calibri-bold-italic.ttf" %}') format('truetype');
+            font-weight: 800;
+            font-style: normal;
+        }
+>>>>>>> settings
 
         * {
             margin: 0;
@@ -475,8 +535,13 @@
         }
 
         .qr-code {
+<<<<<<< HEAD
             width: 80px;
             height: 90px;
+=======
+            width: 100px;
+            height: auto;
+>>>>>>> settings
             margin-right: 120px;
             margin-top:-10px;
             margin-bottom: 5px;
@@ -488,7 +553,12 @@
             margin-right: 15px;
         }
         .arabic-text {
+<<<<<<< HEAD
             font-family: 'Calibri', sans-serif !important;
+=======
+            font-family: 'Dubai', serif !important;
+            font-weight:normal;
+>>>>>>> settings
         }
 
         .english-text {
@@ -523,18 +593,30 @@
             </tr>
                             <tr style="height:35px;">
                     <td class="highlight english-text" style="max-height: 35px; height:35px;color:#ffffff;vertical-align: middle;">
+<<<<<<< HEAD
                                                 {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date|hijri_date }} الى {{ sick_leave.end_date|hijri_date }})
+=======
+                        {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date_hijri }} الى {{ sick_leave.end_date_hijri }})
+>>>>>>> settings
                     </td>
                     <td class="highlight english-text" dir="ltr" style="vertical-align: middle;">
                         {{ sick_leave.duration_days }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.start_date|date:"d-m-Y" }} to {{ sick_leave.end_date|date:"d-m-Y" }})
                     </td>
                 </tr>
                         <tr style="height:35px;">
+<<<<<<< HEAD
                 <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date|hijri_date }}</td>
                 <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date|date:"d-m-Y" }}</td>
             </tr>
             <tr style="height:35px;">
                 <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date|hijri_date }}</td>
+=======
+                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date_hijri }}</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date|date:"d-m-Y" }}</td>
+            </tr>
+            <tr style="height:35px;">
+                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date_hijri }}</td>
+>>>>>>> settings
                 <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date|date:"d-m-Y" }}</td>
             </tr>
             <tr style="height:35px;">
@@ -547,7 +629,11 @@
                     <span class="arabic-text" style="display: block; white-space: wrap;font-size: 14px; overflow: hidden; text-overflow: ellipsis;">{{ sick_leave.patient.name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px; height:35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; height: 35px; max-height: 35px;">
+<<<<<<< HEAD
                     <span class="english-text" style="display: block; white-space: wrap;  text-overflow: ellipsis;">{{ sick_leave.patient.name|translate_to_english|upper }}</span>
+=======
+                    <span class="english-text" style="display: block; white-space: wrap;  text-overflow: ellipsis;">{{ sick_leave.patient.name_en|upper }}</span>
+>>>>>>> settings
                 </td>
             </tr>
             <tr style="height: 35px;">
@@ -560,7 +646,11 @@
                     <span class="arabic-text">{{ sick_leave.patient.nationality }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+<<<<<<< HEAD
                     <span class="english-text">{{ sick_leave.patient.nationality|translate_to_english|upper }}</span>
+=======
+                    <span class="english-text">{{ sick_leave.patient.nationality_en|capitalize }}</span>
+>>>>>>> settings
                 </td>
             </tr>
             <tr style="height: 35px;">
@@ -568,7 +658,11 @@
                     <span class="arabic-text">{{ sick_leave.patient.employer_name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px;overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+<<<<<<< HEAD
                     <span class="english-text">{{ sick_leave.patient.employer_name|translate_to_english|upper }}</span>
+=======
+                    <span class="english-text"></span>
+>>>>>>> settings
                 </td>
             </tr>
             <tr style="height: 60px;">
@@ -576,7 +670,11 @@
                     <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.name }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200; width: 209px;max-height:60px;height:60px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+<<<<<<< HEAD
                     <span class="english-text" style="display: block;">{{ sick_leave.doctor.name|translate_to_english|upper }}</span>
+=======
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.name_en|upper }}</span>
+>>>>>>> settings
                 </td>
             </tr>
             <tr style="height: 35px;">
@@ -584,7 +682,11 @@
                     <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.position }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px;  width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
+<<<<<<< HEAD
                     <span class="english-text" style="display: block;">{{ sick_leave.doctor.position|translate_to_english|upper }}</span>
+=======
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position_en|capitalize|first_word }}</span>
+>>>>>>> settings
                 </td>
             </tr>
           </tbody></table>
@@ -600,6 +702,7 @@
     <div class="footer-section">
         <div class="row">
             <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:180px;">
+<<<<<<< HEAD
                 <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
                 <p class="arabic-text" style="margin-top: 2px ;
                 margin-left:30px">{{ sick_leave.doctor.hospital.name }}</p>
@@ -607,11 +710,23 @@
                 margin-left:30px">{{ sick_leave.doctor.hospital.name|translate_to_english|upper }}</p>
                  <p class="arabic-text" style="margin-top: 2px ; font-size:12px;
                 margin-left:30px">   رقـم  الـــترخيص :     14101535512860  </p>
+=======
+                <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo"></img>
+                <br>
+                
+                <p class="arabic-text" style="margin-top: 2px ;
+                margin-left:30px; font-weight:bold; font-size:12px;">{{ sick_leave.doctor.hospital.name }}</p>
+               <p class="english-text" style="margin-top: -2px ; font-size:12px;
+                margin-left:30px; font-weight:bold; font-size:11px;">{{ sick_leave.doctor.hospital.name_en|capitalize }}</p>
+                 <p class="arabic-text" style="margin-top: 2px ; font-size:12px;
+                margin-left:30px; font-weight:bold; font-size:12px;">   رقـم  الـــترخيص :     14101535512860  </p>
+>>>>>>> settings
 
             </div>
 
             <div class="text-center col-6 qr-code-section">
                 <div class="qr-code">
+<<<<<<< HEAD
                     <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="qr-image">
                 </div>
              <p class="text-gray-700 qr-text" style="line-height: 2.2;">
@@ -621,6 +736,19 @@
              <a href="https://sahafaty.site/quiries/quiry" class="underline english-text" style="color:#0000ffc2; text-decoration: underline #0000ffc2; border-bottom: none; box-shadow: none; -webkit-text-decoration-color: #0000ffc2;">
                 www.seha.sa/#/inquiries/slenquiry
             </a>
+=======
+                    <img src="{% generate_qrcode 'https://sahafaty.site/quiries/slenquiry' 300 %}" alt="QR Code" class="qr-image">
+                </div>
+             <p class="text-gray-700 qr-text" style="line-height: 2.2;">
+            <p class="arabic-text" style="font-size: 10px;font-weight:700;">للتحقق من بيانات التقرير، يرجى التأكد من زيارة موقع منصة صحة </p>
+             <p class="arabic-text" style="font-size: 10px;font-weight:700;">الرسمي</p>
+             <p class="english-text" style="display: block; margin-top: -2px;font-size: 10px;font-weight: 200; font-family: 'Cairo', sans-serif !important;">To check the report data, please visit Seha's official website</p>
+             <p class="english-text" style="display: block; margin-top: -2px;font-size: 10px;font-weight: 200; font-family: 'Cairo', sans-serif !important;">
+             <a href="https://sahafaty.site/quiries/quiry" class="underline english-text" style="color:#0000ff; text-decoration: underline #0000ffc2; border-bottom: none; box-shadow: none; -webkit-text-decoration-color: #0000ffc2;">
+                www.seha.sa/#/inquiries/slenquiry
+            </a>
+        </p>
+>>>>>>> settings
             </p>
             </div>
         </div>
@@ -630,9 +758,25 @@
                 <img src="{% static 'images/National_center_for_midical.png' %}" alt="National Center" class="national-logo">
             </div>
             <div class="text-left col-6" style="font-size:10px; margin-top:20px; font-weight: bold;  margin-left:22px;">
+<<<<<<< HEAD
             <span class="english-text" style="display: inline-block;">AM</span>
                 <span class="english-text" style="display: inline-block;">12:03</span>
                 <br>  <span class="english-text"> {% now "l, d F Y" %}</span>
+=======
+                {% if sick_leave.created_at.hour < 12 %}
+                <span class="english-text" style="display: inline-block;">AM</span>
+                {% else %}
+                <span class="english-text" style="display: inline-block;">PM</span>
+                {% endif %}
+                <span class="english-text" style="display: inline-block;">
+                    {% if sick_leave.created_at.hour <= 12 %}
+                        {{ sick_leave.created_at|date:"h:i" }}
+                    {% else %}
+                        {{ sick_leave.created_at|date:"h:i" }}
+                    {% endif %}
+                </span>
+                <br> <span class="english-text">{{ sick_leave.created_at|date:"l, d F Y"|translate_to_english }}</span>
+>>>>>>> settings
             </div>
         </div>
     </div>
@@ -659,4 +803,8 @@
     </script>
 
 
+<<<<<<< HEAD
 </body></html>
+=======
+</body></html>
+>>>>>>> settings

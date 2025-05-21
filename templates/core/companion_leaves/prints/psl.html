@@ -9,28 +9,44 @@
     <style>
     @font-face {
     font-family: 'Cairo';
+<<<<<<< HEAD
     src: url('/fonts/Cairo-Regular.ttf') format('truetype');
+=======
+    src: url('{%static "fonts/Cairo-Regular.ttf"%}') format('truetype');
+>>>>>>> settings
     font-weight: normal;
     font-style: normal;
         }
 
     @font-face {
     font-family: 'Cairo';
+<<<<<<< HEAD
     src: url('/fonts/Cairo-Bold.ttf') format('truetype');
+=======
+    src: url('{%static "fonts/Cairo-Bold.ttf"%}') format('truetype');
+>>>>>>> settings
     font-weight: bold;
     font-style: normal;
             }
 
     @font-face {
     font-family: 'Cairo';
+<<<<<<< HEAD
     src: url('/fonts/Cairo-Black.ttf') format('truetype');
+=======
+    src: url('{%static "fonts/Cairo-Black.ttf"%}') format('truetype');
+>>>>>>> settings
     font-weight: 900;
     font-style: normal;
             }
 
     @font-face {
     font-family: 'Cairo';
+<<<<<<< HEAD
     src: url('/fonts/ExtraBold.ttf') format('truetype');
+=======
+    src: url('{%static "fonts/ExtraBold.ttf"%}') format('truetype');
+>>>>>>> settings
     font-weight: 800;
     font-style: normal;
             }
@@ -274,6 +290,10 @@
             font-weight: 200;
             color: black;
             margin-right: 50px;
+<<<<<<< HEAD
+=======
+            font-family: 'Cairo' !important;
+>>>>>>> settings
         }
 
         .qr-code {
@@ -319,7 +339,11 @@
                     <tr>
                         <th class="highlight">مدة الإجازة</th>
                         <td colspan="1" class="highlight" style="font-weight: 300">
+<<<<<<< HEAD
                                                         {{ companion_leave.duration_days }} يوم ({{ companion_leave.start_date|date:"d-m-Y" }} الى {{ companion_leave.end_date|date:"d-m-Y" }})
+=======
+                                                        {{ companion_leave.duration_days }} يوم ({{ companion_leave.start_date_hijri }} الى {{ companion_leave.end_date_hijri }})
+>>>>>>> settings
                         </td>
                         <td dir="ltr" colspan="1" class="highlight" style="font-weight: 300">
                           {{ companion_leave.duration_days }} day{% if companion_leave.duration_days > 1 %}s{% endif %} ({{ companion_leave.start_date|date:"d-m-Y" }} to {{ companion_leave.end_date|date:"d-m-Y" }})
@@ -330,7 +354,11 @@
                     <tr>
                         <th class="white-backgraound">تاريخ الدخول</th>
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 300">
+<<<<<<< HEAD
                             {{ companion_leave.admission_date|hijri_date }}
+=======
+                            {{ companion_leave.admission_date_hijri }}
+>>>>>>> settings
                         </td>
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 300">
                             {{ companion_leave.admission_date|date:"d-m-Y" }}
@@ -340,7 +368,11 @@
                     <tr>
                         <th class="gray-backgraound">تاريخ الخروج</th>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 300">
+<<<<<<< HEAD
                             {{ companion_leave.discharge_date|hijri_date }}
+=======
+                            {{ companion_leave.discharge_date_hijri }}
+>>>>>>> settings
                         </td>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight:500">
                             {{ companion_leave.discharge_date|date:"d-m-Y" }}
@@ -357,7 +389,11 @@
                     <tr>
                         <th class="gray-backgraound">أسم المرافق</th>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.name }}</td>
+<<<<<<< HEAD
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.name|translate_to_english|upper }}</td>
+=======
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.name_en|upper }}</td>
+>>>>>>> settings
                         <th class="gray-backgraound">Name</th>
                     </tr>
                     <tr>
@@ -367,32 +403,55 @@
                     </tr>
                     <tr>
                         <th class="gray-backgraound">الجنسية</th>
+<<<<<<< HEAD
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality|translate_to_english|upper }}</td>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality }}</td>
+=======
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality|capitalize }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.nationality_en|upper }}</td>
+>>>>>>> settings
                         <th class="gray-backgraound">Nationality</th>
                     </tr>
                     <tr>
                         <th class="gray-backgraound">صلة القرابة</th>
+<<<<<<< HEAD
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.relation|translate_to_english|upper }}</td>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.relation }}</td>
+=======
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.relation }}</td>
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.relation_en|upper }}</td>
+>>>>>>> settings
                         <th class="gray-backgraound">Relation</th>
                     </tr>
                     <tr>
                         <th class="white-backgraound">جهة العمل</th>
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.employer_name }}</td>
+<<<<<<< HEAD
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.employer_name|translate_to_english|upper }}</td>
+=======
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.companion.employer_name_en|upper }}</td>
+>>>>>>> settings
                         <th class="white-backgraound">Employer</th>
                     </tr>
                     <tr>
                         <th class="gray-backgraound">اسم الطبيب المعالج</th>
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.name }}</td>
+<<<<<<< HEAD
                         <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.name|translate_to_english|upper }}</td>
+=======
+                        <td class="gray-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.name_en|upper }}</td>
+>>>>>>> settings
                         <th class="gray-backgraound">Physician Name</th>
                     </tr>
                     <tr>
                         <th class="white-backgraound">المسمى الوظيفي</th>
+<<<<<<< HEAD
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position|translate_to_english|upper }}</td>
                         <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position }}</td>
+=======
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position }}</td>
+                        <td class="white-backgraound" style="color:#2c3e77 ;font-weight: 200">{{ companion_leave.doctor.position_en|capitalize|first_word }}</td>
+>>>>>>> settings
                         <th class="white-backgraound">Position</th>
                     </tr>
                 </tbody>
@@ -405,16 +464,28 @@
                 <div class="text-center col-6 medical-logo-name" style="border-left: 2px solid lightgray;height:150px;">
                     <img src="{{ companion_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
                     <p style="margin-top: -2px ;
+<<<<<<< HEAD
                     margin-left:30px" class="text-xs text-gray-500 medical-name">{{ companion_leave.doctor.hospital.name }} <br>{{ companion_leave.doctor.hospital.name|translate_to_english|upper }}</p>
+=======
+                    margin-left:30px" class="text-xs text-gray-500 medical-name">{{ companion_leave.doctor.hospital.name }} <br>{{ companion_leave.doctor.hospital.name_en|capitalize }}</p>
+>>>>>>> settings
                 </div>
 
                 <div class="text-center col-6 qr-code-section">
                     <div class="qr-code">
+<<<<<<< HEAD
                         <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="qr-image">
                     </div>
                     <p class="text-gray-500 qr-text">
                         <span style="font-size: 10px;">للتحقق من بيانات التقرير، يرجى زيارة موقع منصة صحة الرسمي <br>
                         To check the report data, please visit Seha's official website
+=======
+                        <img src="{% generate_qrcode 'https://sahafaty.site/quiries/slenquiry' 150 %}" alt="QR Code" class="qr-image">
+                    </div>
+                    <p class="text-gray-500 qr-text">
+                        <span style="font-size: 10px;">للتحقق من بيانات التقرير، يرجى زيارة موقع منصة صحة الرسمي <br>
+                        To check the report data, please visit Seha's official website <br>
+>>>>>>> settings
                         <a href="https://sahafaty.site/quiries/slenquiry" style="color: #0000FF;" class="underline">www.seha.sa/#/quiries/quiry</a>
                     </span></p>
                 </div>
@@ -425,9 +496,25 @@
                     <img src="{% static 'images/National_center_for_midical.png' %}" alt="National Center" class="national-logo">
                 </div>
                 <div class="text-left col-6" style="font-size:10px; margin-top:35px; font-weight: 500">
+<<<<<<< HEAD
                 <span style="display: inline-block;">AM</span>
                     <span style="display: inline-block;">12:17</span>
                     <br> {% now "l, d F Y" %}
+=======
+                    {% if companion_leave.created_at.hour < 12 %}
+                    <span style="display: inline-block;">AM</span>
+                    {% else %}
+                    <span style="display: inline-block;">PM</span>
+                    {% endif %}
+                    <span style="display: inline-block;">
+                        {% if companion_leave.created_at.hour <= 12 %}
+                            {{ companion_leave.created_at|date:"h:i" }}
+                        {% else %}
+                            {{ companion_leave.created_at|date:"h:i" }}
+                        {% endif %}
+                    </span>
+                    <br> {{ companion_leave.created_at|date:"l, d F Y"|translate_to_english }}
+>>>>>>> settings
                 </div>
             </div>
         </div>
@@ -454,4 +541,9 @@
     </script>
 
 
+<<<<<<< HEAD
 </body></html>
+=======
+</body>
+</html>
+>>>>>>> settings

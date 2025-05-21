@@ -18,18 +18,18 @@
             <p><strong>ملاحظة:</strong> هذا المريض مرتبط بـ {{ sick_leaves_count }} إجازة مرضية و {{ companion_leaves_count }} إجازة مرافق. سيؤدي حذف المريض إلى تأثر هذه البيانات.</p>
             {% endif %}
         </div>
-        
+
         <div class="mb-4">
             <h5>بيانات المريض:</h5>
             <ul>
                 <li><strong>الاسم:</strong> {{ patient.name }}</li>
                 <li><strong>رقم الهوية:</strong> {{ patient.national_id }}</li>
                 <li><strong>الجنسية:</strong> {{ patient.nationality }}</li>
-                <li><strong>جهة العمل:</strong> {{ patient.employer.name|default:"غير محدد" }}</li>
+                <li><strong>جهة العمل:</strong> {{ patient.employer_name|default:"غير محدد" }}</li>
                 <li><strong>تاريخ الإنشاء:</strong> {{ patient.created_at }}</li>
             </ul>
         </div>
-        
+
         <form method="post">
             {% csrf_token %}
             <div class="mt-4">

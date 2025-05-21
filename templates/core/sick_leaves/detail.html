@@ -75,7 +75,7 @@
                         <strong>تاريخ البداية:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ sick_leave.start_date }}
+                        {{ sick_leave.start_date }} <small class="text-muted">({{ sick_leave.start_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -83,7 +83,7 @@
                         <strong>تاريخ النهاية:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ sick_leave.end_date }}
+                        {{ sick_leave.end_date }} <small class="text-muted">({{ sick_leave.end_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -99,7 +99,7 @@
                         <strong>تاريخ الدخول:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ sick_leave.admission_date }}
+                        {{ sick_leave.admission_date }} <small class="text-muted">({{ sick_leave.admission_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -107,7 +107,7 @@
                         <strong>تاريخ الخروج:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ sick_leave.discharge_date }}
+                        {{ sick_leave.discharge_date }} <small class="text-muted">({{ sick_leave.discharge_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -115,7 +115,7 @@
                         <strong>تاريخ الإصدار:</strong>
                     </div>
                     <div class="col-md-8">
-                        {{ sick_leave.issue_date }}
+                        {{ sick_leave.issue_date }} <small class="text-muted">({{ sick_leave.issue_date_hijri }})</small>
                     </div>
                 </div>
                 <div class="row mb-3">

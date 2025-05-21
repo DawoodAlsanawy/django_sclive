@@ -331,7 +331,7 @@
                     <a href="{% url 'core:payment_detail' detail.payment.id %}" class="list-group-item list-group-item-action">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">{{ detail.payment.payment_number }}</h6>
-                            <small>{{ detail.payment.payment_date }}</small>
+                            <small>{{ detail.payment.payment_date|date:"Y-m-d" }}</small>
                         </div>
                         <p class="mb-1">{{ detail.amount }} ريال</p>
                         <small>
@@ -343,6 +343,8 @@
                             <span class="badge bg-info">شيك</span>
                             {% elif detail.payment.payment_method == 'credit_card' %}
                             <span class="badge bg-warning">بطاقة ائتمان</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ detail.payment.payment_method|default:"غير محدد" }}</span>
                             {% endif %}
                         </small>
                     </a>

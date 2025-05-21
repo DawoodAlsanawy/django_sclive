@@ -10,7 +10,12 @@ from django.utils import timezone
 from core.forms import SickLeaveForm, SickLeaveWithInvoiceForm
 from core.models import (Doctor, Hospital, LeaveInvoice, LeavePrice, Patient,
                          SickLeave)
+<<<<<<< HEAD
 from core.utils import generate_sick_leave_id, generate_unique_number
+=======
+from core.utils import (convert_to_hijri, generate_sick_leave_id,
+                        generate_unique_number, translate_text)
+>>>>>>> settings
 
 
 @login_required
@@ -183,11 +188,38 @@ def sick_leave_create(request):
             # الحصول على البادئة المختارة
             prefix = form.cleaned_data.get('prefix', 'PSL')
 
+<<<<<<< HEAD
+=======
+            # التأكد من أن البادئة هي PSL أو GSL
+            if prefix not in ['PSL', 'GSL']:
+                prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+
+>>>>>>> settings
             # توليد رقم إجازة تلقائي باستخدام البادئة المختارة
             leave_id = generate_sick_leave_id(prefix)
 
             # تعيين رقم الإجازة في النموذج
             form.instance.leave_id = leave_id
+<<<<<<< HEAD
+=======
+            form.instance.prefix = prefix
+
+            # تحويل التواريخ الميلادية إلى هجرية
+            if form.instance.start_date:
+                form.instance.start_date_hijri = convert_to_hijri(form.instance.start_date)
+
+            if form.instance.end_date:
+                form.instance.end_date_hijri = convert_to_hijri(form.instance.end_date)
+
+            if form.instance.admission_date:
+                form.instance.admission_date_hijri = convert_to_hijri(form.instance.admission_date)
+
+            if form.instance.discharge_date:
+                form.instance.discharge_date_hijri = convert_to_hijri(form.instance.discharge_date)
+
+            if form.instance.issue_date:
+                form.instance.issue_date_hijri = convert_to_hijri(form.instance.issue_date)
+>>>>>>> settings
 
             sick_leave = form.save()
 
@@ -328,6 +360,7 @@ def sick_leave_create_with_invoice(request):
             # الحصول على البادئة المختارة
             prefix = form.cleaned_data.get('prefix', 'PSL')
 
+<<<<<<< HEAD
             # إنشاء الإجازة المرضية
             leave_id = generate_sick_leave_id(prefix)
             sick_leave = SickLeave.objects.create(
@@ -338,6 +371,32 @@ def sick_leave_create_with_invoice(request):
                 end_date=end_date,
                 duration_days=duration_days,
                 issue_date=issue_date
+=======
+            # التأكد من أن البادئة هي PSL أو GSL
+            if prefix not in ['PSL', 'GSL']:
+                prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+
+            # إنشاء الإجازة المرضية
+            leave_id = generate_sick_leave_id(prefix)
+
+            # تحويل التواريخ الميلادية إلى هجرية
+            start_date_hijri = convert_to_hijri(start_date)
+            end_date_hijri = convert_to_hijri(end_date)
+            issue_date_hijri = convert_to_hijri(issue_date)
+
+            sick_leave = SickLeave.objects.create(
+                leave_id=leave_id,
+                prefix=prefix,
+                patient=patient,
+                doctor=doctor,
+                start_date=start_date,
+                start_date_hijri=start_date_hijri,
+                end_date=end_date,
+                end_date_hijri=end_date_hijri,
+                duration_days=duration_days,
+                issue_date=issue_date,
+                issue_date_hijri=issue_date_hijri
+>>>>>>> settings
             )
 
             # إنشاء فاتورة تلقائياً دائماً
@@ -510,9 +569,37 @@ def sick_leave_edit(request, sick_leave_id):
                 form.add_error('doctor', 'يجب اختيار طبيب موجود أو إدخال بيانات طبيب جديد')
                 return render(request, 'core/sick_leaves/edit.html', {'form': form, 'sick_leave': sick_leave})
 
+<<<<<<< HEAD
             # الحصول على العميل الجديد من النموذج
             new_client = form.cleaned_data.get('client')
 
+=======
+            # التحقق من البادئة وتحديثها إذا لزم الأمر
+            prefix = form.cleaned_data.get('prefix')
+            if prefix and prefix not in ['PSL', 'GSL']:
+                prefix = 'PSL'  # استخدام PSL كبادئة افتراضية
+                form.instance.prefix = prefix
+
+            # الحصول على العميل الجديد من النموذج
+            new_client = form.cleaned_data.get('client')
+
+            # تحويل التواريخ الميلادية إلى هجرية
+            if form.instance.start_date:
+                form.instance.start_date_hijri = convert_to_hijri(form.instance.start_date)
+
+            if form.instance.end_date:
+                form.instance.end_date_hijri = convert_to_hijri(form.instance.end_date)
+
+            if form.instance.admission_date:
+                form.instance.admission_date_hijri = convert_to_hijri(form.instance.admission_date)
+
+            if form.instance.discharge_date:
+                form.instance.discharge_date_hijri = convert_to_hijri(form.instance.discharge_date)
+
+            if form.instance.issue_date:
+                form.instance.issue_date_hijri = convert_to_hijri(form.instance.issue_date)
+
+>>>>>>> settings
             # حفظ التغييرات
             updated_sick_leave = form.save()
 
@@ -622,12 +709,25 @@ def sick_leave_print(request, sick_leave_id):
     # الحصول على البادئة من الطلب أو استخراجها من رقم الإجازة
     prefix = request.GET.get('prefix')
     if not prefix:
+<<<<<<< HEAD
         # استخراج البادئة من رقم الإجازة
         prefix = 'PSL'  # القيمة الافتراضية
         if sick_leave.leave_id.startswith('GSL'):
             prefix = 'GSL'
         elif sick_leave.leave_id.startswith('PSL'):
             prefix = 'PSL'
+=======
+        # استخراج البادئة من رقم الإجازة أو من حقل prefix في النموذج
+        if hasattr(sick_leave, 'prefix') and sick_leave.prefix in ['PSL', 'GSL']:
+            prefix = sick_leave.prefix
+        else:
+            # استخراج البادئة من رقم الإجازة
+            prefix = 'PSL'  # القيمة الافتراضية
+            if sick_leave.leave_id.startswith('GSL'):
+                prefix = 'GSL'
+            elif sick_leave.leave_id.startswith('PSL'):
+                prefix = 'PSL'
+>>>>>>> settings
 
     # تحديد قالب الطباعة المناسب
     template_path = 'core/sick_leaves/print.html'  # القالب الافتراضي

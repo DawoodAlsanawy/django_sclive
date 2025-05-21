@@ -10,7 +10,12 @@ from django.utils import timezone
 from core.forms import CompanionLeaveForm, CompanionLeaveWithInvoiceForm
 from core.models import (CompanionLeave, Doctor, Hospital, LeaveInvoice,
                          LeavePrice, Patient)
+<<<<<<< HEAD
 from core.utils import generate_companion_leave_id, generate_unique_number
+=======
+from core.utils import (convert_to_hijri, generate_companion_leave_id,
+                        generate_unique_number, translate_text)
+>>>>>>> settings
 
 
 @login_required
@@ -109,6 +114,26 @@ def companion_leave_create(request):
 
             # تعيين رقم الإجازة في النموذج
             form.instance.leave_id = leave_id
+<<<<<<< HEAD
+=======
+            form.instance.prefix = prefix
+
+            # تحويل التواريخ الميلادية إلى هجرية
+            if form.instance.start_date:
+                form.instance.start_date_hijri = convert_to_hijri(form.instance.start_date)
+
+            if form.instance.end_date:
+                form.instance.end_date_hijri = convert_to_hijri(form.instance.end_date)
+
+            if form.instance.admission_date:
+                form.instance.admission_date_hijri = convert_to_hijri(form.instance.admission_date)
+
+            if form.instance.discharge_date:
+                form.instance.discharge_date_hijri = convert_to_hijri(form.instance.discharge_date)
+
+            if form.instance.issue_date:
+                form.instance.issue_date_hijri = convert_to_hijri(form.instance.issue_date)
+>>>>>>> settings
 
             companion_leave = form.save()
 
@@ -171,6 +196,10 @@ def companion_leave_create_with_invoice(request):
             companion_national_id = form.cleaned_data['companion_national_id']
             companion_name = form.cleaned_data['companion_name']
             companion_phone = form.cleaned_data.get('companion_phone', '')
+<<<<<<< HEAD
+=======
+            relation = form.cleaned_data.get('relation', '')
+>>>>>>> settings
 
             # معالجة إضافة طبيب جديد إذا تم إدخال بياناته
             if form.cleaned_data.get('new_doctor_name') and form.cleaned_data.get('new_doctor_national_id'):
@@ -269,6 +298,7 @@ def companion_leave_create_with_invoice(request):
 
             # إنشاء إجازة المرافق
             leave_id = generate_companion_leave_id(prefix)
+<<<<<<< HEAD
             companion_leave = CompanionLeave.objects.create(
                 leave_id=leave_id,
                 patient=patient,
@@ -278,6 +308,28 @@ def companion_leave_create_with_invoice(request):
                 end_date=end_date,
                 duration_days=duration_days,
                 issue_date=issue_date
+=======
+
+            # تحويل التواريخ الميلادية إلى هجرية
+            start_date_hijri = convert_to_hijri(start_date)
+            end_date_hijri = convert_to_hijri(end_date)
+            issue_date_hijri = convert_to_hijri(issue_date)
+
+            companion_leave = CompanionLeave.objects.create(
+                leave_id=leave_id,
+                prefix=prefix,
+                patient=patient,
+                companion=companion,
+                relation=relation,
+                doctor=doctor,
+                start_date=start_date,
+                start_date_hijri=start_date_hijri,
+                end_date=end_date,
+                end_date_hijri=end_date_hijri,
+                duration_days=duration_days,
+                issue_date=issue_date,
+                issue_date_hijri=issue_date_hijri
+>>>>>>> settings
             )
 
             # إنشاء فاتورة تلقائياً دائماً
@@ -491,6 +543,25 @@ def companion_leave_edit(request, companion_leave_id):
             # الحصول على العميل الجديد من النموذج
             new_client = form.cleaned_data.get('client')
 
+<<<<<<< HEAD
+=======
+            # تحويل التواريخ الميلادية إلى هجرية
+            if form.instance.start_date:
+                form.instance.start_date_hijri = convert_to_hijri(form.instance.start_date)
+
+            if form.instance.end_date:
+                form.instance.end_date_hijri = convert_to_hijri(form.instance.end_date)
+
+            if form.instance.admission_date:
+                form.instance.admission_date_hijri = convert_to_hijri(form.instance.admission_date)
+
+            if form.instance.discharge_date:
+                form.instance.discharge_date_hijri = convert_to_hijri(form.instance.discharge_date)
+
+            if form.instance.issue_date:
+                form.instance.issue_date_hijri = convert_to_hijri(form.instance.issue_date)
+
+>>>>>>> settings
             # حفظ التغييرات
             updated_companion_leave = form.save()
 

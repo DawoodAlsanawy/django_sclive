@@ -22,8 +22,13 @@ def doctor_search_api(request):
         results.append({
             'id': doctor.id,
             'display': doctor.name,
+<<<<<<< HEAD
             'national_id': doctor.national_id,
             'position': doctor.position,
+=======
+            'national_id': doctor.national_id or '',
+            'position': doctor.position or '',
+>>>>>>> settings
             'hospital': doctor.hospital.name if doctor.hospital else '',
             'phone': doctor.phone or '',
             'email': doctor.email or ''
@@ -48,11 +53,20 @@ def patient_search_api(request):
     results = []
     for patient in patients:
         employer_name = patient.employer_name or "غير محدد"
+<<<<<<< HEAD
         results.append({
             'id': patient.id,
             'text': f"{patient.name} ({patient.national_id})",
             'display': patient.name,
             'national_id': patient.national_id,
+=======
+        national_id_display = f" ({patient.national_id})" if patient.national_id else ""
+        results.append({
+            'id': patient.id,
+            'text': f"{patient.name}{national_id_display}",
+            'display': patient.name,
+            'national_id': patient.national_id or '',
+>>>>>>> settings
             'nationality': patient.nationality or '',
             'employer': employer_name,
             'phone': patient.phone or '',
@@ -75,11 +89,20 @@ def client_search_api(request):
 
     results = []
     for client in clients:
+<<<<<<< HEAD
         results.append({
             'id': client.id,
             'text': f"{client.name} ({client.phone})",
             'display': client.name,
             'phone': client.phone,
+=======
+        phone_display = f" ({client.phone})" if client.phone else ""
+        results.append({
+            'id': client.id,
+            'text': f"{client.name}{phone_display}",
+            'display': client.name,
+            'phone': client.phone or '',
+>>>>>>> settings
             'email': client.email or '',
             'address': client.address or '',
             'balance': client.get_balance()
@@ -116,22 +139,57 @@ def leave_price_api_get_price(request):
     # الحصول على معلومات إضافية
     leave_type_display = 'إجازة مرضية' if leave_type == 'sick_leave' else 'إجازة مرافق'
 
+<<<<<<< HEAD
     # البحث عن سعر مطابق تمامًا للعميل
     exact_price = None
+=======
+    # تحديد نوع السعر (ثابت أو يومي) ومصدر السعر
+    price_source = "غير محدد"
+    price_type = "per_day"  # افتراضي
+
+    # 1. البحث عن سعر يومي مخصص للعميل بمدة مطابقة تمامًا
+>>>>>>> settings
     if client:
         exact_price = LeavePrice.objects.filter(
             leave_type=leave_type,
             duration_days=duration_days,
             client=client,
+<<<<<<< HEAD
             is_active=True
         ).first()
 
     # إذا لم يتم العثور على سعر مخصص للعميل، ابحث عن السعر العام
     if not exact_price:
+=======
+            pricing_type='per_day',
+            is_active=True
+        ).first()
+
+        if exact_price:
+            price_type = 'per_day'
+            price_source = "سعر يومي مخصص للعميل"
+        else:
+            # 2. البحث عن سعر ثابت مخصص للعميل
+            fixed_price = LeavePrice.objects.filter(
+                leave_type=leave_type,
+                client=client,
+                pricing_type='fixed',
+                is_active=True
+            ).first()
+
+            if fixed_price:
+                price_type = 'fixed'
+                price_source = "سعر ثابت مخصص للعميل"
+
+    # إذا لم يتم العثور على سعر مخصص للعميل، ابحث عن السعر العام
+    if price_source == "غير محدد":
+        # 3. البحث عن سعر يومي عام بمدة مطابقة تمامًا
+>>>>>>> settings
         exact_price = LeavePrice.objects.filter(
             leave_type=leave_type,
             duration_days=duration_days,
             client__isnull=True,
+<<<<<<< HEAD
             is_active=True
         ).first()
 
@@ -141,10 +199,44 @@ def leave_price_api_get_price(request):
     return JsonResponse({
         'success': True,
         'price': float(price),
+=======
+            pricing_type='per_day',
+            is_active=True
+        ).first()
+
+        if exact_price:
+            price_type = 'per_day'
+            price_source = "سعر يومي عام"
+        else:
+            # 4. البحث عن سعر ثابت عام
+            fixed_price = LeavePrice.objects.filter(
+                leave_type=leave_type,
+                client__isnull=True,
+                pricing_type='fixed',
+                is_active=True
+            ).first()
+
+            if fixed_price:
+                price_type = 'fixed'
+                price_source = "سعر ثابت عام"
+            else:
+                price_source = "سعر محسوب"
+
+    # حساب السعر اليومي
+    daily_price = float(price) / duration_days if duration_days > 0 and price else 0
+
+    return JsonResponse({
+        'success': True,
+        'price': float(price) if price else 0,
+>>>>>>> settings
         'leave_type': leave_type,
         'leave_type_display': leave_type_display,
         'duration_days': duration_days,
         'price_type': price_type,
+<<<<<<< HEAD
+=======
+        'price_source': price_source,
+>>>>>>> settings
         'daily_price': daily_price,
         'client_id': client.id if client else None,
         'client_name': client.name if client else None

@@ -339,81 +339,7 @@ def hospital_delete(request, hospital_id):
     return render(request, 'core/hospitals/delete.html', {'hospital': hospital, 'doctors_count': doctors_count})
 
 
-# وظائف إدارة جهات العمل
-@login_required
-def employer_list(request):
-    """قائمة جهات العمل"""
-    employers = Employer.objects.all().order_by('name')
-
-    # تطبيق الفلاتر
-    name = request.GET.get('name')
-    phone = request.GET.get('phone')
-    email = request.GET.get('email')
-
-    if name:
-        employers = employers.filter(name__icontains=name)
-    if phone:
-        employers = employers.filter(phone__icontains=phone)
-    if email:
-        employers = employers.filter(email__icontains=email)
-
-    return render(request, 'core/employers/list.html', {'employers': employers})
-
-
-@login_required
-def employer_detail(request, employer_id):
-    """عرض تفاصيل جهة العمل"""
-    employer = get_object_or_404(Employer, id=employer_id)
-    return render(request, 'core/employers/detail.html', {'employer': employer})
-
-
-@login_required
-def employer_create(request):
-    """إنشاء جهة عمل جديدة"""
-    if request.method == 'POST':
-        form = EmployerForm(request.POST)
-        if form.is_valid():
-            employer = form.save()
-            messages.success(request, f'تم إنشاء جهة العمل {employer.name} بنجاح')
-            return redirect('core:employer_list')
-    else:
-        form = EmployerForm()
-
-    return render(request, 'core/employers/create.html', {'form': form})
-
-
-@login_required
-def employer_edit(request, employer_id):
-    """تعديل جهة عمل"""
-    employer = get_object_or_404(Employer, id=employer_id)
-
-    if request.method == 'POST':
-        form = EmployerForm(request.POST, instance=employer)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'تم تعديل جهة العمل {employer.name} بنجاح')
-            return redirect('core:employer_detail', employer_id=employer.id)
-    else:
-        form = EmployerForm(instance=employer)
-
-    return render(request, 'core/employers/edit.html', {'form': form, 'employer': employer})
-
-
-@login_required
-def employer_delete(request, employer_id):
-    """حذف جهة عمل"""
-    employer = get_object_or_404(Employer, id=employer_id)
-
-    # التحقق من وجود موظفين مرتبطين بجهة العمل
-    patients_count = employer.patients.count()
-
-    if request.method == 'POST':
-        employer_name = employer.name  # حفظ اسم جهة العمل قبل الحذف
-        employer.delete()
-        messages.success(request, f'تم حذف جهة العمل {employer_name} بنجاح')
-        return redirect('core:employer_list')
-
-    return render(request, 'core/employers/delete.html', {'employer': employer})
+# تم إزالة وظائف إدارة جهات العمل
 
 
 # وظائف إدارة الأطباء
@@ -3226,7 +3152,11 @@ def doctor_create_ajax(request):
             'doctor': {
                 'id': doctor.id,
                 'name': doctor.name,
+<<<<<<< HEAD
                 'national_id': doctor.national_id
+=======
+                'national_id': doctor.national_id if doctor.national_id else ''
+>>>>>>> settings
             }
         })
     else:
@@ -3235,6 +3165,7 @@ def doctor_create_ajax(request):
             'errors': form.errors
         })
 
+<<<<<<< HEAD
 @login_required
 @require_POST
 def hospital_create_ajax(request):
@@ -3254,6 +3185,9 @@ def hospital_create_ajax(request):
             'success': False,
             'errors': form.errors
         })
+=======
+# تم نقل وظيفة hospital_create_ajax إلى ملف hospital_ajax_views.py
+>>>>>>> settings
 
 @login_required
 @require_POST

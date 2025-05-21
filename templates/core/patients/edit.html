@@ -39,6 +39,9 @@
                 <div class="col-md-6">
                     {{ form.name|as_crispy_field }}
                 </div>
+                <div class="col-md-6">
+                    {{ form.name_en|as_crispy_field }}
+                </div>
             </div>
 
             <div class="row">
@@ -46,7 +49,10 @@
                     {{ form.nationality|as_crispy_field }}
                 </div>
                 <div class="col-md-6">
-                    {{ form.employer|as_crispy_field }}
+                    {{ form.employer_name|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.employer_name_en|as_crispy_field }}
                 </div>
             </div>
 

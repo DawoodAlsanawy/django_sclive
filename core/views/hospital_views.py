@@ -3,7 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from core.forms import HospitalForm
+<<<<<<< HEAD
 from core.models import Hospital
+=======
+from core.models import Doctor, Hospital
+>>>>>>> settings
 
 
 @login_required
@@ -20,6 +24,25 @@ def hospital_list(request):
 
 
 @login_required
+<<<<<<< HEAD
+=======
+def hospital_detail(request, hospital_id):
+    """تفاصيل المستشفى"""
+    hospital = get_object_or_404(Hospital, id=hospital_id)
+
+    # الحصول على الأطباء المرتبطين بالمستشفى
+    doctors = Doctor.objects.filter(hospital=hospital).order_by('name')
+
+    context = {
+        'hospital': hospital,
+        'doctors': doctors
+    }
+
+    return render(request, 'core/hospitals/detail.html', context)
+
+
+@login_required
+>>>>>>> settings
 def hospital_create(request):
     """إنشاء مستشفى جديد"""
     # التحقق من صلاحيات المستخدم
@@ -74,6 +97,19 @@ def hospital_delete(request, hospital_id):
     # التحقق من وجود أطباء مرتبطين بالمستشفى
     doctors_count = hospital.doctors.count()
 
+<<<<<<< HEAD
+=======
+    # التحقق من وجود إجازات مرضية مرتبطة بالمستشفى من خلال الأطباء
+    sick_leaves_count = 0
+    companion_leaves_count = 0
+
+    if doctors_count > 0:
+        from core.models import CompanionLeave, SickLeave
+        doctors = hospital.doctors.all()
+        sick_leaves_count = SickLeave.objects.filter(doctor__in=doctors).count()
+        companion_leaves_count = CompanionLeave.objects.filter(doctor__in=doctors).count()
+
+>>>>>>> settings
     if request.method == 'POST':
         hospital_name = hospital.name  # حفظ اسم المستشفى قبل الحذف
 
@@ -86,4 +122,16 @@ def hospital_delete(request, hospital_id):
         messages.success(request, f'تم حذف المستشفى {hospital_name} بنجاح')
         return redirect('core:hospital_list')
 
+<<<<<<< HEAD
     return render(request, 'core/hospitals/delete.html', {'hospital': hospital, 'doctors_count': doctors_count})
+=======
+    context = {
+        'hospital': hospital,
+        'doctors_count': doctors_count,
+        'sick_leaves_count': sick_leaves_count,
+        'companion_leaves_count': companion_leaves_count,
+        'total_leaves_count': sick_leaves_count + companion_leaves_count
+    }
+
+    return render(request, 'core/hospitals/delete.html', context)
+>>>>>>> settings

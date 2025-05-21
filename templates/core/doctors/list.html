@@ -65,8 +65,8 @@
                     {% for doctor in doctors %}
                     <tr>
                         <td>{{ doctor.name }}</td>
-                        <td>{{ doctor.position }}</td>
-                        <td>{{ doctor.hospital.name }}</td>
+                        <td>{{ doctor.position|default:"-" }}</td>
+                        <td>{% if doctor.hospital %}{{ doctor.hospital.name }}{% else %}-{% endif %}</td>
                         <td>{{ doctor.phone|default:"-" }}</td>
                         <td>{{ doctor.email|default:"-" }}</td>
                         <td>

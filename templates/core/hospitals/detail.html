@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block title %}تفاصيل المستشفى - نظام إدارة الإجازات المرضية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>تفاصيل المستشفى</h2>
+        <p class="text-muted">عرض تفاصيل المستشفى {{ hospital.name }}</p>
+    </div>
+    <div class="col-md-6 text-md-end">
+        <div class="btn-group" role="group">
+            <a href="{% url 'core:hospital_edit' hospital.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> تعديل
+            </a>
+            <a href="{% url 'core:hospital_delete' hospital.id %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> حذف
+            </a>
+            <a href="{% url 'core:hospital_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-right"></i> العودة للقائمة
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">معلومات المستشفى</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>الاسم:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ hospital.name }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>الاسم (بالإنجليزية):</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ hospital.name_en|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>العنوان:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ hospital.address|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>العنوان (بالإنجليزية):</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ hospital.address_en|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>معلومات الاتصال:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ hospital.contact_info|default:"غير محدد" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ الإنشاء:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ hospital.created_at|date:"Y-m-d" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>تاريخ التحديث:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {{ hospital.updated_at|date:"Y-m-d" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">شعار المستشفى</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if hospital.logo %}
+                <img src="{{ hospital.logo.url }}" alt="{{ hospital.name }}" class="img-fluid" style="max-height: 200px;">
+                {% else %}
+                <div class="alert alert-info">
+                    لا يوجد شعار للمستشفى
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">الأطباء المرتبطون بالمستشفى</h5>
+            </div>
+            <div class="card-body">
+                {% if doctors %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم الطبيب</th>
+                                <th>التخصص</th>
+                                <th>رقم الهاتف</th>
+                                <th>البريد الإلكتروني</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doctor in doctors %}
+                            <tr>
+                                <td>{{ doctor.id }}</td>
+                                <td>{{ doctor.name }}</td>
+                                <td>{{ doctor.position|default:"-" }}</td>
+                                <td>{{ doctor.phone|default:"-" }}</td>
+                                <td>{{ doctor.email|default:"-" }}</td>
+                                <td>
+                                    <a href="{% url 'core:doctor_detail' doctor.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> عرض
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    لا يوجد أطباء مرتبطون بهذا المستشفى
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
