@@ -120,6 +120,151 @@
 
 [vscode Auth Url](vscode://augment.vscode-augment/auth/result?code=_5031d6128af9e22aef6c87587b9290fc&state=68221de7-4c68-43a9-b532-843f8e7ace75&tenant_url=https%3A%2F%2Fd11.api.augmentcode.com%2F)
 
+[vscode Auth Url](vscode://augment.vscode-augment/auth/result?code=_6ab504e9dcd4a47ad1861d6818dec497&state=0b5769095-8978-4d0a-bd16-9b169bf8db6c&tenant_url=https%3A%2F%2Fd7.api.augmentcode.com%2F)
+[vscode Auth Url](vscode://augment.vscode-augment/auth/result?code=_8a140bd77d793224135ca6291ef63414&state=3779b754-bb20-4b31-8f04-235b105d1b73&tenant_url=https%3A%2F%2Fd14.api.augmentcode.com%2F)
 
 
 <div class="results-inquiery row"><div class="col-md-6"><span>الاسم: </span>أمل احمد محمد قيسي</div><div class="col-md-6"><span>تاريخ إصدار تقرير الإجازة:</span> 2025-04-14</div><div class="col-md-6"><span>تبدأ من:</span> 2025-04-13</div><div class="col-md-6"><span>وحتى:</span> 2025-04-13</div><div class="col-md-6"><span>المدة بالأيام:</span> 1</div><div class="col-md-6"><span>اسم الطبيب:</span> مصطفى سيد محمد</div><div class="col-md-6"><span>المسمى الوظيفي:</span> طب بشري</div></div>
+[
+    {
+        "name": "ajs_user_id",
+        "value": "80104653-bf35-4391-b3cb-d9b6b98c425d",
+        "domain": ".augmentcode.com",
+        "hostOnly": false,
+        "path": "/",
+        "secure": false,
+        "httpOnly": false,
+        "sameSite": "lax",
+        "session": false,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "expirationDate": 1779375808,
+        "storeId": null
+    },
+    {
+        "name": "ph_phc_Kc4h1nMQmkyKUo9uGYXOCt25GiiXwguFcnWr1Xhl6bW_posthog",
+        "value": "%7B%22distinct_id%22%3A%2280104653-bf35-4391-b3cb-d9b6b98c425d%22%2C%22%24sesid%22%3A%5B1747839809289%2C%220196f35b-cfa0-778b-b426-ed0b0b5b25d3%22%2C1747839602592%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Flogin.augmentcode.com%2Fu%2Flogin%2Fidentifier%3Fstate%3DhKFo2SBUdzN2Wml3aXlhbXpTRzdGV3Y3UEVfRjRabHVDREJxRqFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIHdRQnEtdEM2T2FQRFBFQUFvNTh2bkYxa1lBYmJaSHZXo2NpZNkgd2xMVFZXR0RmSXRXOUh6aUlvd1NSaWVRTlJ5bE1QVGE%22%7D%7D",
+        "domain": ".augmentcode.com",
+        "hostOnly": false,
+        "path": "/",
+        "secure": true,
+        "httpOnly": false,
+        "sameSite": "lax",
+        "session": false,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "expirationDate": 1779375809,
+        "storeId": null
+    },
+    {
+        "name": "_ga_F6GPDJDCJY",
+        "value": "GS2.1.s1746593626$o2$g0$t1746593626$j60$l0$h0",
+        "domain": ".augmentcode.com",
+        "hostOnly": false,
+        "path": "/",
+        "secure": false,
+        "httpOnly": false,
+        "sameSite": "no_restriction",
+        "session": false,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "expirationDate": 1781153627,
+        "storeId": null
+    },
+    {
+        "name": "ajs_anonymous_id",
+        "value": "26b7191e-47ae-46c8-8e08-0bb30ad8446a",
+        "domain": ".augmentcode.com",
+        "hostOnly": false,
+        "path": "/",
+        "secure": false,
+        "httpOnly": false,
+        "sameSite": "lax",
+        "session": false,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "expirationDate": 1779375808,
+        "storeId": null
+    },
+    {
+        "name": "_ga",
+        "value": "GA1.1.1685689020.1746573137",
+        "domain": ".augmentcode.com",
+        "hostOnly": false,
+        "path": "/",
+        "secure": false,
+        "httpOnly": false,
+        "sameSite": "no_restriction",
+        "session": false,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "expirationDate": 1781134211,
+        "storeId": null
+    },
+    {
+        "name": "_gcl_au",
+        "value": "1.1.1731149960.1746573137.1894345669.1746573932.1746574236",
+        "domain": ".augmentcode.com",
+        "hostOnly": false,
+        "path": "/",
+        "secure": false,
+        "httpOnly": false,
+        "sameSite": "no_restriction",
+        "session": false,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "expirationDate": 1754349137,
+        "storeId": null
+    },
+    {
+        "name": "session",
+        "value": ".eJztUtFumzAU_Rek5qVVE0y2lEjR1CyCFgUaqIHACwLbSQDbIDANtOq_z2SqVml938skW7auzrnn2Pe8KUlNGpZywoWyFE1HbpSkFakgSdqJ0yyh1THnCWLBKzL1DoHggB_oOYZqkQGPWsx5ic3gEIHTKTN7mjFMd34QI9VykYnXqamHEaP1M63pMzsOLvSHuKwjuCl7N4w0RL19VDpPqKAtDHwWAb2MA71ITaPNzKCLpV4WBjPZp9wF9uDASGL6Og6_zfaAlrvQUGOg0oy7AnPn4mkbBnMsuQjQlyyPhzj0aum_wIauIlbqHzgLOmsLWua4o33ApU6Hf34DCIxv8sWfmj94zFCxeaR2KfvtHTV7cBnSvBM2fd1hBrNhpNpFJBzT7518NnsK3X4LT8wuXBGzqI-Le80BLohDq7BGfW1Nd2EgopC2Fl8PGVDPeKO2GcC19Kzu_LaH3OigL_89pIayfFNwKtLx5BVHRFkq2wOF6Ohxcmcf8SZoeX94VG6UhuC8IUgkXZNL1EmIul1Op-M0b9PuyOSgUYXJLarYtBqrYIpSSrMUlZLdNfQT6TL8v1gjqWryV_KjIW1d8ZYkYqjJagRMEM0lNsnx6ky3MAjNzeFRhPrDa_5YnZ-9nLiON1B7B9PJZ6eri-SVdn8FDLm-civLv_3Ky4fjSYsqqSw3z_E1YWlOr-umOuSUTC4pXv1P7r9N7kSOg9VidYnS5JLd1ZfJfb9RSF8rS3UxX9zNNU2_u118X8wWc-39_ReDZJ-6.aC3rXg.arU8Mmf2G-zaMITrdTdIXJpHNDY",
+        "domain": "auth.augmentcode.com",
+        "hostOnly": true,
+        "path": "/",
+        "secure": true,
+        "httpOnly": true,
+        "sameSite": "lax",
+        "session": false,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "expirationDate": 1750518241,
+        "storeId": null
+    }
+]
+
+
+
+
+
+[
+    {
+        "name": "WorkosCursorSessionToken",
+        "value": "user_01JVSQ3XNYFHAAETJEH2G8P823%3A%3AeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhdXRoMHx1c2VyXzAxSlZTUTNYTllGSEFBRVRKRUgyRzhQODIzIiwidGltZSI6IjE3NDc4NDExNjAiLCJyYW5kb21uZXNzIjoiYjEwMWI5NWEtMzA3Yy00YTE2IiwiZXhwIjoxNzQ3ODQ2NTYwLCJpc3MiOiJodHRwczovL2F1dGhlbnRpY2F0aW9uLmN1cnNvci5zaCIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwgb2ZmbGluZV9hY2Nlc3MiLCJhdWQiOiJodHRwczovL2N1cnNvci5jb20ifQ.XWmu8pHDGZQv5rV7mzPCUpjPm-dOAA_nRQPdHPzyDKI",
+        "domain": "www.cursor.com",
+        "hostOnly": true,
+        "path": "/",
+        "secure": true,
+        "httpOnly": true,
+        "sameSite": "lax",
+        "session": true,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "storeId": null
+    },
+    {
+        "name": "IndrX2ZuSmZramJSX0NIYUZoRzRzUGZ0cENIVHpHNXk0VE0ya2ZiUkVzQU14X2Fub255bW91c1VzZXJJZCI%3D",
+        "value": "IjBiZTAzZGM0LTc3OGEtNGMxNC04NzNkLTM4OWQyZDc0ZDQxZiI=",
+        "domain": ".cursor.com",
+        "hostOnly": false,
+        "path": "/",
+        "secure": false,
+        "httpOnly": false,
+        "sameSite": "no_restriction",
+        "session": false,
+        "firstPartyDomain": "",
+        "partitionKey": null,
+        "expirationDate": 1779377106,
+        "storeId": null
+    }
+]
