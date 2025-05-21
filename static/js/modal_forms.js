@@ -132,14 +132,11 @@ $(document).ready(function() {
             data: $(this).serialize(),
             dataType: 'json',
             success: function(response) {
-<<<<<<< HEAD
-=======
                 // تحديث حقل صلة القرابة في نموذج إجازة المرافق إذا كان موجودًا
                 if (response.relation && $('#id_relation').length > 0) {
                     $('#id_relation').val(response.relation);
                 }
 
->>>>>>> settings
                 handleModalFormResponse(response, '#companionModal', '#id_companion');
             },
             error: function(xhr, status, error) {
@@ -172,12 +169,6 @@ $(document).ready(function() {
     $('#hospital-form').on('submit', function(e) {
         e.preventDefault();
 
-<<<<<<< HEAD
-        $.ajax({
-            url: '/hospitals/create-ajax/', // عنوان URL ثابت
-            type: 'POST',
-            data: $(this).serialize(),
-=======
         // إنشاء كائن FormData للتعامل مع الملفات
         var formData = new FormData(this);
 
@@ -187,7 +178,6 @@ $(document).ready(function() {
             data: formData,
             processData: false, // مهم للتعامل مع الملفات
             contentType: false, // مهم للتعامل مع الملفات
->>>>>>> settings
             dataType: 'json',
             success: function(response) {
                 handleModalFormResponse(response, '#hospitalModal', '#id_new_doctor_hospital');

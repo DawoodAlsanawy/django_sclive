@@ -51,12 +51,8 @@ class SickLeaveViewsTest(TestCase):
 
         # إنشاء إجازة مرضية للاختبار
         self.sick_leave = SickLeave.objects.create(
-<<<<<<< HEAD
-            leave_id="SL-20230101-001",
-=======
             leave_id="PSL2023010100",
             prefix="PSL",
->>>>>>> settings
             patient=self.patient,
             doctor=self.doctor,
             start_date=date.today(),
@@ -113,11 +109,7 @@ class SickLeaveViewsTest(TestCase):
         """اختبار إنشاء إجازة مرضية جديدة"""
         # بيانات الإجازة المرضية الجديدة
         data = {
-<<<<<<< HEAD
-            'leave_id': 'SL-20230101-002',
-=======
             'prefix': 'PSL',  # إضافة البادئة
->>>>>>> settings
             'patient': self.patient.id,
             'doctor': self.doctor.id,
             'start_date': date.today(),
@@ -146,13 +138,9 @@ class SickLeaveViewsTest(TestCase):
 
         # التحقق من إنشاء الإجازة المرضية
         self.assertEqual(SickLeave.objects.count(), 2)
-<<<<<<< HEAD
-        new_sick_leave = SickLeave.objects.get(leave_id='SL-20230101-002')
-=======
         # الحصول على الإجازة المرضية الجديدة (آخر إجازة تم إنشاؤها)
         new_sick_leave = SickLeave.objects.exclude(id=self.sick_leave.id).first()
         self.assertEqual(new_sick_leave.prefix, 'PSL')  # التحقق من البادئة
->>>>>>> settings
         self.assertEqual(new_sick_leave.patient, self.patient)
         self.assertEqual(new_sick_leave.doctor, self.doctor)
         self.assertEqual(new_sick_leave.duration_days, 4)
@@ -162,10 +150,7 @@ class SickLeaveViewsTest(TestCase):
         # بيانات التعديل
         data = {
             'leave_id': self.sick_leave.leave_id,
-<<<<<<< HEAD
-=======
             'prefix': self.sick_leave.prefix,  # إضافة البادئة
->>>>>>> settings
             'patient': self.patient.id,
             'doctor': self.doctor.id,
             'start_date': self.sick_leave.start_date,
@@ -282,12 +267,8 @@ class CompanionLeaveViewsTest(TestCase):
 
         # إنشاء إجازة مرافق للاختبار
         self.companion_leave = CompanionLeave.objects.create(
-<<<<<<< HEAD
-            leave_id="CL-20230101-001",
-=======
             leave_id="PSL2023010100",
             prefix="PSL",
->>>>>>> settings
             patient=self.patient,
             companion=self.companion,
             doctor=self.doctor,
@@ -345,11 +326,7 @@ class CompanionLeaveViewsTest(TestCase):
         """اختبار إنشاء إجازة مرافق جديدة"""
         # بيانات إجازة المرافق الجديدة
         data = {
-<<<<<<< HEAD
-            'leave_id': 'CL-20230101-002',
-=======
             'prefix': 'PSL',  # إضافة البادئة
->>>>>>> settings
             'patient': self.patient.id,
             'companion': self.companion.id,
             'doctor': self.doctor.id,
@@ -383,13 +360,9 @@ class CompanionLeaveViewsTest(TestCase):
 
         # التحقق من إنشاء إجازة المرافق
         self.assertEqual(CompanionLeave.objects.count(), 2)
-<<<<<<< HEAD
-        new_companion_leave = CompanionLeave.objects.get(leave_id='CL-20230101-002')
-=======
         # الحصول على إجازة المرافق الجديدة (آخر إجازة تم إنشاؤها)
         new_companion_leave = CompanionLeave.objects.exclude(id=self.companion_leave.id).first()
         self.assertEqual(new_companion_leave.prefix, 'PSL')  # التحقق من البادئة
->>>>>>> settings
         self.assertEqual(new_companion_leave.patient, self.patient)
         self.assertEqual(new_companion_leave.companion, self.companion)
         self.assertEqual(new_companion_leave.doctor, self.doctor)
@@ -400,10 +373,7 @@ class CompanionLeaveViewsTest(TestCase):
         # بيانات التعديل
         data = {
             'leave_id': self.companion_leave.leave_id,
-<<<<<<< HEAD
-=======
             'prefix': self.companion_leave.prefix,  # إضافة البادئة
->>>>>>> settings
             'patient': self.patient.id,
             'companion': self.companion.id,
             'doctor': self.doctor.id,

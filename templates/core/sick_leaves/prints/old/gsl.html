@@ -10,44 +10,28 @@
     <style>
         @font-face {
             font-family: 'Cairo';
-<<<<<<< HEAD
-            src: url('/fonts/Cairo-Regular.ttf') format('truetype');
-=======
             src: url('{%static "fonts/Cairo-Regular.ttf"%}') format('truetype');
->>>>>>> settings
             font-weight: normal;
             font-style: normal;
         }
 
         @font-face {
             font-family: 'Cairo';
-<<<<<<< HEAD
-            src: url('/fonts/Cairo-Bold.ttf') format('truetype');
-=======
             src: url('{%static "fonts/Cairo-Bold.ttf"%}') format('truetype');
->>>>>>> settings
             font-weight: bold;
             font-style: normal;
         }
 
         @font-face {
             font-family: 'Cairo';
-<<<<<<< HEAD
-            src: url('/fonts/Cairo-Black.ttf') format('truetype');
-=======
             src: url('{%static "fonts/Cairo-Black.ttf"%}') format('truetype');
->>>>>>> settings
             font-weight: 900;
             font-style: normal;
         }
 
         @font-face {
             font-family: 'Cairo';
-<<<<<<< HEAD
-            src: url('/fonts/ExtraBold.ttf') format('truetype');
-=======
             src: url('/fonts/Cairo-ExtraBold.ttf') format('truetype');
->>>>>>> settings
             font-weight: 800;
             font-style: normal;
         }
@@ -553,31 +537,19 @@
             </tr>
                             <tr>
                     <td class="highlight" style="padding-top:15px;">
-<<<<<<< HEAD
-                                                {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date|hijri_date }} الى {{ sick_leave.end_date|hijri_date }})
-=======
                                                 {{ sick_leave.duration_days }} يوم ({{ sick_leave.start_date_hijri_date }} الى {{ sick_leave.end_date_hijri }})
->>>>>>> settings
                     </td>
                     <td class="highlight" dir="ltr" style="padding-top:15px;">
                         {{ sick_leave.duration_days }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.start_date|date:"d-m-Y" }} to {{ sick_leave.end_date|date:"d-m-Y" }})
                     </td>
                 </tr>
                         <tr>
-<<<<<<< HEAD
-            <td style="color:#2c3e77 ;font-weight: 300 ;padding-top:15px;"> {{ sick_leave.admission_date|hijri_date }}</td>
-=======
             <td style="color:#2c3e77 ;font-weight: 300 ;padding-top:15px;"> {{ sick_leave.admission_date_hijri }}</td>
->>>>>>> settings
             <td style="color:#2c3e77 ;font-weight: 300;padding-top:15px;">  {{ sick_leave.admission_date|date:"d-m-Y" }}</td>
 
             </tr>
             <tr>
-<<<<<<< HEAD
-            <td style="color:#2c3e77 ;font-weight: 300;padding-top:15px;">  {{ sick_leave.discharge_date|hijri_date }}</td>
-=======
             <td style="color:#2c3e77 ;font-weight: 300;padding-top:15px;">  {{ sick_leave.discharge_date_hijri_date }}</td>
->>>>>>> settings
             <td style="color:#2c3e77 ;font-weight: 300;padding-top:15px;">  {{ sick_leave.discharge_date|date:"d-m-Y" }}</td>
             </tr>
             <tr>
@@ -587,32 +559,13 @@
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:14px;">{{ sick_leave.patient.name }}</td>
-<<<<<<< HEAD
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:14px;"> {{ sick_leave.patient.name|translate_to_english|upper }}</td>
-=======
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:14px;"> {{ sick_leave.patient.name_en|upper }}</td>
->>>>>>> settings
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:14px;" colspan="2">{{ sick_leave.patient.national_id }}</td>
             </tr>
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality }}</td>
-<<<<<<< HEAD
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality|translate_to_english|upper }}</td>
-            </tr>
-            <tr>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.employer_name }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200">{{ sick_leave.patient.employer_name|translate_to_english|upper }}</td>
-            </tr>
-            <tr>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:19px;">{{ sick_leave.doctor.name }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:19px;">{{ sick_leave.doctor.name|translate_to_english|upper }}</td>
-            </tr>
-            <tr>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position }}</td>
-            <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position|translate_to_english|upper }}</td>
-=======
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:13px;">{{ sick_leave.patient.nationality_en|capitalize }}</td>
             </tr>
             <tr>
@@ -626,7 +579,6 @@
             <tr>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position }}</td>
             <td style="color:#2c3e77 ;font-weight: 200;padding-top:16px;">{{ sick_leave.doctor.position_en|capitalize|first_word }}</td>
->>>>>>> settings
             </tr>
           </tbody></table>
             <div class="body-image">
@@ -643,21 +595,13 @@
             <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:140px;">
                 <img src="{{ sick_leave.doctor.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
                 <p style="margin-top: -2px ;
-<<<<<<< HEAD
-                margin-left:30px" class="text-xs text-gray-500 medical-name">{{ sick_leave.doctor.hospital.name }} <br>{{ sick_leave.doctor.hospital.name|translate_to_english|upper }} <br>
-=======
                 margin-left:30px" class="text-xs text-gray-500 medical-name">{{ sick_leave.doctor.hospital.name }} <br>{{ sick_leave.doctor.hospital.name_en|capitalize }} <br>
->>>>>>> settings
                 </p>
             </div>
 
             <div class="text-center col-6 qr-code-section">
                 <div class="qr-code">
-<<<<<<< HEAD
-                    <img src="{% static 'images/qr-code.png' %}" alt="QR Code" class="qr-image">
-=======
                     <img src="{% generate_qrcode 'https://sahafaty.site/quiries/slenquiry' 150 %}" alt="QR Code" class="qr-image">
->>>>>>> settings
                 </div>
              <p class="text-gray-700 qr-text" style="line-height: 2.2;">
             <span style="font-size: 8px;font-weight: 200;">للتحقق من بيانات التقرير، يرجى التأكد من زيارة موقع منصة صحة الرسمي</span>
@@ -672,11 +616,6 @@
                 <img src="{% static 'images/National_center_for_midical.png' %}" alt="National Center" class="national-logo">
             </div>
             <div class="text-left col-6" style="font-size:10px; margin-top:35px; font-weight: 500;  margin-left:22px;">
-<<<<<<< HEAD
-            <span style="display: inline-block;">AM</span>
-                <span style="display: inline-block;">12:06</span>
-                <br> {% now "l, d F Y" %}
-=======
                 {% if sick_leave.created_at.hour < 12 %}
                 <span style="display: inline-block;">AM</span>
                 {% else %}
@@ -690,7 +629,6 @@
                     {% endif %}
                 </span>
                 <br> {{ sick_leave.created_at|date:"l, d F Y"|translate_to_english }}
->>>>>>> settings
             </div>
         </div>
     </div>

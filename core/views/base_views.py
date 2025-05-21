@@ -1,16 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.db import models
-<<<<<<< HEAD
-from django.shortcuts import render
-
-from core.models import (Client, CompanionLeave, Doctor, Hospital, LeaveInvoice,
-                         Patient, Payment, SickLeave)
-=======
 from django.shortcuts import redirect, render
 
 from core.models import (Client, CompanionLeave, Doctor, Hospital,
                          LeaveInvoice, Patient, Payment, SickLeave)
->>>>>>> settings
 
 
 def home(request):
@@ -70,12 +63,8 @@ def home(request):
 
     # إذا كان المستخدم غير مسجل الدخول، عرض صفحة الترحيب
     else:
-<<<<<<< HEAD
-        return render(request, 'core/index.html')
-=======
         # return render(request, 'core/index.html')
         return redirect('https://seha.sa')
->>>>>>> settings
 
 
 def about(request):

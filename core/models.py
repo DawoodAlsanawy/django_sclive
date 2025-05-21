@@ -85,8 +85,6 @@ class Hospital(models.Model):
         """الحصول على عدد الأطباء المرتبطين بالمستشفى"""
         return self.doctors.count()
 
-<<<<<<< HEAD
-=======
     def save(self, *args, **kwargs):
         """حفظ المستشفى مع ترجمة البيانات تلقائيًا"""
         # ترجمة الاسم والعنوان إلى الإنجليزية إذا كانت فارغة
@@ -110,7 +108,6 @@ class Hospital(models.Model):
 
         super().save(*args, **kwargs)
 
->>>>>>> settings
     def delete(self, *args, **kwargs):
         """حذف المستشفى وملف الشعار المرتبط به"""
         # حذف ملف الشعار إذا كان موجودًا
@@ -146,15 +143,10 @@ class Doctor(models.Model):
     """نموذج الطبيب"""
     national_id = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم الطبيب')
-<<<<<<< HEAD
-    position = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب')
-    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', verbose_name='المستشفى')
-=======
     name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم الطبيب (بالإنجليزية)')
     position = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب')
     position_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب (بالإنجليزية)')
     hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', blank=True, null=True, verbose_name='المستشفى')
->>>>>>> settings
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
@@ -195,13 +187,6 @@ class Patient(models.Model):
     """نموذج المريض"""
     national_id = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم المريض')
-<<<<<<< HEAD
-    nationality = models.CharField(max_length=50, blank=True, null=True, verbose_name='الجنسية')
-    employer_name = models.CharField(max_length=100, blank=True, null=True, verbose_name='جهة العمل')
-    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
-    email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
-    address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
-=======
     name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم المريض (بالإنجليزية)')
     nationality = models.CharField(max_length=50, blank=True, null=True, verbose_name='الجنسية')
     nationality_en = models.CharField(max_length=50, blank=True, null=True, verbose_name='الجنسية (بالإنجليزية)')
@@ -211,7 +196,6 @@ class Patient(models.Model):
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     address_en = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان (بالإنجليزية)')
->>>>>>> settings
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
@@ -273,10 +257,7 @@ class Client(models.Model):
     address = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان')
     address_en = models.CharField(max_length=200, blank=True, null=True, verbose_name='العنوان (بالإنجليزية)')
     notes = models.TextField(blank=True, null=True, verbose_name='ملاحظات')
-<<<<<<< HEAD
-=======
     notes_en = models.TextField(blank=True, null=True, verbose_name='ملاحظات (بالإنجليزية)')
->>>>>>> settings
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
@@ -348,56 +329,11 @@ class LeavePrice(models.Model):
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True, verbose_name='تاريخ التحديث')
 
-<<<<<<< HEAD
-    @staticmethod
-    def get_price(leave_type, duration_days, client=None):
-        """
-        حساب سعر الإجازة بناءً على نوعها ومدتها والعميل
-        """
-        from decimal import Decimal
-
-        # البحث عن سعر محدد للعميل والمدة
-        if client:
-            client_price = LeavePrice.objects.filter(
-                leave_type=leave_type,
-                duration_days=duration_days,
-                client=client,
-                is_active=True
-            ).first()
-
-            if client_price:
-                if client_price.pricing_type == 'fixed':
-                    return client_price.price
-                else:  # per_day
-                    return client_price.price * duration_days
-
-        # البحث عن سعر عام للمدة (بدون تحديد عميل)
-        general_price = LeavePrice.objects.filter(
-            leave_type=leave_type,
-            duration_days=duration_days,
-            client__isnull=True,
-            is_active=True
-        ).first()
-
-        if general_price:
-            if general_price.pricing_type == 'fixed':
-                return general_price.price
-            else:  # per_day
-                return general_price.price * duration_days
-
-        # إذا لم يتم العثور على سعر محدد، استخدم السعر الافتراضي
-        default_price = Decimal('5.00')  # سعر افتراضي لليوم الواحد
-        return default_price * duration_days
-=======
     # تم حذف الدالة الثابتة get_price لتجنب التضارب مع الدالة الأخرى
->>>>>>> settings
 
     class Meta:
         verbose_name = 'سعر الإجازة'
         verbose_name_plural = 'أسعار الإجازات'
-<<<<<<< HEAD
-        unique_together = ['leave_type', 'duration_days', 'client', 'pricing_type']
-=======
         # تعديل قيود الفريد لتكون مناسبة لطريقة التسعير
         constraints = [
             # للسعر اليومي، يجب أن تكون المجموعة (نوع الإجازة، المدة، العميل، طريقة التسعير) فريدة
@@ -413,7 +349,6 @@ class LeavePrice(models.Model):
                 name='unique_fixed_price'
             ),
         ]
->>>>>>> settings
 
     def __str__(self):
         leave_type_display = dict([('sick_leave', 'إجازة مرضية'), ('companion_leave', 'إجازة مرافق')])
@@ -442,21 +377,6 @@ class LeavePrice(models.Model):
         يعيد:
         - سعر الإجازة
         """
-<<<<<<< HEAD
-        # 1. البحث عن سعر ثابت مخصص للعميل
-        if client:
-            # البحث عن سعر ثابت للإجازة مخصص للعميل
-            fixed_price = cls.objects.filter(
-                leave_type=leave_type,
-                client=client,
-                pricing_type='fixed',
-                is_active=True
-            ).first()
-            if fixed_price:
-                return fixed_price.price
-
-            # 2. البحث عن سعر يومي مخصص للعميل بمدة مطابقة تمامًا
-=======
         from decimal import Decimal
 
         # التحقق من صحة المدخلات
@@ -466,7 +386,6 @@ class LeavePrice(models.Model):
         # أولاً: البحث عن أسعار مخصصة للعميل
         if client:
             # 1. البحث عن سعر يومي مخصص للعميل بمدة مطابقة تمامًا
->>>>>>> settings
             price = cls.objects.filter(
                 leave_type=leave_type,
                 duration_days=duration_days,
@@ -477,12 +396,6 @@ class LeavePrice(models.Model):
             if price:
                 return price.price
 
-<<<<<<< HEAD
-            # 3. البحث عن أقرب سعر يومي مخصص للعميل (أقل مدة أكبر من المدة المطلوبة)
-            price = cls.objects.filter(
-                leave_type=leave_type,
-                duration_days__lt=duration_days,
-=======
             # 2. البحث عن سعر ثابت مخصص للعميل
             fixed_price = cls.objects.filter(
                 leave_type=leave_type,
@@ -497,26 +410,16 @@ class LeavePrice(models.Model):
             price = cls.objects.filter(
                 leave_type=leave_type,
                 duration_days__lte=duration_days,
->>>>>>> settings
                 client=client,
                 pricing_type='per_day',
                 is_active=True
             ).order_by('-duration_days').first()
-<<<<<<< HEAD
-            if price:
-                # حساب السعر بناءً على السعر اليومي
-                daily_price = price.price / price.duration_days
-                return daily_price * duration_days
-
-            # 4. البحث عن أقرب سعر يومي مخصص للعميل (أكبر مدة أقل من المدة المطلوبة)
-=======
             if price and price.duration_days > 0:
                 # حساب السعر بناءً على السعر اليومي
                 daily_price = price.price / price.duration_days
                 return daily_price * Decimal(str(duration_days))
 
             # 4. البحث عن أقرب سعر يومي مخصص للعميل (أكبر مدة من المدة المطلوبة)
->>>>>>> settings
             price = cls.objects.filter(
                 leave_type=leave_type,
                 duration_days__gt=duration_days,
@@ -524,22 +427,6 @@ class LeavePrice(models.Model):
                 pricing_type='per_day',
                 is_active=True
             ).order_by('duration_days').first()
-<<<<<<< HEAD
-            if price:
-                return price.price
-
-        # 5. البحث عن سعر ثابت عام
-        fixed_price = cls.objects.filter(
-            leave_type=leave_type,
-            client__isnull=True,
-            pricing_type='fixed',
-            is_active=True
-        ).first()
-        if fixed_price:
-            return fixed_price.price
-
-        # 6. البحث عن سعر يومي عام بمدة مطابقة تمامًا
-=======
             if price and price.duration_days > 0:
                 # حساب السعر بناءً على السعر اليومي
                 daily_price = price.price / price.duration_days
@@ -547,7 +434,6 @@ class LeavePrice(models.Model):
 
         # ثانياً: البحث عن أسعار عامة
         # 5. البحث عن سعر يومي عام بمدة مطابقة تمامًا
->>>>>>> settings
         price = cls.objects.filter(
             leave_type=leave_type,
             duration_days=duration_days,
@@ -558,12 +444,6 @@ class LeavePrice(models.Model):
         if price:
             return price.price
 
-<<<<<<< HEAD
-        # 7. البحث عن أقرب سعر يومي عام (أقل مدة أكبر من المدة المطلوبة)
-        price = cls.objects.filter(
-            leave_type=leave_type,
-            duration_days__lt=duration_days,
-=======
         # 6. البحث عن سعر ثابت عام
         fixed_price = cls.objects.filter(
             leave_type=leave_type,
@@ -578,25 +458,16 @@ class LeavePrice(models.Model):
         price = cls.objects.filter(
             leave_type=leave_type,
             duration_days__lte=duration_days,
->>>>>>> settings
             client__isnull=True,
             pricing_type='per_day',
             is_active=True
         ).order_by('-duration_days').first()
-<<<<<<< HEAD
-        if price:
-=======
         if price and price.duration_days > 0:
->>>>>>> settings
             # حساب السعر بناءً على السعر اليومي
             daily_price = price.price / price.duration_days
             return daily_price * Decimal(str(duration_days))
 
-<<<<<<< HEAD
-        # 8. البحث عن أقرب سعر يومي عام (أكبر مدة أقل من المدة المطلوبة)
-=======
         # 8. البحث عن أقرب سعر يومي عام (أكبر مدة من المدة المطلوبة)
->>>>>>> settings
         price = cls.objects.filter(
             leave_type=leave_type,
             duration_days__gt=duration_days,
@@ -604,15 +475,10 @@ class LeavePrice(models.Model):
             pricing_type='per_day',
             is_active=True
         ).order_by('duration_days').first()
-<<<<<<< HEAD
-        if price:
-            return price.price
-=======
         if price and price.duration_days > 0:
             # حساب السعر بناءً على السعر اليومي
             daily_price = price.price / price.duration_days
             return daily_price * Decimal(str(duration_days))
->>>>>>> settings
 
         return Decimal('0')  # لا يوجد سعر مناسب
 
@@ -629,13 +495,9 @@ class SickLeave(models.Model):
     end_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ النهاية (هجري)')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
     admission_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الدخول')
-<<<<<<< HEAD
-    discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
-=======
     admission_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الدخول (هجري)')
     discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
     discharge_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الخروج (هجري)')
->>>>>>> settings
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
     issue_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الإصدار (هجري)')
     status = models.CharField(max_length=20, choices=[
@@ -784,13 +646,9 @@ class CompanionLeave(models.Model):
     end_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ النهاية (هجري)')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
     admission_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الدخول')
-<<<<<<< HEAD
-    discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
-=======
     admission_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الدخول (هجري)')
     discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
     discharge_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الخروج (هجري)')
->>>>>>> settings
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
     issue_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الإصدار (هجري)')
     status = models.CharField(max_length=20, choices=[

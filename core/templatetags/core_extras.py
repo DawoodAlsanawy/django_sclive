@@ -1,15 +1,9 @@
-<<<<<<< HEAD
-=======
 import base64
->>>>>>> settings
 import datetime
 import os
 import re
 from datetime import date
-<<<<<<< HEAD
-=======
 from io import BytesIO
->>>>>>> settings
 
 import qrcode
 from django import template
@@ -209,8 +203,6 @@ def to_uppercase(value):
         return value
 
 @register.filter
-<<<<<<< HEAD
-=======
 def capitalize(value):
     """
     فلتر لتحويل النص إلى أحرف كبيرة
@@ -230,7 +222,6 @@ def capitalize(value):
         return value
 
 @register.filter
->>>>>>> settings
 def add(value, arg):
     """
     فلتر لإضافة قيمة إلى قيمة أخرى

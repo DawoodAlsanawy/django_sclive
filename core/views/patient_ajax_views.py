@@ -20,31 +20,17 @@ def patient_create_ajax(request):
         email = request.POST.get('email', '')
 
         # التحقق من البيانات المطلوبة
-<<<<<<< HEAD
-        if not national_id or not name:
-            return JsonResponse({
-                'success': False,
-                'message': 'يرجى ملء جميع الحقول المطلوبة',
-                'errors': {
-                    'national_id': ['هذا الحقل مطلوب'] if not national_id else [],
-=======
         if not name:
             return JsonResponse({
                 'success': False,
                 'message': 'يرجى ملء اسم المريض',
                 'errors': {
->>>>>>> settings
                     'name': ['هذا الحقل مطلوب'] if not name else []
                 }
             })
 
-<<<<<<< HEAD
-        # التحقق مما إذا كان هناك مريض بنفس رقم الهوية
-        if Patient.objects.filter(national_id=national_id).exists():
-=======
         # التحقق مما إذا كان هناك مريض بنفس رقم الهوية (فقط إذا تم إدخال رقم هوية)
         if national_id and Patient.objects.filter(national_id=national_id).exists():
->>>>>>> settings
             return JsonResponse({
                 'success': False,
                 'message': 'يوجد مريض بنفس رقم الهوية',
@@ -54,11 +40,7 @@ def patient_create_ajax(request):
             })
 
         # إنشاء المريض
-<<<<<<< HEAD
-        patient = Patient.objects.create(
-=======
         patient = Patient(
->>>>>>> settings
             national_id=national_id,
             name=name,
             phone=phone,
@@ -67,11 +49,8 @@ def patient_create_ajax(request):
             nationality=nationality,
             email=email
         )
-<<<<<<< HEAD
-=======
         # استخدام دالة save() لتفعيل الترجمة التلقائية
         patient.save()
->>>>>>> settings
 
         # إرجاع استجابة ناجحة
         return JsonResponse({

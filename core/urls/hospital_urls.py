@@ -6,10 +6,7 @@ from core import views
 urlpatterns = [
     path('hospitals/', views.hospital_list, name='hospital_list'),
     path('hospitals/create/', views.hospital_create, name='hospital_create'),
-<<<<<<< HEAD
-=======
     path('hospitals/<int:hospital_id>/', views.hospital_detail, name='hospital_detail'),
->>>>>>> settings
     path('hospitals/<int:hospital_id>/edit/', views.hospital_edit, name='hospital_edit'),
     path('hospitals/<int:hospital_id>/delete/', views.hospital_delete, name='hospital_delete'),
 ]

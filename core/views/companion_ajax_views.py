@@ -41,32 +41,20 @@ def companion_create_ajax(request):
             })
 
         # إنشاء المرافق (المرافق هو مريض في النظام)
-<<<<<<< HEAD
-        # يمكن إضافة حقل ملاحظات لتخزين معلومات العلاقة إذا لزم الأمر
-        notes = f"علاقة المرافق: {relation}" if relation else ""
-
-        companion = Patient.objects.create(
-=======
         # تخزين صلة القرابة في حقل الملاحظات
         notes = f"علاقة المرافق: {relation}" if relation else ""
 
         companion = Patient(
->>>>>>> settings
             national_id=national_id,
             name=name,
             phone=phone,
             employer_name=employer_name,
             address=address,
-<<<<<<< HEAD
-            nationality=nationality
-        )
-=======
             nationality=nationality,
             notes=notes
         )
         # استخدام دالة save() لتفعيل الترجمة التلقائية
         companion.save()
->>>>>>> settings
 
         # إرجاع استجابة ناجحة
         return JsonResponse({

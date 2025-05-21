@@ -70,8 +70,6 @@
     $(document).ready(function() {
         // تنفيذ الدالة عند تحميل الصفحة لتطبيق الحالة الأولية
         toggleDurationField($('#id_pricing_type').val());
-<<<<<<< HEAD
-=======
 
         // إضافة مستمع حدث لتقديم النموذج
         $('form').on('submit', function() {
@@ -80,7 +78,6 @@
                 $('#id_duration_days').val(1);
             }
         });
->>>>>>> settings
     });
 
     // دالة لإخفاء/إظهار حقل المدة بالأيام حسب طريقة التسعير
@@ -88,16 +85,6 @@
         if (pricingType === 'fixed') {
             // إذا كان السعر ثابت، نخفي حقل المدة ونضع قيمة افتراضية (1)
             $('#duration_days_container').hide();
-<<<<<<< HEAD
-            if ($('#id_duration_days').val() === '') {
-                $('#id_duration_days').val(1);
-            }
-        } else {
-            // إذا كان السعر يومي، نظهر حقل المدة
-            $('#duration_days_container').show();
-        }
-    }
-=======
             $('#id_duration_days').val(1);
         } else {
             // إذا كان السعر يومي، نظهر حقل المدة
@@ -115,6 +102,5 @@
     $('#id_pricing_type').change(function() {
         toggleDurationField($(this).val());
     });
->>>>>>> settings
 </script>
 {% endblock %}

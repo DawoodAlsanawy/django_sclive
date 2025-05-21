@@ -3,8 +3,4 @@ venv/*
 db.sqlite3
 *.pyc
 .venv
-<<<<<<< HEAD
-logs/django.log
-=======
 logs/*
->>>>>>> settings

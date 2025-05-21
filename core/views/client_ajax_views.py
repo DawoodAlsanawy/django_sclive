@@ -27,11 +27,7 @@ def client_create_ajax(request):
                 }
             })
 
-<<<<<<< HEAD
-        # التحقق مما إذا كان هناك عميل بنفس رقم الهاتف
-=======
         # التحقق مما إذا كان هناك عميل بنفس رقم الهاتف (فقط إذا تم إدخال رقم هاتف)
->>>>>>> settings
         if phone and Client.objects.filter(phone=phone).exists():
             return JsonResponse({
                 'success': False,
@@ -42,22 +38,15 @@ def client_create_ajax(request):
             })
 
         # إنشاء العميل
-<<<<<<< HEAD
-        client = Client.objects.create(
-=======
         client = Client(
->>>>>>> settings
             name=name,
             phone=phone,
             email=email,
             address=address,
             notes=notes
         )
-<<<<<<< HEAD
-=======
         # استخدام دالة save() لتفعيل الترجمة التلقائية
         client.save()
->>>>>>> settings
 
         # إرجاع استجابة ناجحة
         return JsonResponse({

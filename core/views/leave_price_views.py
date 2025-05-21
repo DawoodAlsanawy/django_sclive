@@ -4,11 +4,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from core.forms import LeavePriceForm
-<<<<<<< HEAD
-from core.models import LeavePrice, LeaveInvoice
-=======
 from core.models import LeaveInvoice, LeavePrice
->>>>>>> settings
 
 
 @login_required
@@ -95,20 +91,6 @@ def leave_price_delete(request, leave_price_id):
     """حذف سعر إجازة"""
     leave_price = get_object_or_404(LeavePrice, id=leave_price_id)
 
-<<<<<<< HEAD
-    # التحقق من استخدام السعر في الفواتير
-    invoices_count = LeaveInvoice.objects.filter(
-        Q(leave_type=leave_price.leave_type) &
-        Q(amount=leave_price.price)
-    ).count()
-
-    if request.method == 'POST':
-        leave_type_display = 'إجازة مرضية' if leave_price.leave_type == 'sick_leave' else 'إجازة مرافق'
-        duration_days = leave_price.duration_days
-        price = leave_price.price
-        leave_price.delete()
-        messages.success(request, f'تم حذف سعر {leave_type_display} لمدة {duration_days} يوم بمبلغ {price} ريال بنجاح')
-=======
     # التحقق من استخدام السعر في الفواتير بشكل أكثر دقة
     # نبحث عن الفواتير التي تم إنشاؤها باستخدام هذا السعر
     # نحتاج إلى تحسين هذا البحث لأن السعر قد يكون تم حسابه بناءً على هذا السعر
@@ -153,7 +135,6 @@ def leave_price_delete(request, leave_price_id):
             leave_price.delete()
             messages.success(request, f'تم حذف سعر {leave_type_display} {pricing_type_display} لمدة {duration_days} يوم بمبلغ {price} ريال بنجاح')
 
->>>>>>> settings
         return redirect('core:leave_price_list')
 
     context = {
