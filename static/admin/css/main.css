@@ -1,0 +1,10 @@
+.card-row{
+    margin-bottom: 10px;
+}
+.card .card-header{
+    justify-content: center !important;
+    text-align: center;
+    }
+.card .card-header img{
+height: 300px;
+}

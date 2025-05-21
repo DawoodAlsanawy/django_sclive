@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    {% load crispy_forms_tags %}
+    
+{% load static %}
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="origin-trial"
+        content="Az520Inasey3TAyqLyojQa8MnmCALSEU29yQFW8dePZ7xQTvSt73pHazLFTK5f7SyLUJSo2uKLesEtEa9aUYcgMAAACPeyJvcmlnaW4iOiJodHRwczovL2dvb2dsZS5jb206NDQzIiwiZmVhdHVyZSI6IkRpc2FibGVUaGlyZFBhcnR5U3RvcmFnZVBhcnRpdGlvbmluZyIsImV4cGlyeSI6MTcyNTQwNzk5OSwiaXNTdWJkb21haW4iOnRydWUsImlzVGhpcmRQYXJ0eSI6dHJ1ZX0=">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#000000">
+    <title>صحة - منصة الخدمات الصحية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Beiruti:wght@200..900&family=Cairo:wght@200..1000&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="{% static 'admin/favicon.png'%}">
+    <meta name="description"
+        content="هي منصة إلكترونية تخدم القطاع الصحي في المملكة من خلال تقديم خدمات إلكترونية معتمدة من قبل وزارة الصحة، أنشئت منصة صحة تماشيًا مع رؤية المملكة 2030 وتفعيلاً للتوجه الحكومي، وتهدف إلى أتمتة وتوحيد الإجراءات والخدمات وتسهيلها في جميع الجهات الصحية وتشمل العديد من الخدمات الصحية التي تحت مظلة منظومة الصحة وقطاعاتها المتنوعة للأفراد من المنشأت الطبية. ">
+    <link href="{% static 'admin/css/main.1828b7a7.css'%}" rel="stylesheet">
+    <link href="{% static 'admin/css/indexStyles1.css'%}" rel="stylesheet">
+    <link rel="manifest" href="https://sehe-sa.com/inquiries/slenquiry/manifest.json">
+    <link rel="apple-touch-icon" href="https://sehe-sa.com/inquiries/slenquiry/logo.png.html">
+    
+</head>
+<style>
+    .back-color-heading {
+        background-image: url("{% static 'media/rectangle.svg' %}");
+        background-position: 50%;
+        background-repeat: no-repeat;
+        color: #306db5;
+        display: inline-block;
+        font-family: Cairo, sans-serif;
+        font-size: 40px;
+        font-weight: 700;
+        margin-top: 20px;
+        position: relative;
+    }
+</style>
+
+<body>
+    <div class="col-md-12 text-center">
+        <div style="z-index: 99; opacity: 1; transform: none;">
+            <nav class="header navbar navbar-expand-lg navbar-light">
+                <div class="nav-container"><a class="navbar-brand" href="#/"><img
+                            src="{% static 'media/seha_logo.4dde29e5c4f38890ccf9787220bcc5be.svg'%}" class="logo"></a>
+                    <div class="d-lg-none d-xl-none justify-content-end menu"><button
+                            aria-controls="responsive-navbar-nav" type="button" aria-label="Toggle navigation"
+                            class="d-inline-flex menu-img navbar-toggler collapsed"><span
+                                class="navbar-toggler-icon"></span></button></div>
+                    <div class="white  justify-content-between navbar-collapse collapse" id="responsive-navbar-nav">
+                        <div class="justify-content-between navbar-nav"><a data-rr-ui-event-key="1"
+                                class="link nav-link" href="/execusessystem/#/services">الخدمات</a><a
+                                data-rr-ui-event-key="2" class="link nav-link active"
+                                href="/execusessystem/#/inquiries">الاستعلامات</a></div>
+                        <div class="justify-content-between navbar-nav"><a data-rr-ui-event-key="4" class="nav-link"
+                                href="#/iamredirection/1">
+                                <p>إنشاء حساب</p>
+                            </a><a data-rr-ui-event-key="5" class="login nav-link" href="#/account/login"><img
+                                    src="{% static 'media/user_o.7825677e64284b06f60f7c30082fed56.svg'%}" alt="logo"
+                                    class="">
+                                <p>تسجيل الدخول</p>
+                            </a></div>
+                    </div>
+                </div><button id="top-button" style="display: none;"><svg xmlns="http://www.w3.org/2000/svg"
+                        width="14.4" height="18.503" viewBox="0 0 14.4 18.503">
+                        <path id="arrow-up-c"
+                            d="M8.862,11.37,14.381,6.1a1.7,1.7,0,0,1,2.355,0l5.54,5.272a1.555,1.555,0,0,1,0,2.271,1.738,1.738,0,0,1-2.376,0l-2.649-2.528V22.519a1.684,1.684,0,0,1-3.364,0V11.113l-2.649,2.534a1.738,1.738,0,0,1-2.376,0,1.561,1.561,0,0,1,0-2.276Z"
+                            transform="translate(-8.369 -5.625)" fill="#00a1c9"></path>
+                    </svg></button>
+            </nav>
+        </div>
+        <div class="">
+            <div class="inner-page inquiries-container">
+                <h1 class="heading"
+                    style="background-image: url({%static 'media/rectangle.svg'%}); background-position: 50%; background-repeat: no-repeat; color: #306db5; display: inline-block; font-family: Cairo, sans-serif; font-size: 40px; font-weight: 700; margin-top: 20px; position: relative; ">
+                    الإجازات المرضية</h1>
+                <p class="sub-heading">خدمة الاستعلام عن الإجازات المرضية تتيح لك الاستعلام عن حالة طلبك للإجازة ويمكنك
+                    طباعتها عن طريق تطبيق صحتي</p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="all" id="table">
+                        <div class="row justify-content-center mt-1">
+                            <div class="col-md-5 p-4">
+
+                                <!-- Display error message -->
+                                {% if error %}
+                                <p class="alert alert-danger">
+                                    {{ error }}
+                                </p>
+                                {% endif %}
+                                
+                                <!-- Leave ID Input -->
+                                <div class="form-group mb-3">
+                                    <input type="text" maxlength="14" id="leave_id" name="leave_id"
+                                        value="{{ leave_id }}"
+                                        placeholder="رقم الإجازة" class="form-control">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <input type="text" maxlength="10" name="national_id" id="national_id" pattern="\d*"
+                                        value="{{ national_id }}"
+                                        placeholder="رقم الهوية / الإقامة" class="form-control">
+                                </div>
+                                {% if leave %}
+                                <!-- <div class="results-inquiery row">
+                                    <span>الاسم:</span>
+                                    <p>{{ leave.patient.name }}</p>
+                                    <span>تاريخ إصدار تقرير الإجازة:</span>
+                                    <p>{{ leave.issue_date }}</p>
+                                    <span>تبدأ من:</span>
+                                    <p>{{ leave.start_date }}</p>
+                                    <span>وحتى:</span>
+                                    <p>{{ leave.end_date }}</p>
+                                    <span>المدة بالأيام:</span>
+                                    <p>{{ leave.duration_days }}</p>
+                                    <span>اسم الطبيب:</span>
+                                    <p>{{ leave.doctor.name }}</p>
+                                    <span>المسمى الوظيفي:</span>
+                                    <p>{{ leave.doctor.position|default:"طبيب" }}</p>
+                                </div> -->
+                                <div class="results-inquiery row">
+                                    <div class="col-md-6"><span>الاسم: </span>{{ leave.patient.name }}</div>
+                                    <div class="col-md-6"><span>تاريخ إصدار تقرير الإجازة:</span> {{ leave.issue_date }}</div>
+                                    <div class="col-md-6"><span>تبدأ من:</span> {{ leave.start_date }}</div>
+                                    <div class="col-md-6"><span>وحتى:</span> {{ leave.end_date }}</div>
+                                    <div class="col-md-6"><span>المدة بالأيام:</span> {{ leave.duration_days }}</div>
+                                    <div class="col-md-6"><span>اسم الطبيب:</span> {{ leave.doctor.name }}</div>
+                                    <div class="col-md-6"><span>المسمى الوظيفي:</span> {{ leave.doctor.position|default:"طبيب عام" }}</div>
+                                </div>
+                                
+                                
+
+
+                                <input type="submit" class="btn btn-primary mt-3" value="استعلام جديد"
+                                    onclick="window.location.href='../slenquiry/'; return false;" />
+
+                                   {% elif error_nodata%}
+                                    <p class="alert alert-danger">
+                                        {{ error_nodata }}
+                                    </p>
+                                    <input type="submit" class="btn btn-primary mt-3" value="استعلام" />
+                                {% else %}
+                                    <input type="submit" class="btn btn-primary mt-3" value="استعلام" />
+                                {% endif %}
+                                <br>
+                                <div class="col-md-12 text-center">
+                                    <br>
+                                    <a class="btn btn-primary mb-3" href="{% url 'core:home' %}">رجوع للرئيسية</a>
+                                </div>
+                                <br>
+                                <div class="col-md-12 text-center">
+                                    <br>
+                                    <a class="btn btn-primary mb-3" href="/execusessystem/#/inquiries">رجوع
+                                        للاستعلامات</a>
+                                </div>
+                            </div>
+                            <div class="mini-footer-container container-fluid">
+                                <ul class="logos-wrapper">
+                                    <li>
+                                        <img class="logo"
+                                            src="{% static 'admin/img/seha_images/lean-logo.47f1c2c4f559aab0fc8472beba56bb76.svg'%}"
+                                            alt="Lean Logo">
+                                    </li>
+                                    <li>
+                                        <img class="logo"
+                                            src="{% static 'admin/img/seha_images/MOH-logo.3721a12f98819dbb30527088a659b864.svg'%}"
+                                            alt="MOH Logo">
+                                    </li>
+                                </ul>
+
+                                <div class="footer-note-wrapper">
+                                    <p>منصة صحة معتمدة من قبل وزارة الصحة © 2024</p>
+                                    <ul>
+                                        <li>
+                                            <a href="#">سياسة الخصوصية وشروط الإستخدام</a>
+                                        </li>
+                                        <li>
+                                            <a href="https://seha.sa/Content/LandingPages/UserManual.pdf">دليل
+                                                الاستخدام</a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <ul class="links-wrapper">
+                                    <li><a href="#/">الرئيسية</a></li>
+                                    <li><a href="#/faq">الأسئلة الشائعة</a></li>
+                                    <li><a href="#/contactUs">تواصل معنا</a></li>
+                                </ul>
+
+                                <ul class="contact-wrapper">
+                                    <li class="socials-wrapper">
+                                        <button>
+                                            <a href="https://www.youtube.com/channel/UCb9ZrS2YcriYqIPIHNp9wcQ">
+                                                <img src="{% static 'admin/img/seha_images/youtube-fill.c5beebfa7cdb5cbc577b75e89ef8f244.svg'%}"
+                                                    alt="YouTube">
+                                            </a>
+                                        </button>
+                                        <button>
+                                            <a href="https://twitter.com/seha_services">
+                                                <img src="{% static 'admin/img/seha_images/twitter-fill.9a9732867f4d5522891aeaa883b834bb.svg'%}"
+                                                    alt="Twitter">
+                                            </a>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <a href="mailto:support@seha.sa">support@seha.sa</a>
+                                    </li>
+                                    <li>
+                                        <a href="tel:920002005">920002005</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div><img id="BtnTool" src="{% static 'media/logoc.png'%}"
+        style="position: absolute; top: 316px; left: 673px; z-index: 9999; cursor: pointer; display: none;" height="25"
+        width="25"><img id="LoadingGif" src="moz-extension://829f0342-33f4-4525-b4b2-cca65184ef80/icons/loading.gif"
+        style="position: absolute; top: 316px; z-index: 9999; cursor: pointer; display: none; left: 673px;" height="70"
+        width="70">
+
+</body>
+
+</html>
