@@ -183,6 +183,14 @@ $(document).ready(function() {
                 // تحديث قائمة المستشفيات في نموذج الطبيب الجديد
                 handleModalFormResponse(response, '#hospitalModal', '#id_new_doctor_hospital');
 
+                // تحديث حقل اختيار المستشفى في النموذج الرئيسي
+                if ($('#id_hospital').length > 0) {
+                    // إضافة المستشفى الجديدة إلى قائمة المستشفيات
+                    var newOption = new Option(response.object_text, response.object_id, true, true);
+                    $('#id_hospital').append(newOption).trigger('change');
+                    showNotification('success', `تم إضافة المستشفى ${response.object_text} بنجاح`);
+                }
+
                 // تحديث قائمة المستشفيات في نموذج الدكتور الرئيسي إذا كان موجودًا
                 if ($('#id_doctor').length > 0 && response.doctor_id) {
                     // إذا كان الدكتور محددًا، قم بتحديث قائمة المستشفيات الخاصة به

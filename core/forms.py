@@ -467,6 +467,14 @@ class SickLeaveForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
+    # حقل اختيار المستشفى
+    hospital = forms.ModelChoiceField(
+        label='المستشفى',
+        queryset=Hospital.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control select2-hospital'})
+    )
+
     # حقل إضافة فاتورة - مخفي ومحدد افتراضياً
     create_invoice = forms.BooleanField(
         label='إنشاء فاتورة',
@@ -485,7 +493,7 @@ class SickLeaveForm(forms.ModelForm):
         model = SickLeave
         fields = ('leave_id', 'prefix', 'patient', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
-                  'issue_date', 'issue_date_hijri', 'created_date', 'status')
+                  'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days')
         widgets = {
             'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
             'prefix': forms.Select(attrs={'class': 'form-control'}),
@@ -502,7 +510,8 @@ class SickLeaveForm(forms.ModelForm):
             'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
             'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'created_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'status': forms.Select(attrs={'class': 'form-control'})
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
         }
 
     def __init__(self, *args, **kwargs):
@@ -934,6 +943,14 @@ class CompanionLeaveForm(forms.ModelForm):
         max_length=200,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+    )
+
+    # حقل اختيار المستشفى
+    hospital = forms.ModelChoiceField(
+        label='المستشفى',
+        queryset=Hospital.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control select2-hospital'})
     )
 
     # حقل إضافة فاتورة - مخفي ومحدد افتراضياً

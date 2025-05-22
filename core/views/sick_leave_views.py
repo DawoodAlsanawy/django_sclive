@@ -145,9 +145,11 @@ def sick_leave_create(request):
                                 'address': form.cleaned_data.get('new_hospital_address', '')
                             }
                         )
-                        doctor.hospital = hospital
+                        doctor.hospitals.add(hospital)
                     elif form.cleaned_data.get('new_doctor_hospital'):
-                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+                        doctor.hospitals.clear()
+                        for hospital in form.cleaned_data['new_doctor_hospital']:
+                            doctor.hospitals.add(hospital)
 
                     doctor.save()
                 except Doctor.DoesNotExist:
@@ -197,6 +199,12 @@ def sick_leave_create(request):
             # تعيين رقم الإجازة في النموذج
             form.instance.leave_id = leave_id
             form.instance.prefix = prefix
+
+            # معالجة حقل المستشفى إذا تم اختياره
+            if form.cleaned_data.get('hospital'):
+                # إضافة المستشفى للطبيب إذا لم تكن موجودة بالفعل
+                if form.instance.doctor and form.cleaned_data.get('hospital'):
+                    form.instance.doctor.hospitals.add(form.cleaned_data['hospital'])
 
             # تحويل التواريخ الميلادية إلى هجرية
             if form.instance.start_date:
@@ -579,6 +587,12 @@ def sick_leave_edit(request, sick_leave_id):
 
             if form.instance.issue_date:
                 form.instance.issue_date_hijri = convert_to_hijri(form.instance.issue_date)
+
+            # معالجة حقل المستشفى إذا تم اختياره
+            if form.cleaned_data.get('hospital'):
+                # إضافة المستشفى للطبيب إذا لم تكن موجودة بالفعل
+                if form.instance.doctor and form.cleaned_data.get('hospital'):
+                    form.instance.doctor.hospitals.add(form.cleaned_data['hospital'])
 
             # حفظ التغييرات
             updated_sick_leave = form.save()

@@ -112,6 +112,12 @@ def companion_leave_create(request):
             form.instance.leave_id = leave_id
             form.instance.prefix = prefix
 
+            # معالجة حقل المستشفى إذا تم اختياره
+            if form.cleaned_data.get('hospital'):
+                # إضافة المستشفى للطبيب إذا لم تكن موجودة بالفعل
+                if form.instance.doctor and form.cleaned_data.get('hospital'):
+                    form.instance.doctor.hospitals.add(form.cleaned_data['hospital'])
+
             # تحويل التواريخ الميلادية إلى هجرية
             if form.instance.start_date:
                 form.instance.start_date_hijri = convert_to_hijri(form.instance.start_date)
@@ -550,6 +556,12 @@ def companion_leave_edit(request, companion_leave_id):
 
             if form.instance.issue_date:
                 form.instance.issue_date_hijri = convert_to_hijri(form.instance.issue_date)
+
+            # معالجة حقل المستشفى إذا تم اختياره
+            if form.cleaned_data.get('hospital'):
+                # إضافة المستشفى للطبيب إذا لم تكن موجودة بالفعل
+                if form.instance.doctor and form.cleaned_data.get('hospital'):
+                    form.instance.doctor.hospitals.add(form.cleaned_data['hospital'])
 
             # حفظ التغييرات
             updated_companion_leave = form.save()
