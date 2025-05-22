@@ -84,26 +84,55 @@ def payment_create(request):
 
             payment = form.save()
 
-            # إذا تم تحديد فواتير، قم بإنشاء تفاصيل الدفع
-            invoices = form.cleaned_data.get('invoices')
-            if invoices:
-                for invoice in invoices:
-                    # حساب المبلغ المتبقي للفاتورة
-                    remaining_amount = invoice.get_remaining_amount()
+            # استخراج البيانات من النموذج
+            allocate_to_oldest = request.POST.get('allocate_to_oldest') == 'on'
 
-                    # إذا كان المبلغ المتبقي أكبر من الصفر، قم بإنشاء تفصيل دفع
-                    if remaining_amount > 0:
-                        # إذا كان المبلغ المتبقي أكبر من مبلغ الدفع، استخدم مبلغ الدفع
-                        amount = min(remaining_amount, payment.amount)
+            # إذا تم تحديد خيار توزيع المبلغ على الفواتير القديمة
+            if allocate_to_oldest:
+                # توزيع المبلغ على الفواتير القديمة
+                invoices_paid, total_allocated = payment.allocate_to_oldest_invoices()
 
-                        PaymentDetail.objects.create(
-                            payment=payment,
-                            invoice=invoice,
-                            amount=amount
-                        )
+                if invoices_paid > 0:
+                    messages.success(
+                        request,
+                        f'تم توزيع مبلغ {total_allocated} ريال على {invoices_paid} فاتورة قديمة بنجاح'
+                    )
+                else:
+                    messages.info(request, 'لم يتم العثور على فواتير قديمة غير مدفوعة لهذا العميل')
+            else:
+                # إذا تم تحديد فواتير، قم بإنشاء تفاصيل الدفع
+                invoice_data = {}
+                for key, value in request.POST.items():
+                    if key.startswith('invoice-') and value:
+                        invoice_id = value
+                        index = key.split('-')[1]
+                        amount_key = f'amount-{index}'
+                        amount = request.POST.get(amount_key, 0)
+                        try:
+                            amount = float(amount)
+                            invoice_data[invoice_id] = amount
+                        except (ValueError, TypeError):
+                            pass
 
-                        # تحديث حالة الفاتورة
-                        invoice.update_status()
+                # إنشاء تفاصيل الدفع للفواتير المحددة
+                for invoice_id, amount in invoice_data.items():
+                    try:
+                        invoice = LeaveInvoice.objects.get(id=invoice_id)
+
+                        # التحقق من أن المبلغ لا يتجاوز المبلغ المتبقي للفاتورة
+                        remaining_amount = invoice.get_remaining()
+                        if amount <= remaining_amount and amount > 0:
+                            # إنشاء تفصيل الدفع
+                            PaymentDetail.objects.create(
+                                payment=payment,
+                                invoice=invoice,
+                                amount=amount
+                            )
+
+                            # تحديث حالة الفاتورة
+                            invoice.update_status()
+                    except LeaveInvoice.DoesNotExist:
+                        pass
 
             messages.success(request, f'تم إنشاء المدفوعة رقم {payment.payment_number} بنجاح')
             return redirect('core:payment_detail', payment_id=payment.id)

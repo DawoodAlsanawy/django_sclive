@@ -83,49 +83,68 @@
 
             <hr>
 
-            <h4>تفاصيل الدفعة</h4>
-            <p class="text-muted">اختر الفواتير التي تريد تسديدها من خلال هذه الدفعة</p>
-
-            <div id="invoices-container">
-                <div class="invoice-item" id="invoice-item-1">
-                    <span class="remove-invoice" onclick="removeInvoice(1)"><i class="fas fa-times"></i></span>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="invoice-1">الفاتورة</label>
-                                <select class="form-control invoice-select" id="invoice-1" name="invoice-1" required>
-                                    <option value="">اختر الفاتورة</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="amount-1">المبلغ</label>
-                                <input type="number" class="form-control invoice-amount" id="amount-1" name="amount-1" step="0.01" min="0" required>
-                            </div>
-                        </div>
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">خيارات تخصيص المبلغ</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="allocate_to_oldest" name="allocate_to_oldest">
+                        <label class="form-check-label" for="allocate_to_oldest">
+                            <strong>تسديد الفواتير القديمة تلقائياً</strong> - سيتم توزيع المبلغ على الفواتير القديمة غير المدفوعة بالترتيب من الأقدم إلى الأحدث
+                        </label>
                     </div>
-                    <div class="row mt-2">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>المبلغ الكلي للفاتورة</label>
-                                <input type="text" class="form-control" id="total-amount-1" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>المبلغ المتبقي</label>
-                                <input type="text" class="form-control" id="remaining-amount-1" readonly>
-                            </div>
-                        </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> عند اختيار هذا الخيار، سيتم تجاهل تفاصيل الفواتير المحددة أدناه وسيتم توزيع المبلغ تلقائياً على الفواتير القديمة.
                     </div>
                 </div>
             </div>
 
-            <div class="mt-3">
-                <button type="button" class="btn btn-secondary" id="add-invoice">
-                    <i class="fas fa-plus"></i> إضافة فاتورة أخرى
-                </button>
+            <div id="manual-allocation">
+                <h4>تفاصيل الدفعة</h4>
+                <p class="text-muted">اختر الفواتير التي تريد تسديدها من خلال هذه الدفعة</p>
+
+                <div id="invoices-container">
+                    <div class="invoice-item" id="invoice-item-1">
+                        <span class="remove-invoice" onclick="removeInvoice(1)"><i class="fas fa-times"></i></span>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="invoice-1">الفاتورة</label>
+                                    <select class="form-control invoice-select" id="invoice-1" name="invoice-1">
+                                        <option value="">اختر الفاتورة</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="amount-1">المبلغ</label>
+                                    <input type="number" class="form-control invoice-amount" id="amount-1" name="amount-1" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>المبلغ الكلي للفاتورة</label>
+                                    <input type="text" class="form-control" id="total-amount-1" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>المبلغ المتبقي</label>
+                                    <input type="text" class="form-control" id="remaining-amount-1" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <button type="button" class="btn btn-secondary" id="add-invoice">
+                        <i class="fas fa-plus"></i> إضافة فاتورة أخرى
+                    </button>
+                </div>
             </div>
 
             <hr>
@@ -173,6 +192,21 @@
             var randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
             $('#id_payment_number').val('PAY-' + dateString + '-' + randomNum);
         }
+
+        // إدارة خيار توزيع المبلغ على الفواتير القديمة
+        $('#allocate_to_oldest').change(function() {
+            if ($(this).is(':checked')) {
+                // إخفاء قسم التخصيص اليدوي
+                $('#manual-allocation').addClass('d-none');
+                // إزالة متطلبات الحقول
+                $('.invoice-select, .invoice-amount').prop('required', false);
+            } else {
+                // إظهار قسم التخصيص اليدوي
+                $('#manual-allocation').removeClass('d-none');
+                // إعادة متطلبات الحقول
+                $('.invoice-select, .invoice-amount').prop('required', true);
+            }
+        });
 
         // تعيين تاريخ اليوم كتاريخ افتراضي للدفع إذا كان فارغًا
         if (!$('#id_payment_date').val()) {
