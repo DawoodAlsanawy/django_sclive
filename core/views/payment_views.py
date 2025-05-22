@@ -165,8 +165,28 @@ def payment_detail(request, payment_id):
     allocated_amount = sum(detail.amount for detail in payment_details)
     unallocated_amount = payment.amount - allocated_amount
 
+    # إذا تم طلب توزيع المبلغ على الفواتير القديمة
+    if 'allocate_to_oldest' in request.POST:
+        # التحقق من وجود مبلغ غير مخصص
+        if unallocated_amount > 0:
+            # توزيع المبلغ على الفواتير القديمة
+            invoices_paid, total_allocated = payment.allocate_to_oldest_invoices()
+
+            if invoices_paid > 0:
+                messages.success(
+                    request,
+                    f'تم توزيع مبلغ {total_allocated} ريال على {invoices_paid} فاتورة قديمة بنجاح'
+                )
+            else:
+                messages.info(request, 'لم يتم العثور على فواتير قديمة غير مدفوعة لهذا العميل')
+
+            return redirect('core:payment_detail', payment_id=payment.id)
+        else:
+            messages.error(request, 'لا يوجد مبلغ غير مخصص للتوزيع')
+            return redirect('core:payment_detail', payment_id=payment.id)
+
     # إذا تم إرسال نموذج إضافة تفصيل دفع
-    if request.method == 'POST':
+    elif request.method == 'POST':
         detail_form = PaymentDetailForm(request.POST)
         if detail_form.is_valid():
             invoice = detail_form.cleaned_data['invoice']
@@ -175,7 +195,7 @@ def payment_detail(request, payment_id):
             # التحقق من أن المبلغ لا يتجاوز المبلغ غير المخصص
             if amount <= unallocated_amount:
                 # التحقق من أن المبلغ لا يتجاوز المبلغ المتبقي للفاتورة
-                remaining_amount = invoice.get_remaining_amount()
+                remaining_amount = invoice.get_remaining()
                 if amount <= remaining_amount:
                     # إنشاء تفصيل الدفع
                     PaymentDetail.objects.create(

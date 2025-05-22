@@ -921,6 +921,64 @@ class Payment(models.Model):
     def __str__(self):
         return f"{self.payment_number} - {self.client.name} - {self.amount}"
 
+    def allocate_to_oldest_invoices(self):
+        """
+        توزيع المبلغ المدفوع على الفواتير القديمة غير المدفوعة بالترتيب من الأقدم إلى الأحدث
+
+        تعيد:
+        - عدد الفواتير التي تم تسديدها
+        - إجمالي المبلغ الذي تم تخصيصه
+        """
+        from django.db.models import Sum
+
+        # حساب المبلغ غير المخصص
+        allocated_amount = self.payment_details.aggregate(Sum('amount'))['amount__sum'] or 0
+        unallocated_amount = self.amount - allocated_amount
+
+        # إذا لم يكن هناك مبلغ غير مخصص، نعيد 0
+        if unallocated_amount <= 0:
+            return 0, 0
+
+        # الحصول على الفواتير غير المدفوعة أو المدفوعة جزئيًا للعميل مرتبة من الأقدم إلى الأحدث
+        unpaid_invoices = LeaveInvoice.objects.filter(
+            client=self.client,
+            status__in=['unpaid', 'partially_paid']
+        ).order_by('issue_date', 'id')  # ترتيب حسب تاريخ الإصدار ثم المعرف
+
+        invoices_paid = 0
+        total_allocated = 0
+
+        # توزيع المبلغ على الفواتير
+        for invoice in unpaid_invoices:
+            # حساب المبلغ المتبقي للفاتورة
+            remaining_invoice_amount = invoice.get_remaining()
+
+            # إذا كان المبلغ المتبقي للفاتورة أكبر من 0
+            if remaining_invoice_amount > 0:
+                # المبلغ الذي سيتم تخصيصه لهذه الفاتورة
+                amount_to_allocate = min(remaining_invoice_amount, unallocated_amount)
+
+                # إنشاء تفصيل دفع جديد
+                PaymentDetail.objects.create(
+                    payment=self,
+                    invoice=invoice,
+                    amount=amount_to_allocate
+                )
+
+                # تحديث حالة الفاتورة
+                invoice.update_status()
+
+                # تحديث المبلغ غير المخصص
+                unallocated_amount -= amount_to_allocate
+                total_allocated += amount_to_allocate
+                invoices_paid += 1
+
+                # إذا تم تخصيص كل المبلغ، نخرج من الحلقة
+                if unallocated_amount <= 0:
+                    break
+
+        return invoices_paid, total_allocated
+
 
 class PaymentDetail(models.Model):
     """نموذج تفاصيل الدفعة"""

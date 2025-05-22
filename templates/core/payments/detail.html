@@ -184,8 +184,16 @@
         </div>
 
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">تفاصيل الدفعة</h5>
+                {% if unallocated_amount > 0 %}
+                <form method="post" action="{% url 'core:payment_detail' payment.id %}">
+                    {% csrf_token %}
+                    <button type="submit" name="allocate_to_oldest" class="btn btn-success">
+                        <i class="fas fa-money-bill"></i> تسديد الفواتير القديمة تلقائياً
+                    </button>
+                </form>
+                {% endif %}
             </div>
             <div class="card-body">
                 {% if payment_details %}
@@ -238,13 +246,58 @@
                         <tfoot>
                             <tr>
                                 <th>الإجمالي</th>
-                                <th colspan="6">{{ payment.amount }} ريال</th>
+                                <th colspan="6">{{ allocated_amount }} ريال</th>
                             </tr>
+                            {% if unallocated_amount > 0 %}
+                            <tr>
+                                <th>المبلغ غير المخصص</th>
+                                <th colspan="6" class="text-danger">{{ unallocated_amount }} ريال</th>
+                            </tr>
+                            {% endif %}
                         </tfoot>
                     </table>
                 </div>
                 {% else %}
                 <p class="text-center text-muted">لا توجد تفاصيل لهذه الدفعة</p>
+                {% endif %}
+
+                {% if unallocated_amount > 0 %}
+                <div class="alert alert-info mt-3">
+                    <h5>يوجد مبلغ غير مخصص قدره {{ unallocated_amount }} ريال</h5>
+                    <p>يمكنك تخصيص هذا المبلغ لفاتورة معينة أو تسديد الفواتير القديمة تلقائياً باستخدام الزر أعلاه.</p>
+                </div>
+
+                <!-- نموذج إضافة تفصيل دفع جديد -->
+                {% if detail_form %}
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">إضافة تفصيل دفع جديد</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'core:payment_detail' payment.id %}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="{{ detail_form.invoice.id_for_label }}">الفاتورة</label>
+                                        {{ detail_form.invoice }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="{{ detail_form.amount.id_for_label }}">المبلغ</label>
+                                        {{ detail_form.amount }}
+                                        <small class="form-text text-muted">المبلغ المتاح: {{ unallocated_amount }} ريال</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> إضافة
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
                 {% endif %}
             </div>
         </div>
