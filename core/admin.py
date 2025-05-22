@@ -46,9 +46,9 @@ class HospitalAdmin(admin.ModelAdmin):
 
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'national_id', 'position', 'hospital')
+    list_display = ('name', 'national_id', 'position')
     search_fields = ('name', 'national_id')
-    list_filter = ('hospital', 'position')
+    list_filter = ('position',)
     readonly_fields = ('created_at', 'updated_at')
 
 

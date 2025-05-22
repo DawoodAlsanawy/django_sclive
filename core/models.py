@@ -146,7 +146,7 @@ class Doctor(models.Model):
     name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم الطبيب (بالإنجليزية)')
     position = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب')
     position_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب (بالإنجليزية)')
-    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='doctors', blank=True, null=True, verbose_name='المستشفى')
+    hospitals = models.ManyToManyField(Hospital, related_name='doctors', blank=True, verbose_name='المستشفيات')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهاتف')
     email = models.EmailField(max_length=100, blank=True, null=True, verbose_name='البريد الإلكتروني')
     created_at = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ الإنشاء')
@@ -500,6 +500,7 @@ class SickLeave(models.Model):
     discharge_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الخروج (هجري)')
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
     issue_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الإصدار (هجري)')
+    created_date = models.DateField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ إنشاء الإجازة')
     status = models.CharField(max_length=20, choices=[
         ('active', 'نشطة'),
         ('cancelled', 'ملغية'),
@@ -651,6 +652,7 @@ class CompanionLeave(models.Model):
     discharge_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الخروج (هجري)')
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
     issue_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الإصدار (هجري)')
+    created_date = models.DateField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ إنشاء الإجازة')
     status = models.CharField(max_length=20, choices=[
         ('active', 'نشطة'),
         ('cancelled', 'ملغية'),

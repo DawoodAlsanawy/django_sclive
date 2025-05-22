@@ -33,14 +33,17 @@
             {% csrf_token %}
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     {{ form.prefix|as_crispy_field }}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     {{ form.leave_id|as_crispy_field }}
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     {{ form.issue_date|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    {{ form.created_date|as_crispy_field }}
                 </div>
             </div>
 
@@ -171,6 +174,11 @@
             <div class="row">
                 <div class="col-md-6">
                     {{ form.doctor|as_crispy_field }}
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-success add-hospital-btn" data-bs-toggle="modal" data-bs-target="#hospitalModal">
+                            <i class="fas fa-plus-circle"></i> إضافة مستشفى للطبيب
+                        </button>
+                    </div>
 
                     <!-- حقول إضافة طبيب جديد -->
                     <div class="card mt-2 mb-3 new-doctor-fields" style="display: none;">
@@ -260,15 +268,12 @@
 
             <div class="row">
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="duration_days">المدة (أيام)</label>
-                        <input type="text" class="form-control" id="duration_days" value="{{ companion_leave.duration_days }}" readonly>
-                        <small class="form-text text-muted">
-                            سيتم حساب المدة تلقائيًا بناءً على تاريخ البداية والنهاية.
-                            إذا كان تاريخ البداية والنهاية في نفس اليوم، فالإجازة تعتبر ليوم واحد.
-                            إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين.
-                        </small>
-                    </div>
+                    {{ form.duration_days|as_crispy_field }}
+                    <small class="form-text text-muted">
+                        يمكنك تعديل المدة يدوياً أو تركها ليتم حسابها تلقائيًا بناءً على تاريخ البداية والنهاية.
+                        إذا كان تاريخ البداية والنهاية في نفس اليوم، فالإجازة تعتبر ليوم واحد.
+                        إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين.
+                    </small>
                 </div>
             </div>
 

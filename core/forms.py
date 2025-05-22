@@ -116,14 +116,14 @@ class DoctorForm(forms.ModelForm):
     """نموذج إنشاء وتعديل الطبيب"""
     class Meta:
         model = Doctor
-        fields = ('national_id', 'name', 'name_en', 'position', 'position_en', 'hospital', 'phone', 'email')
+        fields = ('national_id', 'name', 'name_en', 'position', 'position_en', 'hospitals', 'phone', 'email')
         widgets = {
             'national_id': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'name_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'position': forms.TextInput(attrs={'class': 'form-control'}),
             'position_en': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'hospital': forms.Select(attrs={'class': 'form-control'}),
+            'hospitals': forms.SelectMultiple(attrs={'class': 'form-control select2-multiple'}),
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'})
         }
@@ -133,7 +133,7 @@ class DoctorForm(forms.ModelForm):
         # جعل جميع الحقول اختيارية ما عدا اسم الطبيب
         self.fields['national_id'].required = False
         self.fields['position'].required = False
-        self.fields['hospital'].required = False
+        self.fields['hospitals'].required = False
         self.fields['name_en'].required = False
         self.fields['position_en'].required = False
         self.fields['phone'].required = False
@@ -434,11 +434,11 @@ class SickLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
-    new_doctor_hospital = forms.ModelChoiceField(
-        label='مستشفى الطبيب الجديد',
+    new_doctor_hospital = forms.ModelMultipleChoiceField(
+        label='مستشفيات الطبيب الجديد',
         queryset=Hospital.objects.all(),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control select2-hospital'})
+        widget=forms.SelectMultiple(attrs={'class': 'form-control select2-multiple'})
     )
 
     # حقول إضافة مستشفى جديد
@@ -485,7 +485,7 @@ class SickLeaveForm(forms.ModelForm):
         model = SickLeave
         fields = ('leave_id', 'prefix', 'patient', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
-                  'issue_date', 'issue_date_hijri', 'status')
+                  'issue_date', 'issue_date_hijri', 'created_date', 'status')
         widgets = {
             'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
             'prefix': forms.Select(attrs={'class': 'form-control'}),
@@ -501,6 +501,7 @@ class SickLeaveForm(forms.ModelForm):
             'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
             'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
+            'created_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'status': forms.Select(attrs={'class': 'form-control'})
         }
 
@@ -902,11 +903,11 @@ class CompanionLeaveForm(forms.ModelForm):
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
-    new_doctor_hospital = forms.ModelChoiceField(
-        label='مستشفى الطبيب الجديد',
+    new_doctor_hospital = forms.ModelMultipleChoiceField(
+        label='مستشفيات الطبيب الجديد',
         queryset=Hospital.objects.all(),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control select2-hospital'})
+        widget=forms.SelectMultiple(attrs={'class': 'form-control select2-multiple'})
     )
 
     # حقول إضافة مستشفى جديد
@@ -967,7 +968,7 @@ class CompanionLeaveForm(forms.ModelForm):
         model = CompanionLeave
         fields = ('leave_id', 'prefix', 'patient', 'companion', 'relation', 'relation_en', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
-                  'issue_date', 'issue_date_hijri', 'status')
+                  'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days')
         widgets = {
             'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
             'prefix': forms.Select(attrs={'class': 'form-control'}),
@@ -984,7 +985,9 @@ class CompanionLeaveForm(forms.ModelForm):
             'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
             'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'status': forms.Select(attrs={'class': 'form-control'})
+            'created_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
         }
 
     def __init__(self, *args, **kwargs):

@@ -211,9 +211,13 @@ def companion_leave_create_with_invoice(request):
                                 'address': form.cleaned_data.get('new_hospital_address', '')
                             }
                         )
-                        doctor.hospital = hospital
+                        # إضافة المستشفى للطبيب
+                        doctor.hospitals.add(hospital)
                     elif form.cleaned_data.get('new_doctor_hospital'):
-                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+                        # حذف المستشفيات الحالية وإضافة المستشفيات الجديدة
+                        doctor.hospitals.clear()
+                        for hospital in form.cleaned_data['new_doctor_hospital']:
+                            doctor.hospitals.add(hospital)
 
                     doctor.save()
                 except Doctor.DoesNotExist:
@@ -233,9 +237,12 @@ def companion_leave_create_with_invoice(request):
                     doctor = Doctor.objects.create(
                         national_id=form.cleaned_data['new_doctor_national_id'],
                         name=form.cleaned_data['new_doctor_name'],
-                        position=form.cleaned_data.get('new_doctor_position', ''),
-                        hospital=hospital
+                        position=form.cleaned_data.get('new_doctor_position', '')
                     )
+
+                    # إضافة المستشفى للطبيب
+                    if hospital:
+                        doctor.hospitals.add(hospital)
             else:
                 # استخدام الطبيب المحدد من القائمة
                 doctor = form.cleaned_data['doctor']
@@ -481,9 +488,13 @@ def companion_leave_edit(request, companion_leave_id):
                                 'address': form.cleaned_data.get('new_hospital_address', '')
                             }
                         )
-                        doctor.hospital = hospital
+                        # إضافة المستشفى للطبيب
+                        doctor.hospitals.add(hospital)
                     elif form.cleaned_data.get('new_doctor_hospital'):
-                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+                        # حذف المستشفيات الحالية وإضافة المستشفيات الجديدة
+                        doctor.hospitals.clear()
+                        for hospital in form.cleaned_data['new_doctor_hospital']:
+                            doctor.hospitals.add(hospital)
 
                     doctor.save()
                 except Doctor.DoesNotExist:
@@ -507,9 +518,12 @@ def companion_leave_edit(request, companion_leave_id):
                     doctor = Doctor.objects.create(
                         national_id=form.cleaned_data['new_doctor_national_id'],
                         name=form.cleaned_data['new_doctor_name'],
-                        position=form.cleaned_data.get('new_doctor_position', ''),
-                        hospital=hospital
+                        position=form.cleaned_data.get('new_doctor_position', '')
                     )
+
+                    # إضافة المستشفى للطبيب
+                    if hospital:
+                        doctor.hospitals.add(hospital)
 
                 # تعيين الطبيب الجديد في النموذج
                 form.instance.doctor = doctor

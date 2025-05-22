@@ -284,13 +284,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label for="new_doctor_hospital">المستشفى</label>
-                                <select class="form-control" id="new_doctor_hospital" name="hospital">
-                                    <option value="">اختر المستشفى</option>
+                                <label for="new_doctor_hospital">المستشفيات</label>
+                                <select class="form-control select2-multiple" id="new_doctor_hospital" name="hospitals" multiple>
                                     {% for hospital in hospitals %}
                                     <option value="{{ hospital.id }}">{{ hospital.name }}</option>
                                     {% endfor %}
                                 </select>
+                                <small class="form-text text-muted">يمكنك اختيار أكثر من مستشفى</small>
                                 <div class="invalid-feedback"></div>
                             </div>
                             <div class="mt-2">
@@ -322,6 +322,8 @@
                 <div id="alert-container-hospital"></div>
                 <form id="hospital-form" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <!-- حقل مخفي لتخزين معرف الدكتور -->
+                    <input type="hidden" id="doctor_id_for_hospital" name="doctor_id" value="">
                     <div class="form-group mb-3">
                         <label for="new_hospital_name">اسم المستشفى</label>
                         <input type="text" class="form-control" id="new_hospital_name" name="name" required>

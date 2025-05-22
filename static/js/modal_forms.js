@@ -180,7 +180,17 @@ $(document).ready(function() {
             contentType: false, // مهم للتعامل مع الملفات
             dataType: 'json',
             success: function(response) {
+                // تحديث قائمة المستشفيات في نموذج الطبيب الجديد
                 handleModalFormResponse(response, '#hospitalModal', '#id_new_doctor_hospital');
+
+                // تحديث قائمة المستشفيات في نموذج الدكتور الرئيسي إذا كان موجودًا
+                if ($('#id_doctor').length > 0 && response.doctor_id) {
+                    // إذا كان الدكتور محددًا، قم بتحديث قائمة المستشفيات الخاصة به
+                    if (response.doctor_id == $('#id_doctor').val()) {
+                        // إضافة المستشفى الجديدة إلى قائمة المستشفيات في نموذج الدكتور
+                        showNotification('success', `تم إضافة المستشفى ${response.object_text} إلى قائمة مستشفيات الدكتور ${response.doctor_name} بنجاح`);
+                    }
+                }
 
                 // إذا تم فتح نافذة المستشفى المنبثقة من نافذة الطبيب المنبثقة
                 if ($('#doctorModal').data('waiting-for-hospital')) {
@@ -217,5 +227,13 @@ $(document).ready(function() {
     // زر لفتح نافذة المستشفى المنبثقة من نافذة الطبيب المنبثقة
     $('#add-hospital-modal-btn').on('click', function() {
         $('#doctorModal').data('waiting-for-hospital', true);
+    });
+
+    // زر لفتح نافذة المستشفى المنبثقة من صفحة إنشاء الإجازة
+    $('.add-hospital-btn').on('click', function() {
+        // الحصول على معرف الدكتور المحدد
+        var doctorId = $('#id_doctor').val();
+        // تعيين معرف الدكتور في النموذج
+        $('#doctor_id_for_hospital').val(doctorId);
     });
 });

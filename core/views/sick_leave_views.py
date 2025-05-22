@@ -171,9 +171,12 @@ def sick_leave_create(request):
                     doctor = Doctor.objects.create(
                         national_id=form.cleaned_data['new_doctor_national_id'],
                         name=form.cleaned_data['new_doctor_name'],
-                        position=form.cleaned_data.get('new_doctor_position', ''),
-                        hospital=hospital
+                        position=form.cleaned_data.get('new_doctor_position', '')
                     )
+
+                    # إضافة المستشفى للطبيب
+                    if hospital:
+                        doctor.hospitals.add(hospital)
 
                 # تعيين الطبيب الجديد في النموذج
                 form.instance.doctor = doctor
@@ -313,9 +316,12 @@ def sick_leave_create_with_invoice(request):
                     doctor = Doctor.objects.create(
                         national_id=form.cleaned_data['new_doctor_national_id'],
                         name=form.cleaned_data['new_doctor_name'],
-                        position=form.cleaned_data.get('new_doctor_position', ''),
-                        hospital=hospital
+                        position=form.cleaned_data.get('new_doctor_position', '')
                     )
+
+                    # إضافة المستشفى للطبيب
+                    if hospital:
+                        doctor.hospitals.add(hospital)
             else:
                 # استخدام الطبيب المحدد من القائمة
                 doctor = form.cleaned_data['doctor']
@@ -535,9 +541,12 @@ def sick_leave_edit(request, sick_leave_id):
                     doctor = Doctor.objects.create(
                         national_id=form.cleaned_data['new_doctor_national_id'],
                         name=form.cleaned_data['new_doctor_name'],
-                        position=form.cleaned_data.get('new_doctor_position', ''),
-                        hospital=hospital
+                        position=form.cleaned_data.get('new_doctor_position', '')
                     )
+
+                    # إضافة المستشفى للطبيب
+                    if hospital:
+                        doctor.hospitals.add(hospital)
 
                 # تعيين الطبيب الجديد في النموذج
                 form.instance.doctor = doctor
