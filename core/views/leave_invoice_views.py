@@ -221,7 +221,7 @@ def leave_invoice_detail(request, leave_invoice_id):
     if invoice.leave_type == 'sick_leave':
         try:
             # استخدام select_related لتحسين الأداء
-            leave = SickLeave.objects.select_related('patient', 'doctor', 'doctor__hospital').get(leave_id=invoice.leave_id)
+            leave = SickLeave.objects.select_related('patient', 'doctor').get(leave_id=invoice.leave_id)
             leave_info = {
                 'type': 'sick_leave',
                 'type_display': 'إجازة مرضية',
@@ -332,7 +332,7 @@ def leave_invoice_print(request, leave_invoice_id):
     if invoice.leave_type == 'sick_leave':
         try:
             # استخدام select_related لتحسين الأداء
-            leave = SickLeave.objects.select_related('patient', 'doctor', 'doctor__hospital').get(leave_id=invoice.leave_id)
+            leave = SickLeave.objects.select_related('patient', 'doctor').get(leave_id=invoice.leave_id)
             leave_info = {
                 'type': 'sick_leave',
                 'type_display': 'إجازة مرضية',
