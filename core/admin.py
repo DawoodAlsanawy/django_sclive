@@ -2,9 +2,10 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models import (Client, CompanionLeave, Doctor, Hospital, LeaveInvoice,
-                     LeavePrice, Patient, Payment, PaymentDetail, SickLeave,
-                     User)
+from .models import (BackupRecord, BackupSchedule, Client, CompanionLeave,
+                     Doctor, Hospital, LeaveInvoice, LeavePrice, Patient,
+                     Payment, PaymentDetail, SickLeave, SystemSettings, User,
+                     UserProfile)
 
 
 @admin.register(User)
@@ -112,3 +113,45 @@ class PaymentAdmin(admin.ModelAdmin):
     search_fields = ('payment_number', 'client__name', 'reference_number')
     readonly_fields = ('created_at', 'updated_at')
     inlines = [PaymentDetailInline]
+
+
+@admin.register(SystemSettings)
+class SystemSettingsAdmin(admin.ModelAdmin):
+    list_display = ('key', 'setting_type', 'value_preview', 'is_active', 'updated_at')
+    list_filter = ('setting_type', 'is_active', 'updated_at')
+    search_fields = ('key', 'value', 'description')
+    readonly_fields = ('created_at', 'updated_at')
+
+    def value_preview(self, obj):
+        """معاينة مختصرة للقيمة"""
+        return obj.value[:50] + '...' if len(obj.value) > 50 else obj.value
+    value_preview.short_description = 'القيمة'
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'phone', 'theme', 'language', 'email_notifications', 'updated_at')
+    list_filter = ('theme', 'language', 'email_notifications', 'sms_notifications', 'two_factor_enabled')
+    search_fields = ('user__username', 'user__email', 'phone')
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(BackupRecord)
+class BackupRecordAdmin(admin.ModelAdmin):
+    list_display = ('name', 'backup_type', 'status', 'file_size_mb', 'created_by', 'created_at')
+    list_filter = ('backup_type', 'status', 'is_scheduled', 'created_at')
+    search_fields = ('name', 'description', 'created_by__username')
+    readonly_fields = ('file_size', 'started_at', 'completed_at', 'created_at')
+
+    def file_size_mb(self, obj):
+        """حجم الملف بالميجابايت"""
+        return f"{obj.file_size_mb} MB"
+    file_size_mb.short_description = 'حجم الملف'
+
+
+@admin.register(BackupSchedule)
+class BackupScheduleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'backup_type', 'frequency', 'time', 'is_active', 'last_run', 'next_run')
+    list_filter = ('backup_type', 'frequency', 'is_active', 'created_at')
+    search_fields = ('name', 'created_by__username')
+    readonly_fields = ('last_run', 'next_run', 'created_at', 'updated_at')

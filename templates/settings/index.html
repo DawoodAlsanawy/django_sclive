@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}الإعدادات{% endblock %}
+
+{% block extra_css %}
+<style>
+.settings-card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.settings-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.settings-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-cog me-2"></i>
+                    الإعدادات
+                </h1>
+                <p class="text-muted">إدارة إعدادات النظام والملف الشخصي</p>
+            </div>
+
+            <div class="settings-grid">
+                <!-- إعدادات النظام -->
+                <div class="card settings-card">
+                    <div class="card-body text-center">
+                        <div class="settings-icon text-primary">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h5 class="card-title">إعدادات النظام</h5>
+                        <p class="card-text text-muted">
+                            إعدادات عامة للنظام مثل اللغة والمنطقة الزمنية
+                        </p>
+                        <a href="{% url 'settings:system' %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>
+                            تعديل الإعدادات
+                        </a>
+                    </div>
+                </div>
+
+                <!-- إعدادات الشركة -->
+                <div class="card settings-card">
+                    <div class="card-body text-center">
+                        <div class="settings-icon text-info">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <h5 class="card-title">إعدادات الشركة</h5>
+                        <p class="card-text text-muted">
+                            معلومات الشركة والعيادة والشعار
+                        </p>
+                        <a href="{% url 'settings:company' %}" class="btn btn-info">
+                            <i class="fas fa-edit me-1"></i>
+                            تعديل الإعدادات
+                        </a>
+                    </div>
+                </div>
+
+                <!-- إعدادات الإشعارات -->
+                <div class="card settings-card">
+                    <div class="card-body text-center">
+                        <div class="settings-icon text-warning">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <h5 class="card-title">إعدادات الإشعارات</h5>
+                        <p class="card-text text-muted">
+                            إعدادات البريد الإلكتروني والرسائل النصية
+                        </p>
+                        <a href="{% url 'settings:notifications' %}" class="btn btn-warning">
+                            <i class="fas fa-edit me-1"></i>
+                            تعديل الإعدادات
+                        </a>
+                    </div>
+                </div>
+
+                <!-- النسخ الاحتياطي -->
+                <div class="card settings-card">
+                    <div class="card-body text-center">
+                        <div class="settings-icon text-success">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h5 class="card-title">النسخ الاحتياطي</h5>
+                        <p class="card-text text-muted">
+                            إدارة النسخ الاحتياطي والاستعادة
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'settings:backup_list' %}" class="btn btn-success">
+                                <i class="fas fa-list me-1"></i>
+                                إدارة النسخ
+                            </a>
+                            <a href="{% url 'settings:backup' %}" class="btn btn-outline-success">
+                                <i class="fas fa-cog me-1"></i>
+                                الإعدادات
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الملف الشخصي -->
+                <div class="card settings-card">
+                    <div class="card-body text-center">
+                        <div class="settings-icon text-secondary">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h5 class="card-title">الملف الشخصي</h5>
+                        <p class="card-text text-muted">
+                            معلوماتك الشخصية وتفضيلات الواجهة
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'settings:profile' %}" class="btn btn-secondary">
+                                <i class="fas fa-edit me-1"></i>
+                                تعديل الملف
+                            </a>
+                            <a href="{% url 'settings:change_password' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-key me-1"></i>
+                                تغيير كلمة المرور
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- جدولة النسخ الاحتياطي -->
+                <div class="card settings-card">
+                    <div class="card-body text-center">
+                        <div class="settings-icon text-dark">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h5 class="card-title">جدولة النسخ الاحتياطي</h5>
+                        <p class="card-text text-muted">
+                            إعداد النسخ الاحتياطي التلقائي
+                        </p>
+                        <a href="{% url 'settings:backup_schedule_list' %}" class="btn btn-dark">
+                            <i class="fas fa-calendar me-1"></i>
+                            إدارة الجدولة
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- معلومات سريعة -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-info-circle me-1"></i>
+                                معلومات النظام
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">إصدار النظام:</small>
+                                    <div class="fw-bold">1.0.0</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">آخر تحديث:</small>
+                                    <div class="fw-bold">{{ request.user.last_login|date:"Y-m-d" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                الأمان
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">آخر دخول:</small>
+                                    <div class="fw-bold">{{ request.user.last_login|date:"Y-m-d H:i" }}</div>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">الدور:</small>
+                                    <div class="fw-bold">{{ request.user.get_role_display }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // تأثيرات بصرية للبطاقات
+    $('.settings-card').hover(
+        function() {
+            $(this).addClass('shadow-lg');
+        },
+        function() {
+            $(this).removeClass('shadow-lg');
+        }
+    );
+});
+</script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% load settings_tags %}
+<footer class="site-footer mt-5 py-4 bg-dark text-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="footer-title">{{ company.name }}</h6>
+                <p class="footer-description">{{ site.description }}</p>
+
+                {% if company.address %}
+                    <p class="mb-1">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        {{ company.address }}
+                    </p>
+                {% endif %}
+
+                {% if company.phone %}
+                    <p class="mb-1">
+                        <i class="fas fa-phone me-2"></i>
+                        {{ company.phone|format_phone }}
+                    </p>
+                {% endif %}
+
+                {% if company.email %}
+                    <p class="mb-1">
+                        <i class="fas fa-envelope me-2"></i>
+                        {{ company.email }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <h6 class="footer-title">روابط سريعة</h6>
+                <ul class="footer-links list-unstyled">
+                    <li><a href="{% url 'core:home' %}" class="text-light text-decoration-none">الرئيسية</a></li>
+                    <li><a href="{% url 'core:sick_leave_list' %}" class="text-light text-decoration-none">الإجازات المرضية</a></li>
+                    <li><a href="{% url 'core:client_list' %}" class="text-light text-decoration-none">العملاء</a></li>
+                    <li><a href="{% url 'core:report_index' %}" class="text-light text-decoration-none">التقارير</a></li>
+                    {% if user.is_admin %}
+                        <li><a href="{% url 'settings:index' %}" class="text-light text-decoration-none">الإعدادات</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="copyright mb-0">
+                    &copy; {% now "Y" %} {{ company.name }}. جميع الحقوق محفوظة.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-md-end">
+                <p class="system-info mb-0">
+                    <small class="text-muted">
+                        {{ site.name }} - الإصدار 1.0
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+.site-footer {
+    margin-top: auto;
+    border-top: 3px solid var(--primary-color, #007bff);
+}
+
+.footer-title {
+    color: var(--primary-color, #007bff);
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.footer-description {
+    color: #adb5bd;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color, #007bff) !important;
+    text-decoration: underline !important;
+}
+
+.copyright {
+    font-size: 0.9rem;
+    color: #adb5bd;
+}
+
+.system-info {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .site-footer .col-md-6:last-child {
+        text-align: center !important;
+        margin-top: 1rem;
+    }
+}
+</style>

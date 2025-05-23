@@ -25,7 +25,7 @@ def hospital_detail(request, hospital_id):
     hospital = get_object_or_404(Hospital, id=hospital_id)
 
     # الحصول على الأطباء المرتبطين بالمستشفى
-    doctors = Doctor.objects.filter(hospital=hospital).order_by('name')
+    doctors = Doctor.objects.filter(hospitals=hospital).order_by('name')
 
     context = {
         'hospital': hospital,

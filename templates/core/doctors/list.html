@@ -55,7 +55,7 @@
                     <tr>
                         <th>الاسم</th>
                         <th>التخصص</th>
-                        <th>المستشفى</th>
+                        <th>المستشفيات</th>
                         <th>رقم الهاتف</th>
                         <th>البريد الإلكتروني</th>
                         <th>الإجراءات</th>
@@ -66,7 +66,15 @@
                     <tr>
                         <td>{{ doctor.name }}</td>
                         <td>{{ doctor.position|default:"-" }}</td>
-                        <td>{% if doctor.hospital %}{{ doctor.hospital.name }}{% else %}-{% endif %}</td>
+                        <td>
+                            {% if doctor.hospitals.exists %}
+                                {% for hospital in doctor.hospitals.all %}
+                                    <span class="badge bg-secondary me-1">{{ hospital.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
                         <td>{{ doctor.phone|default:"-" }}</td>
                         <td>{{ doctor.email|default:"-" }}</td>
                         <td>

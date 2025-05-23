@@ -1,11 +1,14 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import (AuthenticationForm, PasswordChangeForm,
+                                       UserCreationForm)
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from .models import (Client, CompanionLeave, Doctor, Hospital, LeaveInvoice,
-                     LeavePrice, Patient, Payment, PaymentDetail, SickLeave,
-                     User)
+from .models import (BackupRecord, BackupSchedule, Client, CompanionLeave,
+                     Doctor, Hospital, LeaveInvoice, LeavePrice, Patient,
+                     Payment, PaymentDetail, SickLeave, SystemSettings, User,
+                     UserProfile)
 
 
 class LoginForm(AuthenticationForm):
@@ -222,7 +225,8 @@ class LeavePriceForm(forms.ModelForm):
         widgets = {
             'leave_type': forms.Select(attrs={'class': 'form-control'}),
             'pricing_type': forms.Select(attrs={'class': 'form-control'}),
-            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_duration_days'}),
+            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_duration_days','type':'hidden'}),
+
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
             'client': forms.Select(attrs={'class': 'form-control'}),
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'})
@@ -493,7 +497,7 @@ class SickLeaveForm(forms.ModelForm):
         model = SickLeave
         fields = ('leave_id', 'prefix', 'patient', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
-                  'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days')
+                  'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days','duration_days2')
         widgets = {
             'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
             'prefix': forms.Select(attrs={'class': 'form-control'}),
@@ -511,7 +515,8 @@ class SickLeaveForm(forms.ModelForm):
             'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'created_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
-            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
+            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'type':'hidden'}),
+            'duration_days2': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
         }
 
     def __init__(self, *args, **kwargs):
@@ -985,7 +990,7 @@ class CompanionLeaveForm(forms.ModelForm):
         model = CompanionLeave
         fields = ('leave_id', 'prefix', 'patient', 'companion', 'relation', 'relation_en', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
-                  'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days')
+                  'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days','duration_days2')
         widgets = {
             'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
             'prefix': forms.Select(attrs={'class': 'form-control'}),
@@ -1004,7 +1009,8 @@ class CompanionLeaveForm(forms.ModelForm):
             'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'created_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
-            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
+            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'type':'hidden'}),
+            'duration_days2': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
         }
 
     def __init__(self, *args, **kwargs):
@@ -1320,3 +1326,347 @@ class PaymentDetailForm(forms.ModelForm):
 
 
 # تم نقل نموذج LeaveRequestForm إلى تطبيق ai_leaves
+
+
+# ===== نماذج الإعدادات والملف الشخصي =====
+
+class SystemSettingsForm(forms.Form):
+    """نموذج إعدادات النظام العامة"""
+
+    # الإعدادات العامة
+    site_name = forms.CharField(
+        label="اسم الموقع",
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    site_description = forms.CharField(
+        label="وصف الموقع",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
+    default_language = forms.ChoiceField(
+        label="اللغة الافتراضية",
+        choices=[('ar', 'العربية'), ('en', 'English')],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    timezone = forms.CharField(
+        label="المنطقة الزمنية",
+        max_length=50,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    items_per_page = forms.IntegerField(
+        label="عدد العناصر في الصفحة",
+        min_value=10,
+        max_value=100,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+
+
+class CompanySettingsForm(forms.Form):
+    """نموذج إعدادات الشركة"""
+
+    company_name = forms.CharField(
+        label="اسم الشركة",
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    company_address = forms.CharField(
+        label="عنوان الشركة",
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
+    company_phone = forms.CharField(
+        label="هاتف الشركة",
+        max_length=20,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    company_email = forms.EmailField(
+        label="بريد الشركة الإلكتروني",
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    company_website = forms.URLField(
+        label="موقع الشركة",
+        required=False,
+        widget=forms.URLInput(attrs={'class': 'form-control'})
+    )
+    license_number = forms.CharField(
+        label="رقم الترخيص",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+
+class UserProfileForm(forms.ModelForm):
+    """نموذج الملف الشخصي للمستخدم"""
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'avatar', 'phone', 'address', 'birth_date',
+            'theme', 'language', 'items_per_page',
+            'email_notifications', 'sms_notifications'
+        ]
+        widgets = {
+            'avatar': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'birth_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'theme': forms.Select(attrs={'class': 'form-control'}),
+            'language': forms.Select(attrs={'class': 'form-control'}),
+            'items_per_page': forms.NumberInput(attrs={'class': 'form-control'}),
+            'email_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'sms_notifications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class BackupCreateForm(forms.Form):
+    """نموذج إنشاء نسخة احتياطية"""
+
+    name = forms.CharField(
+        label="اسم النسخة الاحتياطية",
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    backup_type = forms.ChoiceField(
+        label="نوع النسخة الاحتياطية",
+        choices=BackupRecord.BACKUP_TYPES,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    description = forms.CharField(
+        label="الوصف",
+        required=False,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+    )
+
+
+class NotificationSettingsForm(forms.Form):
+    """نموذج إعدادات الإشعارات"""
+
+    email_notifications_enabled = forms.BooleanField(
+        label="تفعيل إشعارات البريد الإلكتروني",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    sms_notifications_enabled = forms.BooleanField(
+        label="تفعيل إشعارات الرسائل النصية",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    notification_email = forms.EmailField(
+        label="بريد الإشعارات",
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    smtp_host = forms.CharField(
+        label="خادم SMTP",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    smtp_port = forms.IntegerField(
+        label="منفذ SMTP",
+        min_value=1,
+        max_value=65535,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    smtp_username = forms.CharField(
+        label="اسم مستخدم SMTP",
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    smtp_password = forms.CharField(
+        label="كلمة مرور SMTP",
+        max_length=100,
+        required=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+    smtp_use_tls = forms.BooleanField(
+        label="استخدام TLS",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+
+class BackupSettingsForm(forms.Form):
+    """نموذج إعدادات النسخ الاحتياطي"""
+
+    auto_backup_enabled = forms.BooleanField(
+        label="تفعيل النسخ الاحتياطي التلقائي",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    backup_frequency = forms.ChoiceField(
+        label="تكرار النسخ الاحتياطي",
+        choices=[
+            ('daily', 'يومي'),
+            ('weekly', 'أسبوعي'),
+            ('monthly', 'شهري')
+        ],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    backup_time = forms.TimeField(
+        label="وقت النسخ الاحتياطي",
+        widget=forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'})
+    )
+    keep_backup_count = forms.IntegerField(
+        label="عدد النسخ المحفوظة",
+        min_value=1,
+        max_value=30,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    compress_backups = forms.BooleanField(
+        label="ضغط النسخ الاحتياطي",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    """نموذج تغيير كلمة المرور المخصص"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['old_password'].widget.attrs.update({'class': 'form-control'})
+        self.fields['new_password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['new_password2'].widget.attrs.update({'class': 'form-control'})
+
+        self.fields['old_password'].label = "كلمة المرور الحالية"
+        self.fields['new_password1'].label = "كلمة المرور الجديدة"
+        self.fields['new_password2'].label = "تأكيد كلمة المرور الجديدة"
+
+
+class RestoreBackupForm(forms.Form):
+    """نموذج استعادة النسخة الاحتياطية"""
+
+    restore_data = forms.BooleanField(
+        label="استعادة البيانات",
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    restore_files = forms.BooleanField(
+        label="استعادة الملفات",
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    restore_settings = forms.BooleanField(
+        label="استعادة الإعدادات",
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    confirm_restore = forms.BooleanField(
+        label="أؤكد أنني أريد استعادة هذه النسخة الاحتياطية (سيتم استبدال البيانات الحالية)",
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
+
+class UISettingsForm(forms.Form):
+    """نموذج إعدادات الواجهة"""
+
+    theme_primary_color = forms.CharField(
+        label="اللون الأساسي",
+        max_length=7,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'color'})
+    )
+    theme_secondary_color = forms.CharField(
+        label="اللون الثانوي",
+        max_length=7,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'color'})
+    )
+    theme_success_color = forms.CharField(
+        label="لون النجاح",
+        max_length=7,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'color'})
+    )
+    theme_danger_color = forms.CharField(
+        label="لون الخطر",
+        max_length=7,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'color'})
+    )
+    font_family = forms.CharField(
+        label="خط النص",
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    font_size_base = forms.CharField(
+        label="حجم الخط الأساسي",
+        max_length=10,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    border_radius = forms.CharField(
+        label="انحناء الحواف",
+        max_length=10,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+
+class ValidationSettingsForm(forms.Form):
+    """نموذج إعدادات التحقق"""
+
+    phone_regex = forms.CharField(
+        label="نمط رقم الهاتف",
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    national_id_regex = forms.CharField(
+        label="نمط رقم الهوية",
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email_required = forms.BooleanField(
+        label="البريد الإلكتروني مطلوب",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    phone_required = forms.BooleanField(
+        label="رقم الهاتف مطلوب",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+    address_max_length = forms.IntegerField(
+        label="الحد الأقصى لطول العنوان",
+        min_value=50,
+        max_value=1000,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    name_max_length = forms.IntegerField(
+        label="الحد الأقصى لطول الاسم",
+        min_value=20,
+        max_value=200,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+
+
+class FileSettingsForm(forms.Form):
+    """نموذج إعدادات الملفات"""
+
+    max_file_size_mb = forms.IntegerField(
+        label="الحد الأقصى لحجم الملف (ميجابايت)",
+        min_value=1,
+        max_value=100,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    allowed_image_formats = forms.CharField(
+        label="صيغ الصور المسموحة",
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'png,jpg,jpeg,gif'})
+    )
+    allowed_document_formats = forms.CharField(
+        label="صيغ المستندات المسموحة",
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'pdf,doc,docx,xls,xlsx'})
+    )
+    image_max_width = forms.IntegerField(
+        label="العرض الأقصى للصور",
+        min_value=100,
+        max_value=5000,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+    image_max_height = forms.IntegerField(
+        label="الارتفاع الأقصى للصور",
+        min_value=100,
+        max_value=5000,
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )

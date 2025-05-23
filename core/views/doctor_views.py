@@ -23,7 +23,7 @@ def doctor_list(request):
         doctors = doctors.filter(position__icontains=position)
 
     if hospital_id:
-        doctors = doctors.filter(hospital_id=hospital_id)
+        doctors = doctors.filter(hospitals__id=hospital_id)
 
     # الحصول على جميع المستشفيات للفلتر
     hospitals = Hospital.objects.all().order_by('name')

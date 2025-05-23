@@ -24,7 +24,7 @@ def doctor_search_api(request):
             'display': doctor.name,
             'national_id': doctor.national_id or '',
             'position': doctor.position or '',
-            'hospital': doctor.hospital.name if doctor.hospital else '',
+            'hospital': ', '.join([h.name for h in doctor.hospitals.all()]) if doctor.hospitals.exists() else '',
             'phone': doctor.phone or '',
             'email': doctor.email or ''
         })

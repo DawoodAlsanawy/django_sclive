@@ -302,9 +302,11 @@ def sick_leave_create_with_invoice(request):
                                 'address': form.cleaned_data.get('new_hospital_address', '')
                             }
                         )
-                        doctor.hospital = hospital
+                        doctor.hospitals.add(hospital)
                     elif form.cleaned_data.get('new_doctor_hospital'):
-                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+                        doctor.hospitals.clear()
+                        for hospital in form.cleaned_data['new_doctor_hospital']:
+                            doctor.hospitals.add(hospital)
 
                     doctor.save()
                 except Doctor.DoesNotExist:
@@ -523,9 +525,11 @@ def sick_leave_edit(request, sick_leave_id):
                                 'address': form.cleaned_data.get('new_hospital_address', '')
                             }
                         )
-                        doctor.hospital = hospital
+                        doctor.hospitals.add(hospital)
                     elif form.cleaned_data.get('new_doctor_hospital'):
-                        doctor.hospital = form.cleaned_data['new_doctor_hospital']
+                        doctor.hospitals.clear()
+                        for hospital in form.cleaned_data['new_doctor_hospital']:
+                            doctor.hospitals.add(hospital)
 
                     doctor.save()
                 except Doctor.DoesNotExist:

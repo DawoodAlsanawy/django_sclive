@@ -494,6 +494,7 @@ class SickLeave(models.Model):
     end_date = models.DateField(verbose_name='تاريخ النهاية')
     end_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ النهاية (هجري)')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
+    duration_days2 = models.IntegerField(verbose_name='المدة بالأيام',default=1)
     admission_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الدخول')
     admission_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الدخول (هجري)')
     discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
@@ -646,6 +647,7 @@ class CompanionLeave(models.Model):
     end_date = models.DateField(verbose_name='تاريخ النهاية')
     end_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ النهاية (هجري)')
     duration_days = models.IntegerField(verbose_name='المدة بالأيام')
+    duration_days2 = models.IntegerField(verbose_name='المدة بالأيام',default=1)
     admission_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الدخول')
     admission_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الدخول (هجري)')
     discharge_date = models.DateField(blank=True, null=True, verbose_name='تاريخ الخروج')
@@ -993,3 +995,168 @@ class PaymentDetail(models.Model):
 
     def __str__(self):
         return f"{self.payment.payment_number} - {self.invoice.invoice_number} - {self.amount}"
+
+
+class SystemSettings(models.Model):
+    """إعدادات النظام"""
+    SETTING_TYPES = [
+        ('general', 'عام'),
+        ('company', 'الشركة'),
+        ('reports', 'التقارير'),
+        ('notifications', 'الإشعارات'),
+        ('backup', 'النسخ الاحتياطي'),
+        ('security', 'الأمان'),
+    ]
+
+    key = models.CharField(max_length=100, unique=True, verbose_name="المفتاح")
+    value = models.TextField(verbose_name="القيمة")
+    setting_type = models.CharField(max_length=20, choices=SETTING_TYPES, default='general', verbose_name="نوع الإعداد")
+    description = models.TextField(blank=True, verbose_name="الوصف")
+    is_active = models.BooleanField(default=True, verbose_name="نشط")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
+
+    class Meta:
+        verbose_name = "إعداد النظام"
+        verbose_name_plural = "إعدادات النظام"
+        ordering = ['setting_type', 'key']
+
+    def __str__(self):
+        return f"{self.key}: {self.value[:50]}"
+
+
+class UserProfile(models.Model):
+    """الملف الشخصي للمستخدم"""
+    THEME_CHOICES = [
+        ('light', 'فاتح'),
+        ('dark', 'داكن'),
+        ('auto', 'تلقائي'),
+    ]
+
+    LANGUAGE_CHOICES = [
+        ('ar', 'العربية'),
+        ('en', 'English'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="المستخدم")
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name="الصورة الشخصية")
+    phone = models.CharField(max_length=20, blank=True, verbose_name="رقم الهاتف")
+    address = models.TextField(blank=True, verbose_name="العنوان")
+    birth_date = models.DateField(blank=True, null=True, verbose_name="تاريخ الميلاد")
+
+    # إعدادات الواجهة
+    theme = models.CharField(max_length=10, choices=THEME_CHOICES, default='light', verbose_name="المظهر")
+    language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES, default='ar', verbose_name="اللغة")
+    items_per_page = models.PositiveIntegerField(default=25, verbose_name="عدد العناصر في الصفحة")
+
+    # إعدادات الإشعارات
+    email_notifications = models.BooleanField(default=True, verbose_name="إشعارات البريد الإلكتروني")
+    sms_notifications = models.BooleanField(default=False, verbose_name="إشعارات الرسائل النصية")
+
+    # إعدادات الأمان
+    two_factor_enabled = models.BooleanField(default=False, verbose_name="المصادقة الثنائية")
+    last_password_change = models.DateTimeField(blank=True, null=True, verbose_name="آخر تغيير كلمة مرور")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
+
+    class Meta:
+        verbose_name = "الملف الشخصي"
+        verbose_name_plural = "الملفات الشخصية"
+
+    def __str__(self):
+        return f"ملف {self.user.get_full_name() or self.user.username}"
+
+
+class BackupRecord(models.Model):
+    """سجل النسخ الاحتياطي"""
+    BACKUP_TYPES = [
+        ('full', 'نسخة كاملة'),
+        ('data', 'البيانات فقط'),
+        ('files', 'الملفات فقط'),
+        ('settings', 'الإعدادات فقط'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'في الانتظار'),
+        ('running', 'قيد التنفيذ'),
+        ('completed', 'مكتملة'),
+        ('failed', 'فشلت'),
+        ('cancelled', 'ملغية'),
+    ]
+
+    name = models.CharField(max_length=200, verbose_name="اسم النسخة")
+    backup_type = models.CharField(max_length=20, choices=BACKUP_TYPES, verbose_name="نوع النسخة")
+    file_path = models.CharField(max_length=500, blank=True, verbose_name="مسار الملف")
+    file_size = models.BigIntegerField(default=0, verbose_name="حجم الملف (بايت)")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="الحالة")
+
+    # معلومات التنفيذ
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="منشئ النسخة")
+    started_at = models.DateTimeField(blank=True, null=True, verbose_name="وقت البدء")
+    completed_at = models.DateTimeField(blank=True, null=True, verbose_name="وقت الانتهاء")
+
+    # تفاصيل إضافية
+    description = models.TextField(blank=True, verbose_name="الوصف")
+    error_message = models.TextField(blank=True, verbose_name="رسالة الخطأ")
+    is_scheduled = models.BooleanField(default=False, verbose_name="مجدولة")
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+
+    class Meta:
+        verbose_name = "سجل النسخة الاحتياطية"
+        verbose_name_plural = "سجلات النسخ الاحتياطي"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.get_status_display()}"
+
+    @property
+    def duration(self):
+        """حساب مدة النسخ الاحتياطي"""
+        if self.started_at and self.completed_at:
+            return self.completed_at - self.started_at
+        return None
+
+    @property
+    def file_size_mb(self):
+        """حجم الملف بالميجابايت"""
+        return round(self.file_size / (1024 * 1024), 2) if self.file_size else 0
+
+
+class BackupSchedule(models.Model):
+    """جدولة النسخ الاحتياطي"""
+    FREQUENCY_CHOICES = [
+        ('daily', 'يومي'),
+        ('weekly', 'أسبوعي'),
+        ('monthly', 'شهري'),
+        ('custom', 'مخصص'),
+    ]
+
+    name = models.CharField(max_length=200, verbose_name="اسم الجدولة")
+    backup_type = models.CharField(max_length=20, choices=BackupRecord.BACKUP_TYPES, verbose_name="نوع النسخة")
+    frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, verbose_name="التكرار")
+
+    # إعدادات التوقيت
+    time = models.TimeField(verbose_name="الوقت")
+    day_of_week = models.PositiveIntegerField(blank=True, null=True, verbose_name="يوم الأسبوع (0=الاثنين)")
+    day_of_month = models.PositiveIntegerField(blank=True, null=True, verbose_name="يوم الشهر")
+
+    # إعدادات الاحتفاظ
+    keep_count = models.PositiveIntegerField(default=7, verbose_name="عدد النسخ المحفوظة")
+
+    is_active = models.BooleanField(default=True, verbose_name="نشط")
+    last_run = models.DateTimeField(blank=True, null=True, verbose_name="آخر تشغيل")
+    next_run = models.DateTimeField(blank=True, null=True, verbose_name="التشغيل التالي")
+
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="المنشئ")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاريخ الإنشاء")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاريخ التحديث")
+
+    class Meta:
+        verbose_name = "جدولة النسخ الاحتياطي"
+        verbose_name_plural = "جدولة النسخ الاحتياطي"
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} - {self.get_frequency_display()}"

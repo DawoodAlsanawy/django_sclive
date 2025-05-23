@@ -1,0 +1,63 @@
+<div class="print-settings-info">
+    <div class="row">
+        <div class="col-md-6">
+            <h6>إعدادات الورق</h6>
+            <ul class="list-unstyled">
+                <li><strong>حجم الورق:</strong> {{ print_settings.paper_size }}</li>
+                <li><strong>الاتجاه:</strong> 
+                    {% if print_settings.orientation == 'portrait' %}
+                        عمودي
+                    {% else %}
+                        أفقي
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+        
+        <div class="col-md-6">
+            <h6>الهوامش</h6>
+            <ul class="list-unstyled">
+                <li><strong>الهامش العلوي:</strong> {{ print_settings.margins.top }}</li>
+                <li><strong>الهامش السفلي:</strong> {{ print_settings.margins.bottom }}</li>
+                <li><strong>الهامش الأيسر:</strong> {{ print_settings.margins.left }}</li>
+                <li><strong>الهامش الأيمن:</strong> {{ print_settings.margins.right }}</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <div class="col-12">
+            <h6>خيارات إضافية</h6>
+            <ul class="list-unstyled">
+                <li>
+                    <i class="fas fa-{% if print_settings.include_header %}check text-success{% else %}times text-danger{% endif %} me-2"></i>
+                    تضمين الرأس
+                </li>
+                <li>
+                    <i class="fas fa-{% if print_settings.include_footer %}check text-success{% else %}times text-danger{% endif %} me-2"></i>
+                    تضمين التذييل
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+.print-settings-info {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.print-settings-info h6 {
+    color: #495057;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.print-settings-info ul li {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+</style>

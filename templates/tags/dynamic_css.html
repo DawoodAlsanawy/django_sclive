@@ -1,0 +1,132 @@
+<style>
+:root {
+    --primary-color: {{ ui_settings.primary_color|default:"#007bff" }};
+    --secondary-color: {{ ui_settings.secondary_color|default:"#6c757d" }};
+    --success-color: {{ ui_settings.success_color|default:"#28a745" }};
+    --danger-color: {{ ui_settings.danger_color|default:"#dc3545" }};
+    --warning-color: {{ ui_settings.warning_color|default:"#ffc107" }};
+    --info-color: {{ ui_settings.info_color|default:"#17a2b8" }};
+    --light-color: {{ ui_settings.light_color|default:"#f8f9fa" }};
+    --dark-color: {{ ui_settings.dark_color|default:"#343a40" }};
+    --font-family: {{ ui_settings.font_family|default:"'Tajawal', sans-serif" }};
+    --font-size-base: {{ ui_settings.font_size_base|default:"14px" }};
+    --border-radius: {{ ui_settings.border_radius|default:"10px" }};
+    --box-shadow: {{ ui_settings.box_shadow|default:"0 2px 5px rgba(0, 0, 0, 0.1)" }};
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+    border-color: color-mix(in srgb, var(--primary-color) 85%, black);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+}
+
+.btn-info {
+    background-color: var(--info-color);
+    border-color: var(--info-color);
+}
+
+.card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: {{ ui_settings.card_margin_bottom|default:"20px" }};
+}
+
+.form-control, .form-select {
+    border-radius: calc(var(--border-radius) * 0.5);
+}
+
+.navbar-brand {
+    font-weight: {{ ui_settings.navbar_brand_font_weight|default:"bold" }};
+}
+
+.sidebar {
+    background-color: var(--dark-color);
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    border-radius: calc(var(--border-radius) * 0.5);
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.alert {
+    border-radius: var(--border-radius);
+}
+
+.modal-content {
+    border-radius: var(--border-radius);
+}
+
+.table-responsive {
+    overflow: {{ ui_settings.table_responsive_overflow|default:"auto" }};
+}
+
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: {{ ui_settings.container_padding_mobile|default:"10px" }};
+    }
+}
+
+/* ألوان مخصصة للحالات */
+.text-primary { color: var(--primary-color) !important; }
+.text-secondary { color: var(--secondary-color) !important; }
+.text-success { color: var(--success-color) !important; }
+.text-danger { color: var(--danger-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-info { color: var(--info-color) !important; }
+
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-secondary { background-color: var(--secondary-color) !important; }
+.bg-success { background-color: var(--success-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+.bg-light { background-color: var(--light-color) !important; }
+.bg-dark { background-color: var(--dark-color) !important; }
+
+/* حدود مخصصة */
+.border-primary { border-color: var(--primary-color) !important; }
+.border-secondary { border-color: var(--secondary-color) !important; }
+.border-success { border-color: var(--success-color) !important; }
+.border-danger { border-color: var(--danger-color) !important; }
+.border-warning { border-color: var(--warning-color) !important; }
+.border-info { border-color: var(--info-color) !important; }
+</style>

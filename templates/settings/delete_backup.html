@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.backup-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-completed { background-color: #d1e7dd; color: #0f5132; }
+.status-failed { background-color: #f8d7da; color: #721c24; }
+
+.backup-type-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.type-full { background-color: #e3f2fd; color: #1976d2; }
+.type-data { background-color: #f3e5f5; color: #7b1fa2; }
+.type-files { background-color: #e8f5e8; color: #388e3c; }
+.type-settings { background-color: #fff3e0; color: #f57c00; }
+
+.danger-box {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+    border: 2px solid #dc3545;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-trash me-2"></i>
+                        حذف النسخة الاحتياطية
+                    </h1>
+                    <p class="text-muted">{{ backup.name }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'settings:backup_detail' backup.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-right me-1"></i>
+                        العودة للتفاصيل
+                    </a>
+                </div>
+            </div>
+
+            <!-- تحذير مهم -->
+            <div class="danger-box">
+                <div class="d-flex align-items-start">
+                    <div class="me-3">
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-danger mb-2">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            تحذير: حذف نهائي
+                        </h5>
+                        <p class="mb-2">
+                            <strong>حذف النسخة الاحتياطية سيؤدي إلى:</strong>
+                        </p>
+                        <ul class="mb-2">
+                            <li>حذف ملف النسخة الاحتياطية نهائياً من الخادم</li>
+                            <li>فقدان إمكانية استعادة البيانات من هذه النسخة</li>
+                            <li>عدم إمكانية التراجع عن هذا الإجراء</li>
+                        </ul>
+                        <p class="mb-0 text-danger">
+                            <strong>تأكد من أن لديك نسخ احتياطية أخرى قبل المتابعة!</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- معلومات النسخة الاحتياطية -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-info-circle me-1"></i>
+                                معلومات النسخة الاحتياطية المراد حذفها
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="backup-type-icon type-{{ backup.backup_type }} me-3">
+                                    {% if backup.backup_type == 'full' %}
+                                        <i class="fas fa-archive"></i>
+                                    {% elif backup.backup_type == 'data' %}
+                                        <i class="fas fa-database"></i>
+                                    {% elif backup.backup_type == 'files' %}
+                                        <i class="fas fa-folder"></i>
+                                    {% elif backup.backup_type == 'settings' %}
+                                        <i class="fas fa-cog"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ backup.name }}</h6>
+                                    <span class="backup-status status-{{ backup.status }}">
+                                        {{ backup.get_status_display }}
+                                    </span>
+                                    <div class="mt-2">
+                                        <small class="text-muted d-block">النوع: {{ backup.get_backup_type_display }}</small>
+                                        <small class="text-muted d-block">الحجم: {{ backup.file_size_mb }} ميجابايت</small>
+                                        <small class="text-muted d-block">التاريخ: {{ backup.created_at|date:"Y-m-d H:i" }}</small>
+                                        {% if backup.description %}
+                                            <small class="text-muted d-block">الوصف: {{ backup.description }}</small>
+                                        {% endif %}
+                                        {% if backup.created_by %}
+                                            <small class="text-muted d-block">المنشئ: {{ backup.created_by.get_full_name|default:backup.created_by.username }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- تأكيد الحذف -->
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                تأكيد الحذف
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-danger mb-4">
+                                <strong>هل أنت متأكد من حذف هذه النسخة الاحتياطية نهائياً؟</strong>
+                            </p>
+                            
+                            <div class="alert alert-warning">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>ملاحظة:</strong> هذا الإجراء لا يمكن التراجع عنه. تأكد من أن لديك نسخ احتياطية أخرى حديثة قبل المتابعة.
+                            </div>
+
+                            <form method="post" class="delete-form">
+                                {% csrf_token %}
+                                
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'settings:backup_detail' backup.id %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>
+                                        إلغاء
+                                    </a>
+                                    <button type="submit" class="btn btn-danger btn-lg" id="deleteBtn">
+                                        <i class="fas fa-trash me-1"></i>
+                                        حذف النسخة الاحتياطية نهائياً
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // تأكيد إضافي عند الحذف
+    $('.delete-form').submit(function(e) {
+        const confirmed = confirm(
+            'تحذير أخير!\n\n' +
+            'هل أنت متأكد تماماً من حذف النسخة الاحتياطية "{{ backup.name }}"؟\n\n' +
+            'سيتم حذف الملف نهائياً ولن تتمكن من استعادته.\n\n' +
+            'اكتب "حذف" للتأكيد:'
+        );
+        
+        if (!confirmed) {
+            e.preventDefault();
+        } else {
+            const userInput = prompt('اكتب "حذف" للتأكيد النهائي:');
+            if (userInput !== 'حذف') {
+                e.preventDefault();
+                alert('تم إلغاء عملية الحذف');
+            } else {
+                // تعطيل الزر لمنع الحذف المتكرر
+                $('#deleteBtn').prop('disabled', true).html(
+                    '<i class="fas fa-spinner fa-spin me-1"></i>جاري الحذف...'
+                );
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

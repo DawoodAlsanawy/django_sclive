@@ -14,6 +14,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('ai-leaves/', include('ai_leaves.urls')),  # مسارات طلبات الإجازات الذكية
+    path('settings/', include(('core.urls.settings_urls', 'settings'), namespace='settings')),  # مسارات الإعدادات
 
     # مسارات المصادقة
     path('login/', auth_views.LoginView.as_view(

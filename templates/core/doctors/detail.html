@@ -48,13 +48,15 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <strong>المستشفى:</strong>
+                        <strong>المستشفيات:</strong>
                     </div>
                     <div class="col-md-8">
-                        {% if doctor.hospital %}
-                            {{ doctor.hospital.name }}
+                        {% if doctor.hospitals.exists %}
+                            {% for hospital in doctor.hospitals.all %}
+                                <span class="badge bg-primary me-1">{{ hospital.name }}</span>
+                            {% endfor %}
                         {% else %}
-                            غير محدد
+                            <span class="text-muted">غير محدد</span>
                         {% endif %}
                     </div>
                 </div>

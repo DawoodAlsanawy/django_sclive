@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.backup-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-completed { background-color: #d1e7dd; color: #0f5132; }
+
+.backup-type-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.type-full { background-color: #e3f2fd; color: #1976d2; }
+.type-data { background-color: #f3e5f5; color: #7b1fa2; }
+.type-files { background-color: #e8f5e8; color: #388e3c; }
+.type-settings { background-color: #fff3e0; color: #f57c00; }
+
+.warning-box {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.restore-option {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.restore-option:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.restore-option.selected {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-undo me-2"></i>
+                        استعادة النسخة الاحتياطية
+                    </h1>
+                    <p class="text-muted">{{ backup.name }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'settings:backup_detail' backup.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-right me-1"></i>
+                        العودة للتفاصيل
+                    </a>
+                </div>
+            </div>
+
+            <!-- تحذير مهم -->
+            <div class="warning-box">
+                <div class="d-flex align-items-start">
+                    <div class="me-3">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-warning mb-2">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            تحذير مهم
+                        </h5>
+                        <p class="mb-2">
+                            <strong>استعادة النسخة الاحتياطية ستؤدي إلى:</strong>
+                        </p>
+                        <ul class="mb-2">
+                            <li>استبدال البيانات الحالية بالبيانات من النسخة الاحتياطية</li>
+                            <li>فقدان أي تغييرات تمت بعد تاريخ إنشاء هذه النسخة</li>
+                            <li>إعادة تشغيل النظام قد تكون مطلوبة</li>
+                        </ul>
+                        <p class="mb-0 text-danger">
+                            <strong>تأكد من إنشاء نسخة احتياطية حديثة قبل المتابعة!</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- معلومات النسخة الاحتياطية -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-info-circle me-1"></i>
+                                معلومات النسخة الاحتياطية
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="backup-type-icon type-{{ backup.backup_type }} me-3">
+                                    {% if backup.backup_type == 'full' %}
+                                        <i class="fas fa-archive"></i>
+                                    {% elif backup.backup_type == 'data' %}
+                                        <i class="fas fa-database"></i>
+                                    {% elif backup.backup_type == 'files' %}
+                                        <i class="fas fa-folder"></i>
+                                    {% elif backup.backup_type == 'settings' %}
+                                        <i class="fas fa-cog"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ backup.name }}</h6>
+                                    <span class="backup-status status-{{ backup.status }}">
+                                        {{ backup.get_status_display }}
+                                    </span>
+                                    <div class="mt-2">
+                                        <small class="text-muted d-block">النوع: {{ backup.get_backup_type_display }}</small>
+                                        <small class="text-muted d-block">الحجم: {{ backup.file_size_mb }} ميجابايت</small>
+                                        <small class="text-muted d-block">التاريخ: {{ backup.created_at|date:"Y-m-d H:i" }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- نموذج الاستعادة -->
+                    <form method="post" class="restore-form">
+                        {% csrf_token %}
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-cog me-1"></i>
+                                    خيارات الاستعادة
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-4">اختر العناصر التي تريد استعادتها من النسخة الاحتياطية:</p>
+
+                                <!-- خيار استعادة البيانات -->
+                                {% if backup.backup_type == 'full' or backup.backup_type == 'data' %}
+                                <div class="restore-option">
+                                    <div class="form-check">
+                                        {{ form.restore_data }}
+                                        <label class="form-check-label" for="{{ form.restore_data.id_for_label }}">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-database text-primary me-2"></i>
+                                                <div>
+                                                    <strong>استعادة البيانات</strong>
+                                                    <small class="d-block text-muted">
+                                                        قاعدة البيانات، الإجازات، العملاء، الأطباء، إلخ
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- خيار استعادة الملفات -->
+                                {% if backup.backup_type == 'full' or backup.backup_type == 'files' %}
+                                <div class="restore-option">
+                                    <div class="form-check">
+                                        {{ form.restore_files }}
+                                        <label class="form-check-label" for="{{ form.restore_files.id_for_label }}">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-folder text-success me-2"></i>
+                                                <div>
+                                                    <strong>استعادة الملفات</strong>
+                                                    <small class="d-block text-muted">
+                                                        الصور، المستندات، الملفات المرفوعة
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- خيار استعادة الإعدادات -->
+                                {% if backup.backup_type == 'full' or backup.backup_type == 'settings' %}
+                                <div class="restore-option">
+                                    <div class="form-check">
+                                        {{ form.restore_settings }}
+                                        <label class="form-check-label" for="{{ form.restore_settings.id_for_label }}">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-cog text-warning me-2"></i>
+                                                <div>
+                                                    <strong>استعادة الإعدادات</strong>
+                                                    <small class="d-block text-muted">
+                                                        إعدادات النظام، الشركة، الواجهة
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- تأكيد الاستعادة -->
+                                <div class="restore-option border-danger">
+                                    <div class="form-check">
+                                        {{ form.confirm_restore }}
+                                        <label class="form-check-label text-danger" for="{{ form.confirm_restore.id_for_label }}">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                                <div>
+                                                    <strong>{{ form.confirm_restore.label }}</strong>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- أزرار الإجراءات -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'settings:backup_detail' backup.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>
+                                إلغاء
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg" id="restoreBtn" disabled>
+                                <i class="fas fa-undo me-1"></i>
+                                بدء الاستعادة
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // تفعيل/تعطيل زر الاستعادة بناءً على تأكيد المستخدم
+    function updateRestoreButton() {
+        const confirmChecked = $('#{{ form.confirm_restore.id_for_label }}').is(':checked');
+        const anyOptionSelected = $('.restore-option input[type="checkbox"]:not(#{{ form.confirm_restore.id_for_label }})').is(':checked');
+        
+        $('#restoreBtn').prop('disabled', !(confirmChecked && anyOptionSelected));
+    }
+
+    // مراقبة تغييرات الخيارات
+    $('.restore-option input[type="checkbox"]').change(function() {
+        updateRestoreButton();
+        
+        // تحديث مظهر الخيار
+        const option = $(this).closest('.restore-option');
+        if ($(this).is(':checked')) {
+            option.addClass('selected');
+        } else {
+            option.removeClass('selected');
+        }
+    });
+
+    // تأكيد إضافي عند الإرسال
+    $('.restore-form').submit(function(e) {
+        const confirmed = confirm(
+            'هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟\n\n' +
+            'سيتم استبدال البيانات الحالية وقد تفقد التغييرات الحديثة.\n\n' +
+            'هذا الإجراء لا يمكن التراجع عنه!'
+        );
+        
+        if (!confirmed) {
+            e.preventDefault();
+        } else {
+            // تعطيل الزر لمنع الإرسال المتكرر
+            $('#restoreBtn').prop('disabled', true).html(
+                '<i class="fas fa-spinner fa-spin me-1"></i>جاري الاستعادة...'
+            );
+        }
+    });
+
+    // تحديث حالة الأزرار عند التحميل
+    updateRestoreButton();
+});
+</script>
+{% endblock %}

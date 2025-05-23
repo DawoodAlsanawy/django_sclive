@@ -11,7 +11,8 @@ try:
                             sick_leave_search_api)
     # Auth views
     from .auth_views import password_change, register
-    from .base_views import about, home, update_all_leaves_status, verify
+    from .base_views import (about, home, test_template_tags,
+                             update_all_leaves_status, verify)
     from .client_ajax_views import *
     # Model views
     from .client_views import *
@@ -36,7 +37,11 @@ except ImportError:
 
 # AJAX views
 from .client_ajax_views import client_create_ajax
-from .companion_ajax_views import companion_create_ajax, get_companion_data, update_companion_ajax
-from .doctor_ajax_views import doctor_create_ajax, get_doctor_data, update_doctor_ajax
-from .hospital_ajax_views import hospital_create_ajax, get_hospital_data, update_hospital_ajax
-from .patient_ajax_views import patient_create_ajax, get_patient_data, update_patient_ajax
+from .companion_ajax_views import (companion_create_ajax, get_companion_data,
+                                   update_companion_ajax)
+from .doctor_ajax_views import (doctor_create_ajax, get_doctor_data,
+                                update_doctor_ajax)
+from .hospital_ajax_views import (get_hospital_data, hospital_create_ajax,
+                                  update_hospital_ajax)
+from .patient_ajax_views import (get_patient_data, patient_create_ajax,
+                                 update_patient_ajax)

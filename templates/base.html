@@ -1,15 +1,20 @@
+{% load static %}
+{% load settings_tags %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}نظام إدارة الإجازات المرضية{% endblock %}</title>
+    <title>{% block title %}{% get_site_name %}{% endblock %}</title>
 
     <!-- Bootstrap RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Dynamic CSS based on settings -->
+    {% dynamic_css %}
 
     <!-- Custom CSS -->
     <style>
@@ -89,7 +94,7 @@
             <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                 <div class="position-sticky pt-3" style="position: fixed; top:0;right:0; overflow-y:auto;">
                     <div class="text-center mb-4">
-                        <h5>نظام إدارة الإجازات المرضية</h5>
+                        <h5>{% get_site_name %}</h5>
                         <p class="text-muted">مرحباً، {{ user.username }}</p>
                     </div>
 
@@ -183,6 +188,13 @@
                         {% endif %}
 
                         <li class="nav-item">
+                            <a class="nav-link {% if '/settings/' in request.path %}active{% endif %}" href="{% url 'settings:index' %}">
+                                <i class="fas fa-cog"></i>
+                                الإعدادات
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a class="nav-link {% if '/about/' in request.path %}active{% endif %}" href="{% url 'core:about' %}">
                                 <i class="fas fa-info-circle"></i>
                                 حول النظام
@@ -191,7 +203,7 @@
 
                         <li class="nav-item mt-3">
                             <form id="logout" method="post" action="{% url 'logout' %}">
-                                
+
                                 {%csrf_token%}
                             <button class="nav-link" onclick="window.logout.submet();" >
                                 <i class="fas fa-sign-out-alt"></i>
@@ -224,11 +236,72 @@
         </div>
     </div>
 
+    <!-- Site Footer -->
+    {% site_footer %}
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Settings-based JavaScript -->
+    <script>
+        // تطبيق إعدادات الرسائل
+        $(document).ready(function() {
+            {% if message_settings.auto_dismiss %}
+                $('.alert').each(function() {
+                    const alert = $(this);
+                    let duration = {% get_message_duration 'info' %};
+
+                    if (alert.hasClass('alert-success')) {
+                        duration = {% get_message_duration 'success' %};
+                    } else if (alert.hasClass('alert-danger')) {
+                        duration = {% get_message_duration 'error' %};
+                    } else if (alert.hasClass('alert-warning')) {
+                        duration = {% get_message_duration 'warning' %};
+                    }
+
+                    setTimeout(function() {
+                        alert.fadeOut();
+                    }, duration);
+                });
+            {% endif %}
+
+            // تطبيق إعدادات الملفات
+            $('input[type="file"]').each(function() {
+                const input = $(this);
+                const maxSize = {% get_max_file_size %} * 1024 * 1024; // تحويل إلى بايت
+
+                input.on('change', function() {
+                    const file = this.files[0];
+                    if (file && file.size > maxSize) {
+                        alert('حجم الملف كبير جداً. الحد الأقصى المسموح: {% get_max_file_size %} ميجابايت');
+                        $(this).val('');
+                    }
+                });
+            });
+
+            // تطبيق إعدادات التحقق من الهاتف
+            $('input[type="tel"], input[name*="phone"]').each(function() {
+                const input = $(this);
+                const phoneRegex = /{{ validation_settings.phone_regex|default:"^(05|5)[0-9]{8}$" }}/;
+
+                input.on('blur', function() {
+                    const value = $(this).val();
+                    if (value && !phoneRegex.test(value)) {
+                        $(this).addClass('is-invalid');
+                        if (!$(this).next('.invalid-feedback').length) {
+                            $(this).after('<div class="invalid-feedback">تنسيق رقم الهاتف غير صحيح</div>');
+                        }
+                    } else {
+                        $(this).removeClass('is-invalid');
+                        $(this).next('.invalid-feedback').remove();
+                    }
+                });
+            });
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>

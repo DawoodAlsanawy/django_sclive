@@ -4,7 +4,8 @@ from django.urls import include, path
 from . import (ajax_urls, api_urls, auth_urls, base_urls, client_urls,
                companion_leave_urls, doctor_urls, hospital_urls, inquiry_urls,
                leave_invoice_urls, leave_price_urls, patient_urls,
-               payment_urls, report_urls, sick_leave_urls, user_urls)
+               payment_urls, report_urls, settings_urls, sick_leave_urls,
+               user_urls)
 
 app_name = 'core'
 
@@ -53,6 +54,9 @@ urlpatterns = [
 
     # التقارير
     path('', include(report_urls.urlpatterns)),
+
+    # الإعدادات
+    path('settings/', include(settings_urls.urlpatterns)),
 
     # الاستعلامات
     path('', include(inquiry_urls.urlpatterns)),

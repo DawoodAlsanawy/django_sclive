@@ -360,7 +360,7 @@ def doctor_list(request):
         doctors = doctors.filter(position__icontains=position)
 
     if hospital_id:
-        doctors = doctors.filter(hospital_id=hospital_id)
+        doctors = doctors.filter(hospitals__id=hospital_id)
 
     # الحصول على جميع المستشفيات للفلتر
     hospitals = Hospital.objects.all().order_by('name')
@@ -465,7 +465,7 @@ def doctor_search_api(request):
             'display': doctor.name,
             'national_id': doctor.national_id,
             'position': doctor.position,
-            'hospital': doctor.hospital.name,
+            'hospital': ', '.join([h.name for h in doctor.hospitals.all()]) if doctor.hospitals.exists() else '',
             'phone': doctor.phone or '',
             'email': doctor.email or ''
         })

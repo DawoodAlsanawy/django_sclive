@@ -1,0 +1,89 @@
+{% load settings_tags %}
+<div class="company-header text-center mb-4">
+    {% if company.logo %}
+        <img src="{{ company.logo }}" alt="{{ company.name }}" class="company-logo mb-2" style="max-height: 80px;">
+    {% endif %}
+
+    <h4 class="company-name text-primary mb-1">{{ company.name }}</h4>
+
+    {% if company.license_number %}
+        <p class="license-number text-muted small mb-2">
+            <i class="fas fa-certificate me-1"></i>
+            ترخيص رقم: {{ company.license_number }}
+        </p>
+    {% endif %}
+
+    <div class="company-contact-info small text-muted">
+        {% if company.address %}
+            <div class="mb-1">
+                <i class="fas fa-map-marker-alt me-1"></i>
+                {{ company.address }}
+            </div>
+        {% endif %}
+
+        <div class="contact-row">
+            {% if company.phone %}
+                <span class="me-3">
+                    <i class="fas fa-phone me-1"></i>
+                    {{ company.phone|format_phone }}
+                </span>
+            {% endif %}
+
+            {% if company.email %}
+                <span class="me-3">
+                    <i class="fas fa-envelope me-1"></i>
+                    {{ company.email }}
+                </span>
+            {% endif %}
+
+            {% if company.website %}
+                <span>
+                    <i class="fas fa-globe me-1"></i>
+                    {{ company.website }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.company-header {
+    border-bottom: 2px solid var(--primary-color, #007bff);
+    padding-bottom: 1rem;
+}
+
+.company-logo {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.company-name {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.license-number {
+    background: var(--light-color, #f8f9fa);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .contact-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .contact-row span {
+        margin: 0 !important;
+    }
+}
+</style>

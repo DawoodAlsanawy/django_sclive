@@ -151,7 +151,7 @@ def update_all_leaves_status(request):
 
     from django.contrib import messages
     from django.shortcuts import redirect
-    
+
     messages.success(request, f'تم تحديث حالة {sick_updated} إجازة مرضية و {companion_updated} إجازة مرافق')
 
     # العودة إلى الصفحة السابقة
@@ -159,3 +159,8 @@ def update_all_leaves_status(request):
     if referer:
         return redirect(referer)
     return redirect('core:dashboard')
+
+
+def test_template_tags(request):
+    """صفحة اختبار Template Tags"""
+    return render(request, 'test_template_tags.html')
