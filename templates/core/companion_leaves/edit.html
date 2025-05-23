@@ -19,11 +19,332 @@
 </style>
 {% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/moment-hijri@2.1.2/moment-hijri.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-12">
         <h2>تعديل إجازة المرافق</h2>
         <p class="text-muted">تعديل بيانات إجازة المرافق رقم {{ companion_leave.leave_id }}</p>
+    </div>
+</div>
+
+<!-- Modal إضافة مريض جديد -->
+<div class="modal fade" id="patientModal" tabindex="-1" aria-labelledby="patientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="patientModalLabel">إضافة مريض جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_patient_national_id|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_patient_name|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_patient_name_en|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_patient_phone|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_patient_nationality|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_patient_nationality_en|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_patient_employer_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_patient_employer_name_en|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_patient_address|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_patient_address_en|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary save-patient-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تعديل بيانات المريض -->
+<div class="modal fade" id="editPatientModal" tabindex="-1" aria-labelledby="editPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPatientModalLabel">تعديل بيانات المريض</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit_patient_id">
+                <!-- هنا سيتم تحميل بيانات المريض -->
+                <div id="edit-patient-form-container">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                        <p class="mt-2">جاري تحميل بيانات المريض...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary update-patient-btn">تحديث</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal إضافة مرافق جديد -->
+<div class="modal fade" id="companionModal" tabindex="-1" aria-labelledby="companionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="companionModalLabel">إضافة مرافق جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_companion_national_id|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_companion_name|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_companion_name_en|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_companion_phone|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_companion_nationality|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_companion_nationality_en|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_companion_relation|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_companion_relation_en|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_companion_employer_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_companion_employer_name_en|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_companion_address|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_companion_address_en|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary save-companion-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تعديل بيانات المرافق -->
+<div class="modal fade" id="editCompanionModal" tabindex="-1" aria-labelledby="editCompanionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCompanionModalLabel">تعديل بيانات المرافق</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit_companion_id">
+                <!-- هنا سيتم تحميل بيانات المرافق -->
+                <div id="edit-companion-form-container">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                        <p class="mt-2">جاري تحميل بيانات المرافق...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary update-companion-btn">تحديث</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal إضافة طبيب جديد -->
+<div class="modal fade" id="doctorModal" tabindex="-1" aria-labelledby="doctorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="doctorModalLabel">إضافة طبيب جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_doctor_national_id|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_doctor_name|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_doctor_name_en|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_doctor_phone|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_doctor_position|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_doctor_position_en|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        {{ form.new_doctor_hospital|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary save-doctor-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تعديل بيانات الطبيب -->
+<div class="modal fade" id="editDoctorModal" tabindex="-1" aria-labelledby="editDoctorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editDoctorModalLabel">تعديل بيانات الطبيب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit_doctor_id">
+                <!-- هنا سيتم تحميل بيانات الطبيب -->
+                <div id="edit-doctor-form-container">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                        <p class="mt-2">جاري تحميل بيانات الطبيب...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary update-doctor-btn">تحديث</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal إضافة مستشفى جديد -->
+<div class="modal fade" id="hospitalModal" tabindex="-1" aria-labelledby="hospitalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="hospitalModalLabel">إضافة مستشفى جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_hospital_name|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_hospital_name_en|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        {{ form.new_hospital_address|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.new_hospital_address_en|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary save-hospital-btn">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal تعديل بيانات المستشفى -->
+<div class="modal fade" id="editHospitalModal" tabindex="-1" aria-labelledby="editHospitalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editHospitalModalLabel">تعديل بيانات المستشفى</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit_hospital_id">
+                <!-- هنا سيتم تحميل بيانات المستشفى -->
+                <div id="edit-hospital-form-container">
+                    <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                        <p class="mt-2">جاري تحميل بيانات المستشفى...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary update-hospital-btn">تحديث</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -50,8 +371,14 @@
             <div class="row">
                 <div class="col-md-6">
                     {{ form.patient|as_crispy_field }}
-
-                    <!-- حقول إضافة مريض جديد -->
+                    <div class="mt-2 d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#patientModal">
+                            <i class="fas fa-plus-circle"></i> إضافة مريض جديد
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning edit-patient-btn" data-bs-toggle="modal" data-bs-target="#editPatientModal">
+                            <i class="fas fa-edit"></i> تعديل بيانات المريض
+                        </button>
+                    </div>
                     <div class="card mt-2 mb-3 new-patient-fields" style="display: none;">
                         <div class="card-header bg-light">
                             <h6 class="mb-0">إضافة مريض جديد</h6>
@@ -102,8 +429,14 @@
                 </div>
                 <div class="col-md-6">
                     {{ form.companion|as_crispy_field }}
-
-                    <!-- حقول إضافة مرافق جديد -->
+                    <div class="mt-2 d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#companionModal">
+                            <i class="fas fa-plus-circle"></i> إضافة مرافق جديد
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning edit-companion-btn" data-bs-toggle="modal" data-bs-target="#editCompanionModal">
+                            <i class="fas fa-edit"></i> تعديل بيانات المرافق
+                        </button>
+                    </div>
                     <div class="card mt-2 mb-3 new-companion-fields" style="display: none;">
                         <div class="card-header bg-light">
                             <h6 class="mb-0">إضافة مرافق جديد</h6>
@@ -174,8 +507,14 @@
             <div class="row">
                 <div class="col-md-6">
                     {{ form.doctor|as_crispy_field }}
-
-                    <!-- حقول إضافة طبيب جديد -->
+                    <div class="mt-2 d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#doctorModal">
+                            <i class="fas fa-plus-circle"></i> إضافة طبيب جديد
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning edit-doctor-btn" data-bs-toggle="modal" data-bs-target="#editDoctorModal">
+                            <i class="fas fa-edit"></i> تعديل بيانات الطبيب
+                        </button>
+                    </div>
                     <div class="card mt-2 mb-3 new-doctor-fields" style="display: none;">
                         <div class="card-header bg-light">
                             <h6 class="mb-0">إضافة طبيب جديد</h6>
@@ -255,20 +594,44 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-3">
                     {{ form.start_date|as_crispy_field }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="start_date_hijri">تاريخ البداية (هجري)</label>
+                        <input type="text" id="start_date_hijri" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     {{ form.end_date|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="end_date_hijri">تاريخ النهاية (هجري)</label>
+                        <input type="text" id="end_date_hijri" class="form-control" readonly>
+                    </div>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-3">
                     {{ form.admission_date|as_crispy_field }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="admission_date_hijri">تاريخ الدخول (هجري)</label>
+                        <input type="text" id="admission_date_hijri" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     {{ form.discharge_date|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="discharge_date_hijri">تاريخ الخروج (هجري)</label>
+                        <input type="text" id="discharge_date_hijri" class="form-control" readonly>
+                    </div>
                 </div>
             </div>
 
@@ -302,6 +665,18 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+        // إعداد URLs للـ AJAX
+        var ajaxUrls = {
+            getPatientData: "/patients/",
+            getDoctorData: "/doctors/",
+            getHospitalData: "/hospitals/",
+            getCompanionData: "/companions/",
+            updatePatientData: "/patients/",
+            updateDoctorData: "/doctors/",
+            updateHospitalData: "/hospitals/",
+            updateCompanionData: "/companions/"
+        };
+
         // تفعيل Select2 للمريض والمرافق والطبيب
         $('#id_patient').select2({
             placeholder: 'اختر المريض',
@@ -318,6 +693,35 @@
             allowClear: true
         });
 
+        // تحويل التواريخ إلى هجري
+        function convertToHijri() {
+            var startDate = $('#id_start_date').val();
+            var endDate = $('#id_end_date').val();
+            var admissionDate = $('#id_admission_date').val();
+            var dischargeDate = $('#id_discharge_date').val();
+
+            // تحويل التواريخ إلى هجري
+            if (startDate) {
+                var hijriStartDate = moment(startDate, 'YYYY-MM-DD').format('iYYYY/iMM/iDD');
+                $('#start_date_hijri').val(hijriStartDate);
+            }
+
+            if (endDate) {
+                var hijriEndDate = moment(endDate, 'YYYY-MM-DD').format('iYYYY/iMM/iDD');
+                $('#end_date_hijri').val(hijriEndDate);
+            }
+
+            if (admissionDate) {
+                var hijriAdmissionDate = moment(admissionDate, 'YYYY-MM-DD').format('iYYYY/iMM/iDD');
+                $('#admission_date_hijri').val(hijriAdmissionDate);
+            }
+
+            if (dischargeDate) {
+                var hijriDischargeDate = moment(dischargeDate, 'YYYY-MM-DD').format('iYYYY/iMM/iDD');
+                $('#discharge_date_hijri').val(hijriDischargeDate);
+            }
+        }
+
         // حساب المدة تلقائيًا
         function calculateDuration() {
             var startDate = $('#id_start_date').val();
@@ -333,11 +737,9 @@
                 // إذا كان تاريخ النهاية بعد تاريخ البداية بيوم واحد، فالإجازة تعتبر ليومين
                 // وهكذا، كل فرق بين التاريخين يضيف يومًا إضافيًا للإجازة
 
-                $('#duration_days').val(diffDays);
+                $('#id_duration_days').val(diffDays);
             }
         }
-
-        $('#id_start_date, #id_end_date').change(calculateDuration);
 
         // إظهار/إخفاء حقول إضافة مريض جديد
         $('#id_patient').change(function() {
@@ -381,6 +783,31 @@
             allowClear: true
         });
 
+        // تفعيل التواريخ
+        $('#id_start_date, #id_end_date, #id_admission_date, #id_discharge_date').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayHighlight: true
+        }).on('changeDate', function() {
+            // تحديث التواريخ الهجرية عند تغيير التاريخ الميلادي
+            convertToHijri();
+        });
+
+        // تحديث التواريخ الهجرية عند تحميل الصفحة
+        convertToHijri();
+
+        // تعطيل الحساب التلقائي للمدة عند تغيير التواريخ
+        $('#id_start_date, #id_end_date').off('change');
+
+        // إضافة زر لحساب المدة
+        $('#id_duration_days').after('<button type="button" class="btn btn-sm btn-outline-secondary mt-2 ms-2" id="calculate-duration-btn">حساب المدة تلقائيًا</button>');
+
+        // تفعيل زر حساب المدة
+        $('#calculate-duration-btn').click(function(e) {
+            e.preventDefault();
+            calculateDuration();
+        });
+
         // التحقق من القيم الأولية
         if ($('#id_patient').val() === '') {
             $('.new-patient-fields').show();
@@ -397,6 +824,533 @@
         if ($('#id_new_doctor_hospital').val() === '') {
             $('.new-hospital-fields').show();
         }
+
+        // تفعيل أزرار تعديل البيانات
+        $('.edit-patient-btn').click(function() {
+            var patientId = $('#id_patient').val();
+            if (patientId) {
+                $('#edit_patient_id').val(patientId);
+
+                // تحميل بيانات المريض من الخادم
+                var url = ajaxUrls.getPatientData + patientId + '/data/';
+                console.log('Request URL:', url);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            var patient = response.patient;
+                            // إنشاء نموذج التعديل
+                            var formHtml = `
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">رقم الهوية</label>
+                                            <input type="text" class="form-control" id="edit_patient_national_id" value="${patient.national_id || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">اسم المريض</label>
+                                            <input type="text" class="form-control" id="edit_patient_name" value="${patient.name || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">اسم المريض (بالإنجليزية)</label>
+                                            <input type="text" class="form-control" id="edit_patient_name_en" value="${patient.name_en || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">رقم الهاتف</label>
+                                            <input type="text" class="form-control" id="edit_patient_phone" value="${patient.phone || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">الجنسية</label>
+                                            <input type="text" class="form-control" id="edit_patient_nationality" value="${patient.nationality || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">الجنسية (بالإنجليزية)</label>
+                                            <input type="text" class="form-control" id="edit_patient_nationality_en" value="${patient.nationality_en || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">جهة العمل</label>
+                                            <input type="text" class="form-control" id="edit_patient_employer_name" value="${patient.employer_name || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">جهة العمل (بالإنجليزية)</label>
+                                            <input type="text" class="form-control" id="edit_patient_employer_name_en" value="${patient.employer_name_en || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">البريد الإلكتروني</label>
+                                            <input type="email" class="form-control" id="edit_patient_email" value="${patient.email || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">العنوان</label>
+                                            <input type="text" class="form-control" id="edit_patient_address" value="${patient.address || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">العنوان (بالإنجليزية)</label>
+                                            <input type="text" class="form-control" id="edit_patient_address_en" value="${patient.address_en || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            $('#edit-patient-form-container').html(formHtml);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('حدث خطأ أثناء تحميل بيانات المريض');
+                    }
+                });
+            } else {
+                alert('الرجاء اختيار مريض أولاً');
+                return false;
+            }
+        });
+
+        $('.edit-companion-btn').click(function() {
+            var companionId = $('#id_companion').val();
+            console.log('Companion ID:', companionId);
+            if (companionId) {
+                $('#edit_companion_id').val(companionId);
+
+                // تحميل بيانات المرافق من الخادم
+                var url = ajaxUrls.getCompanionData + companionId + '/data/';
+                console.log('Request URL:', url);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Response:', response);
+                        if (response.success) {
+                            var companion = response.companion;
+                            // إنشاء نموذج التعديل
+                            var formHtml = `
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">رقم الهوية</label>
+                                            <input type="text" class="form-control" id="edit_companion_national_id" value="${companion.national_id || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">اسم المرافق</label>
+                                            <input type="text" class="form-control" id="edit_companion_name" value="${companion.name || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">اسم المرافق (بالإنجليزية)</label>
+                                            <input type="text" class="form-control" id="edit_companion_name_en" value="${companion.name_en || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">رقم الهاتف</label>
+                                            <input type="text" class="form-control" id="edit_companion_phone" value="${companion.phone || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">الجنسية</label>
+                                            <input type="text" class="form-control" id="edit_companion_nationality" value="${companion.nationality || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">الجنسية (بالإنجليزية)</label>
+                                            <input type="text" class="form-control" id="edit_companion_nationality_en" value="${companion.nationality_en || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">جهة العمل</label>
+                                            <input type="text" class="form-control" id="edit_companion_employer_name" value="${companion.employer_name || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">جهة العمل (بالإنجليزية)</label>
+                                            <input type="text" class="form-control" id="edit_companion_employer_name_en" value="${companion.employer_name_en || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">العنوان</label>
+                                            <input type="text" class="form-control" id="edit_companion_address" value="${companion.address || ''}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">العنوان (بالإنجليزية)</label>
+                                            <input type="text" class="form-control" id="edit_companion_address_en" value="${companion.address_en || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            $('#edit-companion-form-container').html(formHtml);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Error:', xhr, status, error);
+                        console.log('Response Text:', xhr.responseText);
+                        alert('حدث خطأ أثناء تحميل بيانات المرافق: ' + error);
+                    }
+                });
+            } else {
+                alert('الرجاء اختيار مرافق أولاً');
+                return false;
+            }
+        });
+
+        $('.edit-doctor-btn').click(function() {
+            var doctorId = $('#id_doctor').val();
+            if (doctorId) {
+                $('#edit_doctor_id').val(doctorId);
+                // هنا يمكن إضافة كود لتحميل بيانات الطبيب من الخادم
+            } else {
+                alert('الرجاء اختيار طبيب أولاً');
+                return false;
+            }
+        });
+
+        $('.edit-hospital-btn').click(function() {
+            var hospitalId = $('#id_hospital').val();
+            if (hospitalId) {
+                $('#edit_hospital_id').val(hospitalId);
+                // هنا يمكن إضافة كود لتحميل بيانات المستشفى من الخادم
+            } else {
+                alert('الرجاء اختيار مستشفى أولاً');
+                return false;
+            }
+        });
+
+        // تفعيل أزرار حفظ البيانات في النوافذ المنبثقة
+        $('.save-patient-btn').click(function() {
+            // جمع بيانات المريض الجديد
+            var patientData = {
+                national_id: $('#id_new_patient_national_id').val(),
+                name: $('#id_new_patient_name').val(),
+                name_en: $('#id_new_patient_name_en').val(),
+                phone: $('#id_new_patient_phone').val(),
+                nationality: $('#id_new_patient_nationality').val(),
+                nationality_en: $('#id_new_patient_nationality_en').val(),
+                employer_name: $('#id_new_patient_employer_name').val(),
+                employer_name_en: $('#id_new_patient_employer_name_en').val(),
+                address: $('#id_new_patient_address').val(),
+                address_en: $('#id_new_patient_address_en').val()
+            };
+
+            // التحقق من البيانات المطلوبة
+            if (!patientData.national_id || !patientData.name) {
+                alert('الرجاء إدخال رقم الهوية واسم المريض');
+                return;
+            }
+
+            // إرسال البيانات إلى الخادم
+            $.ajax({
+                url: '{% url "core:patient_create_ajax" %}',
+                type: 'POST',
+                data: patientData,
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // إضافة المريض الجديد إلى القائمة المنسدلة
+                        var newOption = new Option(response.object_text, response.object_id, true, true);
+                        $('#id_patient').append(newOption).trigger('change');
+
+                        // إغلاق النافذة المنبثقة
+                        $('#patientModal').modal('hide');
+
+                        // مسح حقول النموذج
+                        $('#id_new_patient_national_id, #id_new_patient_name, #id_new_patient_name_en, #id_new_patient_phone, #id_new_patient_nationality, #id_new_patient_nationality_en, #id_new_patient_employer_name, #id_new_patient_employer_name_en, #id_new_patient_address, #id_new_patient_address_en').val('');
+
+                        // عرض رسالة نجاح
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('حدث خطأ أثناء إضافة المريض');
+                }
+            });
+        });
+
+        $('.save-companion-btn').click(function() {
+            // جمع بيانات المرافق الجديد
+            var companionData = {
+                national_id: $('#id_new_companion_national_id').val(),
+                name: $('#id_new_companion_name').val(),
+                name_en: $('#id_new_companion_name_en').val(),
+                phone: $('#id_new_companion_phone').val(),
+                nationality: $('#id_new_companion_nationality').val(),
+                nationality_en: $('#id_new_companion_nationality_en').val(),
+                relation: $('#id_new_companion_relation').val(),
+                relation_en: $('#id_new_companion_relation_en').val(),
+                employer_name: $('#id_new_companion_employer_name').val(),
+                employer_name_en: $('#id_new_companion_employer_name_en').val(),
+                address: $('#id_new_companion_address').val(),
+                address_en: $('#id_new_companion_address_en').val()
+            };
+
+            // التحقق من البيانات المطلوبة
+            if (!companionData.national_id || !companionData.name) {
+                alert('الرجاء إدخال رقم الهوية واسم المرافق');
+                return;
+            }
+
+            // إرسال البيانات إلى الخادم
+            $.ajax({
+                url: '{% url "core:companion_create_ajax" %}',
+                type: 'POST',
+                data: companionData,
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // إضافة المرافق الجديد إلى القائمة المنسدلة
+                        var newOption = new Option(response.object_text, response.object_id, true, true);
+                        $('#id_companion').append(newOption).trigger('change');
+
+                        // إغلاق النافذة المنبثقة
+                        $('#companionModal').modal('hide');
+
+                        // مسح حقول النموذج
+                        $('#id_new_companion_national_id, #id_new_companion_name, #id_new_companion_name_en, #id_new_companion_phone, #id_new_companion_nationality, #id_new_companion_nationality_en, #id_new_companion_relation, #id_new_companion_relation_en, #id_new_companion_employer_name, #id_new_companion_employer_name_en, #id_new_companion_address, #id_new_companion_address_en').val('');
+
+                        // عرض رسالة نجاح
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('حدث خطأ أثناء إضافة المرافق');
+                }
+            });
+        });
+
+        $('.save-doctor-btn').click(function() {
+            // جمع بيانات الطبيب الجديد
+            var doctorData = {
+                national_id: $('#id_new_doctor_national_id').val(),
+                name: $('#id_new_doctor_name').val(),
+                name_en: $('#id_new_doctor_name_en').val(),
+                phone: $('#id_new_doctor_phone').val(),
+                position: $('#id_new_doctor_position').val(),
+                position_en: $('#id_new_doctor_position_en').val(),
+                hospital: $('#id_new_doctor_hospital').val()
+            };
+
+            // التحقق من البيانات المطلوبة
+            if (!doctorData.name) {
+                alert('الرجاء إدخال اسم الطبيب');
+                return;
+            }
+
+            // إرسال البيانات إلى الخادم
+            $.ajax({
+                url: '{% url "core:doctor_create_ajax" %}',
+                type: 'POST',
+                data: doctorData,
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // إضافة الطبيب الجديد إلى القائمة المنسدلة
+                        var newOption = new Option(response.object_text, response.object_id, true, true);
+                        $('#id_doctor').append(newOption).trigger('change');
+
+                        // إغلاق النافذة المنبثقة
+                        $('#doctorModal').modal('hide');
+
+                        // مسح حقول النموذج
+                        $('#id_new_doctor_national_id, #id_new_doctor_name, #id_new_doctor_name_en, #id_new_doctor_phone, #id_new_doctor_position, #id_new_doctor_position_en, #id_new_doctor_hospital').val('');
+
+                        // عرض رسالة نجاح
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('حدث خطأ أثناء إضافة الطبيب');
+                }
+            });
+        });
+
+        $('.save-hospital-btn').click(function() {
+            // جمع بيانات المستشفى الجديد
+            var hospitalData = {
+                name: $('#id_new_hospital_name').val(),
+                name_en: $('#id_new_hospital_name_en').val(),
+                address: $('#id_new_hospital_address').val(),
+                address_en: $('#id_new_hospital_address_en').val()
+            };
+
+            // التحقق من البيانات المطلوبة
+            if (!hospitalData.name) {
+                alert('الرجاء إدخال اسم المستشفى');
+                return;
+            }
+
+            // إرسال البيانات إلى الخادم
+            $.ajax({
+                url: '{% url "core:hospital_create_ajax" %}',
+                type: 'POST',
+                data: hospitalData,
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // إضافة المستشفى الجديد إلى القائمة المنسدلة
+                        var newOption = new Option(response.object_text, response.object_id, true, true);
+                        $('#id_new_doctor_hospital').append(newOption).trigger('change');
+
+                        // إغلاق النافذة المنبثقة
+                        $('#hospitalModal').modal('hide');
+
+                        // مسح حقول النموذج
+                        $('#id_new_hospital_name, #id_new_hospital_name_en, #id_new_hospital_address, #id_new_hospital_address_en').val('');
+
+                        // عرض رسالة نجاح
+                        alert(response.message);
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('حدث خطأ أثناء إضافة المستشفى');
+                }
+            });
+        });
+
+        // تفعيل أزرار تحديث البيانات
+        $('.update-patient-btn').click(function() {
+            var patientId = $('#edit_patient_id').val();
+            if (patientId) {
+                var patientData = {
+                    national_id: $('#edit_patient_national_id').val(),
+                    name: $('#edit_patient_name').val(),
+                    name_en: $('#edit_patient_name_en').val(),
+                    phone: $('#edit_patient_phone').val(),
+                    nationality: $('#edit_patient_nationality').val(),
+                    nationality_en: $('#edit_patient_nationality_en').val(),
+                    employer_name: $('#edit_patient_employer_name').val(),
+                    employer_name_en: $('#edit_patient_employer_name_en').val(),
+                    email: $('#edit_patient_email').val(),
+                    address: $('#edit_patient_address').val(),
+                    address_en: $('#edit_patient_address_en').val()
+                };
+
+                $.ajax({
+                    url: ajaxUrls.updatePatientData + patientId + '/update-ajax/',
+                    type: 'POST',
+                    data: patientData,
+                    headers: {
+                        'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // تحديث النص في القائمة المنسدلة
+                            $('#id_patient option[value="' + patientId + '"]').text(response.object_text);
+                            $('#editPatientModal').modal('hide');
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('حدث خطأ أثناء تحديث بيانات المريض');
+                    }
+                });
+            }
+        });
+
+        $('.update-companion-btn').click(function() {
+            var companionId = $('#edit_companion_id').val();
+            if (companionId) {
+                var companionData = {
+                    national_id: $('#edit_companion_national_id').val(),
+                    name: $('#edit_companion_name').val(),
+                    name_en: $('#edit_companion_name_en').val(),
+                    phone: $('#edit_companion_phone').val(),
+                    nationality: $('#edit_companion_nationality').val(),
+                    nationality_en: $('#edit_companion_nationality_en').val(),
+                    employer_name: $('#edit_companion_employer_name').val(),
+                    employer_name_en: $('#edit_companion_employer_name_en').val(),
+                    address: $('#edit_companion_address').val(),
+                    address_en: $('#edit_companion_address_en').val()
+                };
+
+                $.ajax({
+                    url: ajaxUrls.updateCompanionData + companionId + '/update-ajax/',
+                    type: 'POST',
+                    data: companionData,
+                    headers: {
+                        'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // تحديث النص في القائمة المنسدلة
+                            $('#id_companion option[value="' + companionId + '"]').text(response.object_text);
+                            $('#editCompanionModal').modal('hide');
+                            alert(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('حدث خطأ أثناء تحديث بيانات المرافق');
+                    }
+                });
+            }
+        });
     });
 </script>
 {% endblock %}

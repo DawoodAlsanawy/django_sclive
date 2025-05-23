@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار AJAX</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        div { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>اختبار وظائف AJAX</h1>
+    
+    <div>
+        <h2>اختبار تحميل بيانات المريض</h2>
+        <button id="test-patient">اختبار المريض ID=1</button>
+        <div id="patient-result"></div>
+    </div>
+    
+    <div>
+        <h2>اختبار تحميل بيانات الطبيب</h2>
+        <button id="test-doctor">اختبار الطبيب ID=1</button>
+        <div id="doctor-result"></div>
+    </div>
+    
+    <div>
+        <h2>اختبار تحميل بيانات المستشفى</h2>
+        <button id="test-hospital">اختبار المستشفى ID=1</button>
+        <div id="hospital-result"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#test-patient').click(function() {
+                $.ajax({
+                    url: '/patients/1/data/',
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Patient Response:', response);
+                        $('#patient-result').html('<pre>' + JSON.stringify(response, null, 2) + '</pre>');
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Patient Error:', xhr, status, error);
+                        $('#patient-result').html('<p style="color: red;">خطأ: ' + error + '</p><pre>' + xhr.responseText + '</pre>');
+                    }
+                });
+            });
+
+            $('#test-doctor').click(function() {
+                $.ajax({
+                    url: '/doctors/1/data/',
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Doctor Response:', response);
+                        $('#doctor-result').html('<pre>' + JSON.stringify(response, null, 2) + '</pre>');
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Doctor Error:', xhr, status, error);
+                        $('#doctor-result').html('<p style="color: red;">خطأ: ' + error + '</p><pre>' + xhr.responseText + '</pre>');
+                    }
+                });
+            });
+
+            $('#test-hospital').click(function() {
+                $.ajax({
+                    url: '/hospitals/1/data/',
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Hospital Response:', response);
+                        $('#hospital-result').html('<pre>' + JSON.stringify(response, null, 2) + '</pre>');
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Hospital Error:', xhr, status, error);
+                        $('#hospital-result').html('<p style="color: red;">خطأ: ' + error + '</p><pre>' + xhr.responseText + '</pre>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

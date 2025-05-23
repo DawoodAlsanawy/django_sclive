@@ -500,7 +500,7 @@ class SickLeave(models.Model):
     discharge_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الخروج (هجري)')
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
     issue_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الإصدار (هجري)')
-    created_date = models.DateField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ إنشاء الإجازة')
+    created_date = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ إنشاء الإجازة')
     status = models.CharField(max_length=20, choices=[
         ('active', 'نشطة'),
         ('cancelled', 'ملغية'),
@@ -652,7 +652,7 @@ class CompanionLeave(models.Model):
     discharge_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الخروج (هجري)')
     issue_date = models.DateField(verbose_name='تاريخ الإصدار')
     issue_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ الإصدار (هجري)')
-    created_date = models.DateField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ إنشاء الإجازة')
+    created_date = models.DateTimeField(default=timezone.now, blank=True, null=True, verbose_name='تاريخ إنشاء الإجازة')
     status = models.CharField(max_length=20, choices=[
         ('active', 'نشطة'),
         ('cancelled', 'ملغية'),

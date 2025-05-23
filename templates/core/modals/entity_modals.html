@@ -407,5 +407,377 @@
     </div>
 </div>
 
+<!-- Modal para editar paciente -->
+<div class="modal fade" id="editPatientModal" tabindex="-1" aria-labelledby="editPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPatientModalLabel">تعديل بيانات المريض</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-edit-patient"></div>
+                <form id="edit-patient-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_patient_id" name="id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_national_id">رقم الهوية</label>
+                                <input type="text" class="form-control" id="edit_patient_national_id" name="national_id">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_name">اسم المريض</label>
+                                <input type="text" class="form-control" id="edit_patient_name" name="name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_name_en">اسم المريض (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_patient_name_en" name="name_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_phone">رقم الهاتف</label>
+                                <input type="text" class="form-control" id="edit_patient_phone" name="phone">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_nationality">الجنسية</label>
+                                <input type="text" class="form-control" id="edit_patient_nationality" name="nationality">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_nationality_en">الجنسية (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_patient_nationality_en" name="nationality_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_employer_name">جهة العمل</label>
+                                <input type="text" class="form-control" id="edit_patient_employer_name" name="employer_name">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_employer_name_en">جهة العمل (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_patient_employer_name_en" name="employer_name_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_address">العنوان</label>
+                                <input type="text" class="form-control" id="edit_patient_address" name="address">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_patient_address_en">العنوان (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_patient_address_en" name="address_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="update-patient-btn">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar doctor -->
+<div class="modal fade" id="editDoctorModal" tabindex="-1" aria-labelledby="editDoctorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editDoctorModalLabel">تعديل بيانات الطبيب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-edit-doctor"></div>
+                <form id="edit-doctor-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_doctor_id" name="id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_doctor_national_id">رقم الهوية</label>
+                                <input type="text" class="form-control" id="edit_doctor_national_id" name="national_id">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_doctor_name">اسم الطبيب</label>
+                                <input type="text" class="form-control" id="edit_doctor_name" name="name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_doctor_name_en">اسم الطبيب (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_doctor_name_en" name="name_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_doctor_phone">رقم الهاتف</label>
+                                <input type="text" class="form-control" id="edit_doctor_phone" name="phone">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_doctor_position">التخصص</label>
+                                <input type="text" class="form-control" id="edit_doctor_position" name="position">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_doctor_position_en">التخصص (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_doctor_position_en" name="position_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group mb-3">
+                                <label for="edit_doctor_hospital">المستشفيات</label>
+                                <select class="form-control select2-multiple" id="edit_doctor_hospital" name="hospitals" multiple>
+                                    {% for hospital in hospitals %}
+                                    <option value="{{ hospital.id }}">{{ hospital.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">يمكنك اختيار أكثر من مستشفى</small>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="add-hospital-modal-btn-edit">
+                                    <i class="fas fa-plus-circle"></i> إضافة مستشفى جديد
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="update-doctor-btn">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar hospital -->
+<div class="modal fade" id="editHospitalModal" tabindex="-1" aria-labelledby="editHospitalModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editHospitalModalLabel">تعديل بيانات المستشفى</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-edit-hospital"></div>
+                <form id="edit-hospital-form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_hospital_id" name="id">
+                    <div class="form-group mb-3">
+                        <label for="edit_hospital_name">اسم المستشفى</label>
+                        <input type="text" class="form-control" id="edit_hospital_name" name="name" required>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="edit_hospital_name_en">اسم المستشفى (بالإنجليزية)</label>
+                        <input type="text" class="form-control" id="edit_hospital_name_en" name="name_en">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="edit_hospital_address">العنوان</label>
+                        <input type="text" class="form-control" id="edit_hospital_address" name="address">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="edit_hospital_address_en">العنوان (بالإنجليزية)</label>
+                        <input type="text" class="form-control" id="edit_hospital_address_en" name="address_en">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="edit_hospital_contact_info">معلومات الاتصال</label>
+                        <input type="text" class="form-control" id="edit_hospital_contact_info" name="contact_info">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="edit_hospital_logo">شعار المستشفى</label>
+                        <input type="file" class="form-control" id="edit_hospital_logo" name="logo" accept="image/*">
+                        <small class="form-text text-muted">يرجى اختيار صورة بتنسيق JPG أو PNG</small>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <div id="current_logo_container" class="mt-2">
+                            <label>الشعار الحالي:</label>
+                            <img id="current_hospital_logo" src="" alt="شعار المستشفى" class="img-thumbnail" style="max-height: 100px;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="update-hospital-btn">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar acompañante -->
+<div class="modal fade" id="editCompanionModal" tabindex="-1" aria-labelledby="editCompanionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCompanionModalLabel">تعديل بيانات المرافق</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alert-container-edit-companion"></div>
+                <form id="edit-companion-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_companion_id" name="id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_national_id">رقم الهوية</label>
+                                <input type="text" class="form-control" id="edit_companion_national_id" name="national_id" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_name">اسم المرافق</label>
+                                <input type="text" class="form-control" id="edit_companion_name" name="name" required>
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_name_en">اسم المرافق (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_companion_name_en" name="name_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_phone">رقم الهاتف</label>
+                                <input type="text" class="form-control" id="edit_companion_phone" name="phone">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_nationality">الجنسية</label>
+                                <input type="text" class="form-control" id="edit_companion_nationality" name="nationality">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_nationality_en">الجنسية (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_companion_nationality_en" name="nationality_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_relation">صلة القرابة</label>
+                                <input type="text" class="form-control" id="edit_companion_relation" name="relation">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_relation_en">صلة القرابة (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_companion_relation_en" name="relation_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_employer_name">جهة العمل</label>
+                                <input type="text" class="form-control" id="edit_companion_employer_name" name="employer_name">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_employer_name_en">جهة العمل (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_companion_employer_name_en" name="employer_name_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_address">العنوان</label>
+                                <input type="text" class="form-control" id="edit_companion_address" name="address">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="edit_companion_address_en">العنوان (بالإنجليزية)</label>
+                                <input type="text" class="form-control" id="edit_companion_address_en" name="address_en">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="update-companion-btn">حفظ التغييرات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Contenedor para alertas -->
 <div id="alert-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>

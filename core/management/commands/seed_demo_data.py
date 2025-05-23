@@ -1,12 +1,12 @@
 import random
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
-from core.models import (Client, CompanionLeave, Doctor, Employer, Hospital,
+from core.models import (Client, CompanionLeave, Doctor, Hospital,
                          LeaveInvoice, LeavePrice, Patient, Payment,
                          PaymentDetail, SickLeave, User)
 from core.utils import generate_unique_number
@@ -94,7 +94,6 @@ class Command(BaseCommand):
         return (
             User.objects.exists() and
             Hospital.objects.exists() and
-            Employer.objects.exists() and
             Doctor.objects.exists() and
             Client.objects.exists() and
             LeavePrice.objects.exists()
@@ -106,7 +105,19 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('يوجد مرضى بالفعل. تخطي إنشاء المرضى التجريبيين.'))
             return Patient.objects.all()
 
-        employers = list(Employer.objects.all())
+        # قائمة بجهات العمل التجريبية
+        employer_names = [
+            'شركة الاتصالات السعودية',
+            'شركة أرامكو السعودية',
+            'شركة سابك',
+            'البنك الأهلي السعودي',
+            'مصرف الراجحي',
+            'وزارة الصحة',
+            'وزارة التعليم',
+            'شركة المراعي',
+            'شركة الكهرباء السعودية',
+            'مستوصف سعد صالح البديوي'
+        ]
 
         # قائمة بأسماء عربية شائعة للذكور
         male_first_names = ['محمد', 'أحمد', 'خالد', 'عبدالله', 'سعد', 'فهد', 'عمر', 'علي', 'إبراهيم', 'عبدالرحمن']
@@ -144,13 +155,13 @@ class Command(BaseCommand):
             nationality = random.choice(nationalities)
 
             # اختيار جهة عمل عشوائية (أو None)
-            employer = random.choice(employers) if random.random() > 0.2 else None
+            employer_name = random.choice(employer_names) if random.random() > 0.2 else None
 
             patient = Patient.objects.create(
                 national_id=national_id,
                 name=name,
                 nationality=nationality,
-                employer=employer,
+                employer_name=employer_name,
                 phone=phone,
                 email=f"{first_name.lower()}.{last_name.lower()}@example.com" if random.random() > 0.3 else None,
                 address=f"الرياض، المملكة العربية السعودية" if random.random() > 0.5 else None

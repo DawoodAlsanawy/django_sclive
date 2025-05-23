@@ -36,7 +36,7 @@ except ImportError:
 
 # AJAX views
 from .client_ajax_views import client_create_ajax
-from .companion_ajax_views import companion_create_ajax
-from .doctor_ajax_views import doctor_create_ajax
-from .hospital_ajax_views import hospital_create_ajax
-from .patient_ajax_views import patient_create_ajax
+from .companion_ajax_views import companion_create_ajax, get_companion_data, update_companion_ajax
+from .doctor_ajax_views import doctor_create_ajax, get_doctor_data, update_doctor_ajax
+from .hospital_ajax_views import hospital_create_ajax, get_hospital_data, update_hospital_ajax
+from .patient_ajax_views import patient_create_ajax, get_patient_data, update_patient_ajax

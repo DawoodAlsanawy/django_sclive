@@ -216,7 +216,7 @@ def convert_to_hijri(date_obj):
     try:
         g_date = Gregorian(date_obj.year, date_obj.month, date_obj.day)
         hijri_date = g_date.to_hijri()
-        return f"{hijri_date.year}-{hijri_date.month}-{hijri_date.day}"
+        return f"{hijri_date.day}-{hijri_date.month}-{hijri_date.year}"
     except Exception as e:
         print(f"خطأ في تحويل التاريخ إلى هجري: {e}")
         return ""

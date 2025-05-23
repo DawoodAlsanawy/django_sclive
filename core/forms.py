@@ -509,7 +509,7 @@ class SickLeaveForm(forms.ModelForm):
             'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
             'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'created_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'created_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
         }
@@ -1002,7 +1002,7 @@ class CompanionLeaveForm(forms.ModelForm):
             'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
             'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'created_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'created_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
         }

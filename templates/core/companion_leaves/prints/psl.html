@@ -432,19 +432,19 @@
                     <img src="{% static 'images/National_center_for_midical.png' %}" alt="National Center" class="national-logo">
                 </div>
                 <div class="text-left col-6" style="font-size:10px; margin-top:35px; font-weight: 500">
-                    {% if companion_leave.created_at.hour < 12 %}
+                    {% if companion_leave.created_date.hour < 12 %}
                     <span style="display: inline-block;">AM</span>
                     {% else %}
                     <span style="display: inline-block;">PM</span>
                     {% endif %}
                     <span style="display: inline-block;">
-                        {% if companion_leave.created_at.hour <= 12 %}
-                            {{ companion_leave.created_at|date:"h:i" }}
+                        {% if companion_leave.created_date.hour <= 12 %}
+                            {{ companion_leave.created_date|date:"h:i" }}
                         {% else %}
-                            {{ companion_leave.created_at|date:"h:i" }}
+                            {{ companion_leave.created_date|date:"h:i" }}
                         {% endif %}
                     </span>
-                    <br> {{ companion_leave.created_at|date:"l, d F Y"|translate_to_english }}
+                    <br> {{ companion_leave.created_date|date:"l, d F Y"|translate_to_english }}
                 </div>
             </div>
         </div>
