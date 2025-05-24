@@ -375,9 +375,9 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#patientModal">
                             <i class="fas fa-plus-circle"></i> إضافة مريض جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-patient-btn">
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-patient-btn" href="{%url 'core:patient_edit'  form.patient.value %}">
                             <i class="fas fa-edit"></i> تعديل بيانات المريض
-                        </button>
+                        </a>
                     </div>
                     <div class="card mt-2 mb-3 new-patient-fields" style="display: none;">
                         <div class="card-header bg-light">
@@ -433,9 +433,9 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#companionModal">
                             <i class="fas fa-plus-circle"></i> إضافة مرافق جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-companion-btn">
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-companion-btn" href="{%url 'core:patient_edit'  form.companion.value %}">
                             <i class="fas fa-edit"></i> تعديل بيانات المرافق
-                        </button>
+                        </a>
                     </div>
                     <div class="card mt-2 mb-3 new-companion-fields" style="display: none;">
                         <div class="card-header bg-light">
@@ -511,9 +511,9 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#doctorModal">
                             <i class="fas fa-plus-circle"></i> إضافة طبيب جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-doctor-btn">
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-doctor-btn" href="{%url 'core:doctor_edit'  form.doctor.value %}">
                             <i class="fas fa-edit"></i> تعديل بيانات الطبيب
-                        </button>
+                        </a>
                     </div>
                     <div class="card mt-2 mb-3 new-doctor-fields" style="display: none;">
                         <div class="card-header bg-light">
@@ -589,9 +589,15 @@
                         <button type="button" class="btn btn-sm btn-outline-success add-hospital-btn" data-bs-toggle="modal" data-bs-target="#hospitalModal">
                             <i class="fas fa-plus-circle"></i> إضافة مستشفى جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-hospital-btn">
+                        {%if form.hospital.value%}
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-hospital-btn" href="{%url 'core:hospital_edit'  form.hospital.value %}">
                             <i class="fas fa-edit"></i> تعديل بيانات المستشفى
-                        </button>
+                        </a>
+                        {%else%}
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-hospital-btn" href="#">
+                            <i class="fas fa-edit"></i> تعديل بيانات المستشفى
+                        </a>
+                        {%endif%}
                     </div>
                 </div>
             </div>

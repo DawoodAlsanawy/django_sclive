@@ -240,7 +240,7 @@ def leave_invoice_detail(request, leave_invoice_id):
     elif invoice.leave_type == 'companion_leave':
         try:
             # استخدام select_related لتحسين الأداء
-            leave = CompanionLeave.objects.select_related('patient', 'companion', 'doctor', 'doctor__hospital').get(leave_id=invoice.leave_id)
+            leave = CompanionLeave.objects.select_related('patient', 'companion', 'doctor').get(leave_id=invoice.leave_id)
             leave_info = {
                 'type': 'companion_leave',
                 'type_display': 'إجازة مرافق',
@@ -351,7 +351,7 @@ def leave_invoice_print(request, leave_invoice_id):
     elif invoice.leave_type == 'companion_leave':
         try:
             # استخدام select_related لتحسين الأداء
-            leave = CompanionLeave.objects.select_related('patient', 'companion', 'doctor', 'doctor__hospital').get(leave_id=invoice.leave_id)
+            leave = CompanionLeave.objects.select_related('patient', 'companion', 'doctor').get(leave_id=invoice.leave_id)
             leave_info = {
                 'type': 'companion_leave',
                 'type_display': 'إجازة مرافق',

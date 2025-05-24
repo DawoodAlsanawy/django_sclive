@@ -95,7 +95,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editPatientModalLabel">تعديل بيانات المريض</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <a type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" href="{%url 'core:patient_edit' form.patient.value  %}"></a>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit_patient_id">
@@ -170,7 +170,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editDoctorModalLabel">تعديل بيانات الطبيب</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <a type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" href="{%url 'core:doctor_edit'  form.doctor.value %}"></a>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit_doctor_id">
@@ -296,9 +296,9 @@
                             <i class="fas fa-plus-circle"></i> إضافة مريض جديد
                         </button>
 
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-patient-btn">
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-patient-btn" href="{% url 'core:patient_edit' form.patient.value %}" >
                             <i class="fas fa-edit"></i> تعديل بيانات المريض
-                        </button>
+                        </a>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -307,23 +307,32 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#doctorModal">
                             <i class="fas fa-plus-circle"></i> إضافة طبيب جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-doctor-btn">
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-doctor-btn" href="{%url 'core:doctor_edit'  form.doctor.value %}">
                             <i class="fas fa-edit"></i> تعديل بيانات الطبيب
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6">
+                    
                     {{ form.hospital|as_crispy_field }}
+                    
+                    
                     <div class="mt-2 d-flex gap-2">
                         <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#hospitalModal">
                             <i class="fas fa-plus-circle"></i> إضافة مستشفى جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-hospital-btn">
+                        {%if form.hospital.value%}
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-hospital-btn" href="{%url 'core:hospital_edit'  form.hospital.value %}">
                             <i class="fas fa-edit"></i> تعديل بيانات المستشفى
-                        </button>
+                        </a>
+                        {%else%}
+                        <a type="button" class="btn btn-sm btn-outline-warning edit-hospital-btn" href="#">
+                            <i class="fas fa-edit"></i> تعديل بيانات المستشفى
+                        </a>
+                        {%endif%}
                     </div>
                 </div>
             </div>
