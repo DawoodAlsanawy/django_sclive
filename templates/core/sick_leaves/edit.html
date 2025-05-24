@@ -295,7 +295,8 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#patientModal">
                             <i class="fas fa-plus-circle"></i> إضافة مريض جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-patient-btn" data-bs-toggle="modal" data-bs-target="#editPatientModal">
+
+                        <button type="button" class="btn btn-sm btn-outline-warning edit-patient-btn">
                             <i class="fas fa-edit"></i> تعديل بيانات المريض
                         </button>
                     </div>
@@ -306,7 +307,7 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#doctorModal">
                             <i class="fas fa-plus-circle"></i> إضافة طبيب جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-doctor-btn" data-bs-toggle="modal" data-bs-target="#editDoctorModal">
+                        <button type="button" class="btn btn-sm btn-outline-warning edit-doctor-btn">
                             <i class="fas fa-edit"></i> تعديل بيانات الطبيب
                         </button>
                     </div>
@@ -320,7 +321,7 @@
                         <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#hospitalModal">
                             <i class="fas fa-plus-circle"></i> إضافة مستشفى جديد
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-warning edit-hospital-btn" data-bs-toggle="modal" data-bs-target="#editHospitalModal">
+                        <button type="button" class="btn btn-sm btn-outline-warning edit-hospital-btn">
                             <i class="fas fa-edit"></i> تعديل بيانات المستشفى
                         </button>
                     </div>
@@ -552,115 +553,12 @@
             $('.new-hospital-fields').show();
         }
 
-        // تفعيل أزرار تعديل البيانات
+        // تفعيل أزرار تعديل البيانات - الانتقال المباشر لصفحات التعديل
         $('.edit-patient-btn').click(function() {
             var patientId = $('#id_patient').val();
-            console.log('Patient ID:', patientId);
             if (patientId) {
-                $('#edit_patient_id').val(patientId);
-
-                // تحميل بيانات المريض من الخادم
-                var url = ajaxUrls.getPatientData + patientId + '/data/';
-                console.log('Request URL:', url);
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        console.log('Response:', response);
-                        if (response.success) {
-                            var patient = response.patient;
-                            // إنشاء نموذج التعديل
-                            var formHtml = `
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">رقم الهوية</label>
-                                            <input type="text" class="form-control" id="edit_patient_national_id" value="${patient.national_id || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">اسم المريض</label>
-                                            <input type="text" class="form-control" id="edit_patient_name" value="${patient.name || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">اسم المريض (بالإنجليزية)</label>
-                                            <input type="text" class="form-control" id="edit_patient_name_en" value="${patient.name_en || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">رقم الهاتف</label>
-                                            <input type="text" class="form-control" id="edit_patient_phone" value="${patient.phone || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">الجنسية</label>
-                                            <input type="text" class="form-control" id="edit_patient_nationality" value="${patient.nationality || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">الجنسية (بالإنجليزية)</label>
-                                            <input type="text" class="form-control" id="edit_patient_nationality_en" value="${patient.nationality_en || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">جهة العمل</label>
-                                            <input type="text" class="form-control" id="edit_patient_employer_name" value="${patient.employer_name || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">جهة العمل (بالإنجليزية)</label>
-                                            <input type="text" class="form-control" id="edit_patient_employer_name_en" value="${patient.employer_name_en || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">البريد الإلكتروني</label>
-                                            <input type="email" class="form-control" id="edit_patient_email" value="${patient.email || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">العنوان</label>
-                                            <input type="text" class="form-control" id="edit_patient_address" value="${patient.address || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">العنوان (بالإنجليزية)</label>
-                                            <input type="text" class="form-control" id="edit_patient_address_en" value="${patient.address_en || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                            $('#edit-patient-form-container').html(formHtml);
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.log('Error:', xhr, status, error);
-                        console.log('Response Text:', xhr.responseText);
-                        alert('حدث خطأ أثناء تحميل بيانات المريض: ' + error);
-                    }
-                });
+                // الانتقال إلى صفحة تعديل المريض
+                window.open('/patients/' + patientId + '/edit/', '_blank');
             } else {
                 alert('الرجاء اختيار مريض أولاً');
                 return false;
@@ -669,81 +567,9 @@
 
         $('.edit-doctor-btn').click(function() {
             var doctorId = $('#id_doctor').val();
-            console.log('Doctor ID:', doctorId);
             if (doctorId) {
-                $('#edit_doctor_id').val(doctorId);
-
-                // تحميل بيانات الطبيب من الخادم
-                var url = ajaxUrls.getDoctorData + doctorId + '/data/';
-                console.log('Request URL:', url);
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.success) {
-                            var doctor = response.doctor;
-                            // إنشاء نموذج التعديل
-                            var formHtml = `
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">رقم الهوية</label>
-                                            <input type="text" class="form-control" id="edit_doctor_national_id" value="${doctor.national_id || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">اسم الطبيب</label>
-                                            <input type="text" class="form-control" id="edit_doctor_name" value="${doctor.name || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">اسم الطبيب (بالإنجليزية)</label>
-                                            <input type="text" class="form-control" id="edit_doctor_name_en" value="${doctor.name_en || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">المنصب</label>
-                                            <input type="text" class="form-control" id="edit_doctor_position" value="${doctor.position || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">المنصب (بالإنجليزية)</label>
-                                            <input type="text" class="form-control" id="edit_doctor_position_en" value="${doctor.position_en || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">رقم الهاتف</label>
-                                            <input type="text" class="form-control" id="edit_doctor_phone" value="${doctor.phone || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">البريد الإلكتروني</label>
-                                            <input type="email" class="form-control" id="edit_doctor_email" value="${doctor.email || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                            $('#edit-doctor-form-container').html(formHtml);
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('حدث خطأ أثناء تحميل بيانات الطبيب');
-                    }
-                });
+                // الانتقال إلى صفحة تعديل الطبيب
+                window.open('/doctors/' + doctorId + '/edit/', '_blank');
             } else {
                 alert('الرجاء اختيار طبيب أولاً');
                 return false;
@@ -753,72 +579,8 @@
         $('.edit-hospital-btn').click(function() {
             var hospitalId = $('#id_hospital').val();
             if (hospitalId) {
-                $('#edit_hospital_id').val(hospitalId);
-
-                // تحميل بيانات المستشفى من الخادم
-                var url = ajaxUrls.getHospitalData + hospitalId + '/data/';
-                console.log('Request URL:', url);
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        if (response.success) {
-                            var hospital = response.hospital;
-                            // إنشاء نموذج التعديل
-                            var formHtml = `
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">اسم المستشفى</label>
-                                            <input type="text" class="form-control" id="edit_hospital_name" value="${hospital.name || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">اسم المستشفى (بالإنجليزية)</label>
-                                            <input type="text" class="form-control" id="edit_hospital_name_en" value="${hospital.name_en || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">العنوان</label>
-                                            <input type="text" class="form-control" id="edit_hospital_address" value="${hospital.address || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">العنوان (بالإنجليزية)</label>
-                                            <input type="text" class="form-control" id="edit_hospital_address_en" value="${hospital.address_en || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">معلومات الاتصال</label>
-                                            <input type="text" class="form-control" id="edit_hospital_contact_info" value="${hospital.contact_info || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">شعار المستشفى</label>
-                                            <input type="file" class="form-control" id="edit_hospital_logo" accept="image/*">
-                                            ${hospital.logo ? '<div class="mt-2"><img src="' + hospital.logo + '" alt="شعار المستشفى" style="max-width: 100px; max-height: 100px;"></div>' : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                            $('#edit-hospital-form-container').html(formHtml);
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('حدث خطأ أثناء تحميل بيانات المستشفى');
-                    }
-                });
+                // الانتقال إلى صفحة تعديل المستشفى
+                window.open('/hospitals/' + hospitalId + '/edit/', '_blank');
             } else {
                 alert('الرجاء اختيار مستشفى أولاً');
                 return false;
@@ -977,119 +739,7 @@
             });
         });
 
-        // تفعيل أزرار تحديث البيانات
-        $('.update-patient-btn').click(function() {
-            var patientId = $('#edit_patient_id').val();
-            if (patientId) {
-                var patientData = {
-                    national_id: $('#edit_patient_national_id').val(),
-                    name: $('#edit_patient_name').val(),
-                    name_en: $('#edit_patient_name_en').val(),
-                    phone: $('#edit_patient_phone').val(),
-                    nationality: $('#edit_patient_nationality').val(),
-                    nationality_en: $('#edit_patient_nationality_en').val(),
-                    employer_name: $('#edit_patient_employer_name').val(),
-                    employer_name_en: $('#edit_patient_employer_name_en').val(),
-                    email: $('#edit_patient_email').val(),
-                    address: $('#edit_patient_address').val(),
-                    address_en: $('#edit_patient_address_en').val()
-                };
 
-                $.ajax({
-                    url: ajaxUrls.updatePatientData + patientId + '/update-ajax/',
-                    type: 'POST',
-                    data: patientData,
-                    headers: {
-                        'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // تحديث النص في القائمة المنسدلة
-                            $('#id_patient option[value="' + patientId + '"]').text(response.object_text);
-                            $('#editPatientModal').modal('hide');
-                            alert(response.message);
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('حدث خطأ أثناء تحديث بيانات المريض');
-                    }
-                });
-            }
-        });
-
-        $('.update-doctor-btn').click(function() {
-            var doctorId = $('#edit_doctor_id').val();
-            if (doctorId) {
-                var doctorData = {
-                    national_id: $('#edit_doctor_national_id').val(),
-                    name: $('#edit_doctor_name').val(),
-                    name_en: $('#edit_doctor_name_en').val(),
-                    position: $('#edit_doctor_position').val(),
-                    position_en: $('#edit_doctor_position_en').val(),
-                    phone: $('#edit_doctor_phone').val(),
-                    email: $('#edit_doctor_email').val()
-                };
-
-                $.ajax({
-                    url: ajaxUrls.updateDoctorData + doctorId + '/update-ajax/',
-                    type: 'POST',
-                    data: doctorData,
-                    headers: {
-                        'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // تحديث النص في القائمة المنسدلة
-                            $('#id_doctor option[value="' + doctorId + '"]').text(response.object_text);
-                            $('#editDoctorModal').modal('hide');
-                            alert(response.message);
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('حدث خطأ أثناء تحديث بيانات الطبيب');
-                    }
-                });
-            }
-        });
-
-        $('.update-hospital-btn').click(function() {
-            var hospitalId = $('#edit_hospital_id').val();
-            if (hospitalId) {
-                var hospitalData = {
-                    name: $('#edit_hospital_name').val(),
-                    name_en: $('#edit_hospital_name_en').val(),
-                    address: $('#edit_hospital_address').val(),
-                    address_en: $('#edit_hospital_address_en').val(),
-                    contact_info: $('#edit_hospital_contact_info').val()
-                };
-
-                $.ajax({
-                    url: ajaxUrls.updateHospitalData + hospitalId + '/update-ajax/',
-                    type: 'POST',
-                    data: hospitalData,
-                    headers: {
-                        'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // تحديث النص في القائمة المنسدلة
-                            $('#id_new_doctor_hospital option[value="' + hospitalId + '"]').text(response.object_text);
-                            $('#editHospitalModal').modal('hide');
-                            alert(response.message);
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('حدث خطأ أثناء تحديث بيانات المستشفى');
-                    }
-                });
-            }
-        });
     });
 </script>
 {% endblock %}
