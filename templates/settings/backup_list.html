@@ -62,6 +62,10 @@
                         <i class="fas fa-clock me-1"></i>
                         الجدولة
                     </a>
+                    <a href="{% url 'settings:upload_restore' %}" class="btn btn-outline-success me-2">
+                        <i class="fas fa-upload me-1"></i>
+                        استعادة من ملف
+                    </a>
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBackupModal">
                         <i class="fas fa-plus me-1"></i>
                         إنشاء نسخة احتياطية
@@ -170,7 +174,7 @@
                                                 <i class="fas fa-eye me-1"></i>
                                                 عرض
                                             </a>
-                                            
+
                                             {% if backup.status == 'completed' %}
                                             <div class="btn-group">
                                                 <a href="{% url 'settings:backup_download' backup.id %}" class="btn btn-sm btn-success">
@@ -199,7 +203,7 @@
                                         <a class="page-link" href="?page={{ page_obj.previous_page_number }}">السابق</a>
                                     </li>
                                 {% endif %}
-                                
+
                                 {% for num in page_obj.paginator.page_range %}
                                     {% if page_obj.number == num %}
                                         <li class="page-item active">
@@ -211,7 +215,7 @@
                                         </li>
                                     {% endif %}
                                 {% endfor %}
-                                
+
                                 {% if page_obj.has_next %}
                                     <li class="page-item">
                                         <a class="page-link" href="?page={{ page_obj.next_page_number }}">التالي</a>

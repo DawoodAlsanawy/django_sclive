@@ -11,7 +11,8 @@ from core.views.settings_views import (BackupListView, BackupSettingsView,
                                        change_password_view,
                                        create_backup_view, delete_backup_view,
                                        download_backup_view, profile_view,
-                                       restore_backup_view)
+                                       restore_backup_view,
+                                       upload_restore_view)
 
 app_name = 'settings'
 
@@ -32,6 +33,7 @@ urlpatterns = [
     # النسخ الاحتياطي
     path('backups/', BackupListView.as_view(), name='backup_list'),
     path('backups/create/', create_backup_view, name='backup_create'),
+    path('backups/upload-restore/', upload_restore_view, name='upload_restore'),
     path('backups/<int:backup_id>/', backup_detail_view, name='backup_detail'),
     path('backups/<int:backup_id>/download/', download_backup_view, name='backup_download'),
     path('backups/<int:backup_id>/delete/', delete_backup_view, name='backup_delete'),

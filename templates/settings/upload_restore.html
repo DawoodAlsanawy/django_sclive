@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.upload-area.dragover {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+    transform: scale(1.02);
+}
+
+.file-info {
+    background-color: #e8f5e8;
+    border: 1px solid #c3e6c3;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.warning-box {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.danger-box {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.option-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #fff;
+}
+
+.option-card.disabled {
+    background-color: #f8f9fa;
+    opacity: 0.6;
+}
+
+.progress-container {
+    display: none;
+    margin-top: 1rem;
+}
+
+.backup-type-info {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h4 mb-1">
+                        <i class="fas fa-upload me-2 text-primary"></i>
+                        {{ page_title }}
+                    </h2>
+                    <p class="text-muted mb-0">استعادة نسخة احتياطية من ملف محفوظ على جهازك</p>
+                </div>
+                <div>
+                    <a href="{% url 'settings:backup_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-right me-1"></i>
+                        العودة للقائمة
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تحذيرات مهمة -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="danger-box">
+                <h6 class="text-danger mb-2">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    تحذير مهم
+                </h6>
+                <ul class="mb-0 text-danger">
+                    <li>ستحل النسخة الاحتياطية محل البيانات الحالية في النظام</li>
+                    <li>قد تفقد جميع التغييرات التي تمت بعد تاريخ النسخة الاحتياطية</li>
+                    <li>هذا الإجراء لا يمكن التراجع عنه</li>
+                    <li>يُنصح بإنشاء نسخة احتياطية من البيانات الحالية قبل المتابعة</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- نموذج الاستعادة -->
+    <form method="post" enctype="multipart/form-data" id="restoreForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- رفع الملف -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-file-upload me-1"></i>
+                            اختيار ملف النسخة الاحتياطية
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <h6>اسحب وأفلت الملف هنا أو انقر للاختيار</h6>
+                            <p class="text-muted mb-0">الملفات المدعومة: .zip, .json (حد أقصى 500 ميجابايت)</p>
+                            {{ form.backup_file }}
+                        </div>
+                        
+                        <div class="file-info" id="fileInfo" style="display: none;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-archive fa-2x text-success me-3"></i>
+                                <div>
+                                    <h6 class="mb-1" id="fileName"></h6>
+                                    <small class="text-muted" id="fileSize"></small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-auto" id="removeFile">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if form.backup_file.errors %}
+                            <div class="text-danger mt-2">
+                                {% for error in form.backup_file.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- نوع النسخة الاحتياطية -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-cog me-1"></i>
+                            نوع النسخة الاحتياطية
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {{ form.backup_type }}
+                        <div class="backup-type-info">
+                            <strong>تحديد تلقائي:</strong> سيحدد النظام نوع النسخة تلقائياً من الملف<br>
+                            <strong>نسخة كاملة:</strong> تحتوي على البيانات والملفات والإعدادات<br>
+                            <strong>البيانات فقط:</strong> تحتوي على قاعدة البيانات فقط<br>
+                            <strong>الملفات فقط:</strong> تحتوي على الملفات المرفوعة فقط<br>
+                            <strong>الإعدادات فقط:</strong> تحتوي على إعدادات النظام فقط
+                        </div>
+                        {% if form.backup_type.errors %}
+                            <div class="text-danger mt-2">
+                                {% for error in form.backup_type.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- خيارات الاستعادة -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-sliders-h me-1"></i>
+                            خيارات الاستعادة
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="option-card">
+                                    <div class="form-check">
+                                        {{ form.restore_data }}
+                                        <label class="form-check-label" for="{{ form.restore_data.id_for_label }}">
+                                            <i class="fas fa-database me-1 text-primary"></i>
+                                            {{ form.restore_data.label }}
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">{{ form.restore_data.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="option-card">
+                                    <div class="form-check">
+                                        {{ form.restore_files }}
+                                        <label class="form-check-label" for="{{ form.restore_files.id_for_label }}">
+                                            <i class="fas fa-folder me-1 text-warning"></i>
+                                            {{ form.restore_files.label }}
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">{{ form.restore_files.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="option-card">
+                                    <div class="form-check">
+                                        {{ form.restore_settings }}
+                                        <label class="form-check-label" for="{{ form.restore_settings.id_for_label }}">
+                                            <i class="fas fa-cogs me-1 text-info"></i>
+                                            {{ form.restore_settings.label }}
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">{{ form.restore_settings.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- معلومات إضافية -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-1"></i>
+                            معلومات مهمة
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-primary">أنواع الملفات المدعومة:</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="fas fa-file-archive text-warning me-1"></i> ملفات ZIP (.zip)</li>
+                                <li><i class="fas fa-file-code text-info me-1"></i> ملفات JSON (.json)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-primary">الحد الأقصى لحجم الملف:</h6>
+                            <p class="mb-0">500 ميجابايت</p>
+                        </div>
+                        
+                        <div>
+                            <h6 class="text-primary">نصائح:</h6>
+                            <ul class="small mb-0">
+                                <li>تأكد من أن الملف نسخة احتياطية صحيحة</li>
+                                <li>اختبر الاستعادة في بيئة تجريبية أولاً</li>
+                                <li>احتفظ بنسخة من البيانات الحالية</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- التأكيد والإرسال -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            {{ form.confirm_restore }}
+                            <label class="form-check-label text-danger fw-bold" for="{{ form.confirm_restore.id_for_label }}">
+                                {{ form.confirm_restore.label }}
+                            </label>
+                            <small class="text-muted d-block mt-1">{{ form.confirm_restore.help_text }}</small>
+                        </div>
+                        
+                        {% if form.confirm_restore.errors %}
+                            <div class="text-danger mb-3">
+                                {% for error in form.confirm_restore.errors %}
+                                    <small>{{ error }}</small><br>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger" id="restoreBtn" disabled>
+                                <i class="fas fa-upload me-1"></i>
+                                استعادة النسخة الاحتياطية
+                            </button>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress mt-3">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted mt-1">جاري استعادة النسخة الاحتياطية...</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const uploadArea = $('#uploadArea');
+    const fileInput = $('#{{ form.backup_file.id_for_label }}');
+    const fileInfo = $('#fileInfo');
+    const fileName = $('#fileName');
+    const fileSize = $('#fileSize');
+    const removeFileBtn = $('#removeFile');
+    const confirmCheckbox = $('#{{ form.confirm_restore.id_for_label }}');
+    const restoreBtn = $('#restoreBtn');
+    const progressContainer = $('.progress-container');
+
+    // إخفاء input الملف الأصلي
+    fileInput.hide();
+
+    // النقر على منطقة الرفع
+    uploadArea.click(function() {
+        fileInput.click();
+    });
+
+    // منع السلوك الافتراضي للسحب والإفلات
+    uploadArea.on('dragover dragenter', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).addClass('dragover');
+    });
+
+    uploadArea.on('dragleave dragend drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass('dragover');
+    });
+
+    // معالجة إفلات الملف
+    uploadArea.on('drop', function(e) {
+        const files = e.originalEvent.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput[0].files = files;
+            handleFileSelect(files[0]);
+        }
+    });
+
+    // معالجة اختيار الملف
+    fileInput.change(function() {
+        const file = this.files[0];
+        if (file) {
+            handleFileSelect(file);
+        }
+    });
+
+    // دالة معالجة الملف المختار
+    function handleFileSelect(file) {
+        fileName.text(file.name);
+        fileSize.text(formatFileSize(file.size));
+        uploadArea.hide();
+        fileInfo.show();
+        updateRestoreButton();
+    }
+
+    // إزالة الملف
+    removeFileBtn.click(function() {
+        fileInput.val('');
+        fileInfo.hide();
+        uploadArea.show();
+        updateRestoreButton();
+    });
+
+    // تحديث حالة زر الاستعادة
+    function updateRestoreButton() {
+        const hasFile = fileInput[0].files.length > 0;
+        const isConfirmed = confirmCheckbox.is(':checked');
+        restoreBtn.prop('disabled', !(hasFile && isConfirmed));
+    }
+
+    // مراقبة تغيير checkbox التأكيد
+    confirmCheckbox.change(updateRestoreButton);
+
+    // تنسيق حجم الملف
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // معالجة إرسال النموذج
+    $('#restoreForm').submit(function(e) {
+        if (!confirm('هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟\n\nسيتم استبدال البيانات الحالية وقد تفقد التغييرات الحديثة.\n\nهذا الإجراء لا يمكن التراجع عنه!')) {
+            e.preventDefault();
+            return false;
+        }
+
+        // إظهار شريط التقدم وتعطيل الزر
+        restoreBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>جاري الاستعادة...');
+        progressContainer.show();
+        
+        // محاكاة تقدم العملية
+        let progress = 0;
+        const progressInterval = setInterval(function() {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            $('.progress-bar').css('width', progress + '%');
+        }, 500);
+
+        // إيقاف محاكاة التقدم عند اكتمال الإرسال
+        setTimeout(function() {
+            clearInterval(progressInterval);
+        }, 10000);
+    });
+
+    // التحقق الأولي من حالة الزر
+    updateRestoreButton();
+});
+</script>
+{% endblock %}

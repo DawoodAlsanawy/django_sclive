@@ -86,30 +86,61 @@ class BackupService:
     def _create_full_backup(self, backup_name: str) -> str:
         """إنشاء نسخة احتياطية كاملة"""
         backup_path = os.path.join(self.backup_dir, f"{backup_name}.zip")
+        temp_files = []
 
-        with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            # نسخ قاعدة البيانات
-            db_file = self._create_database_dump(backup_name)
-            zipf.write(db_file, 'database.json')
+        try:
+            with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as zipf:
+                # نسخ قاعدة البيانات
+                try:
+                    db_file = self._create_database_dump(backup_name)
+                    temp_files.append(db_file)
+                    if os.path.exists(db_file):
+                        zipf.write(db_file, 'database.json')
+                except Exception as e:
+                    print(f"خطأ في إنشاء نسخة قاعدة البيانات: {e}")
 
-            # نسخ الملفات المرفوعة
-            media_root = settings.MEDIA_ROOT
-            if os.path.exists(media_root):
-                for root, dirs, files in os.walk(media_root):
-                    # تجاهل مجلد النسخ الاحتياطي نفسه
-                    if 'backups' in root:
-                        continue
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        arcname = os.path.relpath(file_path, media_root)
-                        zipf.write(file_path, f"media/{arcname}")
+                # نسخ الملفات المرفوعة
+                media_root = settings.MEDIA_ROOT
+                if os.path.exists(media_root):
+                    try:
+                        for root, dirs, files in os.walk(media_root):
+                            # تجاهل مجلد النسخ الاحتياطي نفسه ومجلدات النظام
+                            if any(skip in root for skip in ['backups', '__pycache__', '.git', 'temp']):
+                                continue
 
-            # نسخ الإعدادات
-            settings_file = self._create_settings_dump(backup_name)
-            zipf.write(settings_file, 'settings.json')
+                            for file in files:
+                                try:
+                                    file_path = os.path.join(root, file)
+                                    # تجاهل الملفات المؤقتة والكبيرة جداً
+                                    if os.path.getsize(file_path) > 100 * 1024 * 1024:  # 100MB
+                                        continue
 
-        # حذف الملفات المؤقتة
-        self._cleanup_temp_files([db_file, settings_file])
+                                    arcname = os.path.relpath(file_path, media_root)
+                                    zipf.write(file_path, f"media/{arcname}")
+                                except (OSError, IOError) as e:
+                                    print(f"تجاهل ملف {file_path}: {e}")
+                                    continue
+                    except Exception as e:
+                        print(f"خطأ في نسخ الملفات: {e}")
+
+                # نسخ الإعدادات
+                try:
+                    settings_file = self._create_settings_dump(backup_name)
+                    temp_files.append(settings_file)
+                    if os.path.exists(settings_file):
+                        zipf.write(settings_file, 'settings.json')
+                except Exception as e:
+                    print(f"خطأ في إنشاء نسخة الإعدادات: {e}")
+
+        except Exception as e:
+            # حذف الملف المعطوب إذا كان موجوداً
+            if os.path.exists(backup_path):
+                os.remove(backup_path)
+            raise Exception(f"فشل في إنشاء النسخة الاحتياطية الكاملة: {e}")
+
+        finally:
+            # حذف الملفات المؤقتة
+            self._cleanup_temp_files(temp_files)
 
         return backup_path
 
@@ -149,30 +180,40 @@ class BackupService:
         dump_file = os.path.join(self.backup_dir, f"temp_{backup_name}_db.json")
 
         try:
+            # محاولة استخدام dumpdata أولاً
             with open(dump_file, 'w', encoding='utf-8') as f:
                 call_command('dumpdata',
                             '--natural-foreign',
                             '--natural-primary',
                             '--indent=2',
+                            '--exclude=contenttypes',
+                            '--exclude=auth.permission',
+                            '--exclude=sessions',
                             stdout=f)
         except Exception as e:
+            print(f"فشل dumpdata، استخدام الطريقة البديلة: {e}")
             # في حالة فشل dumpdata، ننشئ ملف JSON بسيط
             import json
 
             from django.apps import apps
+            from django.core import serializers
 
             data = []
+            excluded_apps = ['contenttypes', 'auth', 'sessions', 'admin']
+
             for model in apps.get_models():
-                if model._meta.app_label != 'contenttypes':  # تجاهل contenttypes
-                    try:
-                        for obj in model.objects.all():
-                            data.append({
-                                'model': f"{model._meta.app_label}.{model._meta.model_name}",
-                                'pk': obj.pk,
-                                'fields': self._serialize_model_instance(obj)
-                            })
-                    except Exception:
-                        continue
+                if model._meta.app_label in excluded_apps:
+                    continue
+
+                try:
+                    # استخدام Django serializers للحصول على تسلسل أفضل
+                    model_data = serializers.serialize('json', model.objects.all())
+                    if model_data != '[]':  # تجاهل النماذج الفارغة
+                        model_objects = json.loads(model_data)
+                        data.extend(model_objects)
+                except Exception as model_error:
+                    print(f"تجاهل نموذج {model._meta.label}: {model_error}")
+                    continue
 
             with open(dump_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2, default=str)
@@ -199,19 +240,23 @@ class BackupService:
         dump_file = os.path.join(self.backup_dir, f"temp_{backup_name}_settings.json")
 
         settings_data = {
-            'system_settings': list(SystemSettings.objects.values()),
+            'system_settings': [],
             'backup_timestamp': timezone.now().isoformat(),
             'django_settings': {
-                'SECRET_KEY': settings.SECRET_KEY,
-                'DEBUG': settings.DEBUG,
-                'ALLOWED_HOSTS': settings.ALLOWED_HOSTS,
-                'TIME_ZONE': settings.TIME_ZONE,
-                'LANGUAGE_CODE': settings.LANGUAGE_CODE,
+                'TIME_ZONE': getattr(settings, 'TIME_ZONE', 'UTC'),
+                'LANGUAGE_CODE': getattr(settings, 'LANGUAGE_CODE', 'ar'),
             }
         }
 
+        # جمع إعدادات النظام بأمان
+        try:
+            if SystemSettings.objects.exists():
+                settings_data['system_settings'] = list(SystemSettings.objects.values())
+        except Exception as e:
+            print(f"خطأ في جمع إعدادات النظام: {e}")
+
         with open(dump_file, 'w', encoding='utf-8') as f:
-            json.dump(settings_data, f, ensure_ascii=False, indent=2)
+            json.dump(settings_data, f, ensure_ascii=False, indent=2, default=str)
 
         return dump_file
 
@@ -242,6 +287,93 @@ class BackupService:
 
         except Exception as e:
             raise Exception(f"فشل في استعادة النسخة الاحتياطية: {str(e)}")
+
+    def restore_from_file(self, uploaded_file, backup_type: str = None, restore_options: Dict = None) -> bool:
+        """استعادة نسخة احتياطية من ملف مرفوع"""
+        restore_options = restore_options or {}
+        temp_file_path = None
+
+        try:
+            # حفظ الملف المرفوع مؤقتاً
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            temp_filename = f"temp_restore_{timestamp}_{uploaded_file.name}"
+            temp_file_path = os.path.join(self.backup_dir, temp_filename)
+
+            with open(temp_file_path, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+
+            # تحديد نوع النسخة الاحتياطية إذا لم يتم تحديده
+            if not backup_type:
+                backup_type = self._detect_backup_type(temp_file_path, uploaded_file.name)
+
+            # استعادة النسخة الاحتياطية
+            if backup_type == 'full':
+                return self._restore_full_backup(temp_file_path, restore_options)
+            elif backup_type == 'data':
+                return self._restore_data_backup(temp_file_path, restore_options)
+            elif backup_type == 'files':
+                return self._restore_files_backup(temp_file_path, restore_options)
+            elif backup_type == 'settings':
+                return self._restore_settings_backup(temp_file_path, restore_options)
+            else:
+                raise ValueError(f"نوع النسخة الاحتياطية غير مدعوم: {backup_type}")
+
+        except Exception as e:
+            raise Exception(f"فشل في استعادة النسخة الاحتياطية من الملف: {str(e)}")
+
+        finally:
+            # حذف الملف المؤقت
+            if temp_file_path and os.path.exists(temp_file_path):
+                try:
+                    os.remove(temp_file_path)
+                except Exception:
+                    pass
+
+    def _detect_backup_type(self, file_path: str, filename: str) -> str:
+        """تحديد نوع النسخة الاحتياطية من الملف"""
+        try:
+            # تحديد النوع من اسم الملف
+            if 'full_' in filename:
+                return 'full'
+            elif 'data_' in filename:
+                return 'data'
+            elif 'files_' in filename:
+                return 'files'
+            elif 'settings_' in filename:
+                return 'settings'
+
+            # تحديد النوع من امتداد الملف
+            if filename.endswith('.zip'):
+                # فحص محتويات الملف المضغوط
+                try:
+                    with zipfile.ZipFile(file_path, 'r') as zipf:
+                        files_in_zip = zipf.namelist()
+                        if 'database.json' in files_in_zip and 'settings.json' in files_in_zip:
+                            return 'full'
+                        elif any(f.startswith('media/') for f in files_in_zip):
+                            return 'files'
+                except Exception:
+                    pass
+                return 'files'  # افتراضي للملفات المضغوطة
+            elif filename.endswith('.json'):
+                # فحص محتوى ملف JSON
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read(1000)  # قراءة أول 1000 حرف
+                        if 'system_settings' in content:
+                            return 'settings'
+                        else:
+                            return 'data'
+                except Exception:
+                    pass
+                return 'data'  # افتراضي لملفات JSON
+
+            # افتراضي
+            return 'data'
+
+        except Exception:
+            return 'data'  # افتراضي في حالة الخطأ
 
     def _restore_full_backup(self, backup_path: str, options: Dict) -> bool:
         """استعادة نسخة احتياطية كاملة"""

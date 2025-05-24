@@ -1562,6 +1562,81 @@ class RestoreBackupForm(forms.Form):
     )
 
 
+class UploadRestoreForm(forms.Form):
+    """نموذج استعادة نسخة احتياطية من ملف مرفوع"""
+
+    backup_file = forms.FileField(
+        label='ملف النسخة الاحتياطية',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.zip,.json',
+            'required': True
+        }),
+        help_text='اختر ملف النسخة الاحتياطية (.zip أو .json)'
+    )
+
+    backup_type = forms.ChoiceField(
+        label='نوع النسخة الاحتياطية',
+        choices=[
+            ('', 'تحديد تلقائي'),
+            ('full', 'نسخة كاملة'),
+            ('data', 'البيانات فقط'),
+            ('files', 'الملفات فقط'),
+            ('settings', 'الإعدادات فقط'),
+        ],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text='اتركه فارغاً للتحديد التلقائي'
+    )
+
+    restore_data = forms.BooleanField(
+        label='استعادة البيانات',
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text='استعادة قاعدة البيانات'
+    )
+
+    restore_files = forms.BooleanField(
+        label='استعادة الملفات',
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text='استعادة الملفات المرفوعة'
+    )
+
+    restore_settings = forms.BooleanField(
+        label='استعادة الإعدادات',
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text='استعادة إعدادات النظام'
+    )
+
+    confirm_restore = forms.BooleanField(
+        label='أؤكد أنني أريد استعادة النسخة الاحتياطية',
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text='تحذير: ستحل النسخة الاحتياطية محل البيانات الحالية'
+    )
+
+    def clean_backup_file(self):
+        backup_file = self.cleaned_data.get('backup_file')
+        if backup_file:
+            # التحقق من حجم الملف (حد أقصى 500 ميجابايت)
+            if backup_file.size > 500 * 1024 * 1024:
+                raise forms.ValidationError('حجم الملف كبير جداً. الحد الأقصى 500 ميجابايت.')
+
+            # التحقق من امتداد الملف
+            import os
+            allowed_extensions = ['.zip', '.json']
+            file_extension = os.path.splitext(backup_file.name)[1].lower()
+            if file_extension not in allowed_extensions:
+                raise forms.ValidationError('نوع الملف غير مدعوم. يُسمح بملفات .zip و .json فقط.')
+
+        return backup_file
+
+
 class UISettingsForm(forms.Form):
     """نموذج إعدادات الواجهة"""
 

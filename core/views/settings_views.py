@@ -19,7 +19,7 @@ from django.views.generic import FormView, ListView, TemplateView
 from core.forms import (BackupCreateForm, BackupSettingsForm,
                         CompanySettingsForm, CustomPasswordChangeForm,
                         NotificationSettingsForm, RestoreBackupForm,
-                        SystemSettingsForm, UserProfileForm)
+                        SystemSettingsForm, UploadRestoreForm, UserProfileForm)
 from core.models import BackupRecord, BackupSchedule, UserProfile
 from core.services.backup_service import BackupService
 from core.services.settings_service import SettingsService
@@ -355,3 +355,45 @@ def delete_backup_view(request, backup_id):
     }
 
     return render(request, 'settings/delete_backup.html', context)
+
+
+@login_required
+@user_passes_test(is_admin_or_staff)
+def upload_restore_view(request):
+    """استعادة نسخة احتياطية من ملف مرفوع"""
+    if request.method == 'POST':
+        form = UploadRestoreForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                backup_service = BackupService()
+
+                # خيارات الاستعادة
+                restore_options = {
+                    'restore_data': form.cleaned_data['restore_data'],
+                    'restore_files': form.cleaned_data['restore_files'],
+                    'restore_settings': form.cleaned_data['restore_settings'],
+                }
+
+                # استعادة النسخة الاحتياطية من الملف المرفوع
+                success = backup_service.restore_from_file(
+                    uploaded_file=form.cleaned_data['backup_file'],
+                    backup_type=form.cleaned_data['backup_type'] or None,
+                    restore_options=restore_options
+                )
+
+                if success:
+                    messages.success(request, 'تم استعادة النسخة الاحتياطية من الملف بنجاح')
+                    return redirect('settings:backup_list')
+                else:
+                    messages.error(request, 'فشل في استعادة النسخة الاحتياطية')
+
+            except Exception as e:
+                messages.error(request, f'فشل في استعادة النسخة الاحتياطية: {str(e)}')
+    else:
+        form = UploadRestoreForm()
+
+    context = {
+        'form': form,
+        'page_title': 'استعادة نسخة احتياطية من ملف'
+    }
+    return render(request, 'settings/upload_restore.html', context)
