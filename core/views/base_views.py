@@ -64,7 +64,8 @@ def home(request):
     # إذا كان المستخدم غير مسجل الدخول، عرض صفحة الترحيب
     else:
         # return render(request, 'core/index.html')
-        return redirect('https://seha.sa')
+        return render(request, 'sehea/index.html')
+        # return redirect('https://seha.sa')
 
 
 def about(request):

@@ -675,12 +675,13 @@ def sick_leave_edit(request, sick_leave_id):
 def sick_leave_delete(request, sick_leave_id):
     """حذف إجازة مرضية"""
     sick_leave = get_object_or_404(SickLeave, id=sick_leave_id)
-
+    # sickleave_ivoice=get_object_or_404(LeaveInvoice,leave_invoice.objects.filter(sick_leave_id=sick_leave_id).first().id)
     # التحقق من وجود فواتير مرتبطة بالإجازة
     invoices = LeaveInvoice.objects.filter(leave_type='sick_leave', leave_id=sick_leave.leave_id)
 
     if request.method == 'POST':
         leave_id = sick_leave.leave_id  # حفظ رقم الإجازة قبل الحذف
+        invoice
         sick_leave.delete()
         messages.success(request, f'تم حذف الإجازة المرضية رقم {leave_id} بنجاح')
         return redirect('core:sick_leave_list')
