@@ -488,7 +488,8 @@ class SickLeave(models.Model):
     leave_id = models.CharField(max_length=20, unique=True, verbose_name='رقم الإجازة')
     prefix = models.CharField(max_length=3, choices=[('PSL', 'PSL'), ('GSL', 'GSL')], default='PSL', verbose_name='بادئة الإجازة')
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='sick_leaves', verbose_name='المريض')
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='sick_leaves', verbose_name='الطبيب')
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='sick_leaves', verbose_name='المستشفى')
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='sick_leaves', verbose_name='الطبيب', blank=True, null=True)
     start_date = models.DateField(verbose_name='تاريخ البداية')
     start_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ البداية (هجري)')
     end_date = models.DateField(verbose_name='تاريخ النهاية')
@@ -641,7 +642,8 @@ class CompanionLeave(models.Model):
     companion = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='companion_leaves_as_companion', verbose_name='المرافق')
     relation = models.CharField(max_length=100, blank=True, null=True, verbose_name='صلة القرابة')
     relation_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='صلة القرابة (بالإنجليزية)')
-    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='companion_leaves', verbose_name='الطبيب')
+    hospital = models.ForeignKey(Hospital, on_delete=models.CASCADE, related_name='companion_leaves', verbose_name='المستشفى')
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='companion_leaves', verbose_name='الطبيب', blank=True, null=True)
     start_date = models.DateField(verbose_name='تاريخ البداية')
     start_date_hijri = models.CharField(max_length=20, blank=True, null=True, verbose_name='تاريخ البداية (هجري)')
     end_date = models.DateField(verbose_name='تاريخ النهاية')
@@ -864,7 +866,7 @@ class LeaveInvoice(models.Model):
         """إجمالي المبلغ المدفوع للفاتورة"""
         from django.db.models import Sum
         total = self.payment_details.aggregate(Sum('amount'))['amount__sum'] or 0
-        print(f"إجمالي المبلغ المدفوع للفاتورة {self.invoice_number}: {total}")
+        # print(f"إجمالي المبلغ المدفوع للفاتورة {self.invoice_number}: {total}")
         return total
 
     def get_remaining(self):

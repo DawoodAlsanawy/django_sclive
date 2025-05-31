@@ -496,13 +496,14 @@ class SickLeaveForm(forms.ModelForm):
 
     class Meta:
         model = SickLeave
-        fields = ('leave_id', 'prefix', 'patient', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
+        fields = ('leave_id', 'prefix', 'patient', 'hospital', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
                   'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days','duration_days2')
         widgets = {
             'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
             'prefix': forms.Select(attrs={'class': 'form-control'}),
             'patient': forms.Select(attrs={'class': 'form-control select2-patient'}),
+            'hospital': forms.Select(attrs={'class': 'form-control select2-hospital'}),
             'doctor': forms.Select(attrs={'class': 'form-control select2-doctor'}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'start_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
@@ -514,7 +515,7 @@ class SickLeaveForm(forms.ModelForm):
             'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
             'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'created_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'created_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local','format':'%Y-%m-%dT%H:%M'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'type':'hidden'}),
             'duration_days2': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
@@ -991,7 +992,7 @@ class CompanionLeaveForm(forms.ModelForm):
 
     class Meta:
         model = CompanionLeave
-        fields = ('leave_id', 'prefix', 'patient', 'companion', 'relation', 'relation_en', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
+        fields = ('leave_id', 'prefix', 'patient', 'companion', 'relation', 'relation_en', 'hospital', 'doctor', 'start_date', 'start_date_hijri', 'end_date', 'end_date_hijri',
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
                   'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days','duration_days2')
         widgets = {
@@ -999,6 +1000,7 @@ class CompanionLeaveForm(forms.ModelForm):
             'prefix': forms.Select(attrs={'class': 'form-control'}),
             'patient': forms.Select(attrs={'class': 'form-control select2-patient'}),
             'companion': forms.Select(attrs={'class': 'form-control select2-companion'}),
+            'hospital': forms.Select(attrs={'class': 'form-control select2-hospital'}),
             'doctor': forms.Select(attrs={'class': 'form-control select2-doctor'}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'start_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),

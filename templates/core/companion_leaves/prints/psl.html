@@ -404,15 +404,11 @@
         <div class="footer-section">
             <div class="row">
                 <div class="text-center col-6 medical-logo-name" style="border-left: 2px solid lightgray;height:150px;">
-                    {% if companion_leave.hospital %}
+                    
                     <img src="{{ companion_leave.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo">
                     <p style="margin-top: -2px ;
                     margin-left:30px" class="text-xs text-gray-500 medical-name">{{ companion_leave.hospital.name }} <br>{{ companion_leave.hospital.name_en|capitalize }}</p>
-                    {% elif companion_leave.doctor.hospitals.all.0 %}
-                    <img src="{{ companion_leave.doctor.hospitals.all.0.logo.url }}" alt="Medical Center Logo" class="footer-logo">
-                    <p style="margin-top: -2px ;
-                    margin-left:30px" class="text-xs text-gray-500 medical-name">{{ companion_leave.doctor.hospitals.all.0.name }} <br>{{ companion_leave.doctor.hospitals.all.0.name_en|capitalize }}</p>
-                    {% endif %}
+                    
                 </div>
 
                 <div class="text-center col-6 qr-code-section">

@@ -196,7 +196,7 @@ def translate_text(text, src='ar', dest='en'):
         translation = translator.translate(str(text), src=src, dest=dest)
         return translation.text
     except Exception as e:
-        print(f"خطأ في الترجمة: {e}")
+        # print(f"خطأ في الترجمة: {e}")
         return text
 
 
@@ -218,7 +218,7 @@ def convert_to_hijri(date_obj):
         hijri_date = g_date.to_hijri()
         return f"{hijri_date.day}-{hijri_date.month}-{hijri_date.year}"
     except Exception as e:
-        print(f"خطأ في تحويل التاريخ إلى هجري: {e}")
+        # print(f"خطأ في تحويل التاريخ إلى هجري: {e}")
         return ""
 
 

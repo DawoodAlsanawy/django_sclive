@@ -681,7 +681,7 @@ def sick_leave_delete(request, sick_leave_id):
 
     if request.method == 'POST':
         leave_id = sick_leave.leave_id  # حفظ رقم الإجازة قبل الحذف
-        invoice
+        
         sick_leave.delete()
         messages.success(request, f'تم حذف الإجازة المرضية رقم {leave_id} بنجاح')
         return redirect('core:sick_leave_list')
