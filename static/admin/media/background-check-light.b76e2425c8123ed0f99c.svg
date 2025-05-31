@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="257" height="223" viewBox="0 0 257 223">
+  <defs>
+    <clipPath id="clip-path">
+      <path id="Path_8215" data-name="Path 8215" d="M1212.569,243.378a6.068,6.068,0,0,0,0,12.137h45.692a6.068,6.068,0,0,0,0-12.137Z" transform="translate(-1206.501 -243.378)" fill="#fff"/>
+    </clipPath>
+  </defs>
+  <g id="seha-logo" transform="translate(-549.744 -155)" opacity="0.05">
+    <g id="Group_4351" data-name="Group 4351" transform="translate(742.27 155)">
+      <g id="Group_4350" data-name="Group 4350" transform="translate(0 0)" clip-path="url(#clip-path)">
+        <rect id="Rectangle_9432" data-name="Rectangle 9432" width="57.828" height="12.137" transform="translate(0 0)" fill="#fff"/>
+      </g>
+    </g>
+    <rect id="Rectangle_9450" data-name="Rectangle 9450" width="59" height="12" rx="6" transform="translate(741.744 155)" fill="#fff"/>
+    <rect id="Rectangle_9451" data-name="Rectangle 9451" width="76" height="13" rx="6.5" transform="translate(730.744 170)" fill="#fff"/>
+    <rect id="Rectangle_9452" data-name="Rectangle 9452" width="83" height="12" rx="6" transform="translate(718.744 188)" fill="#fff"/>
+    <rect id="Rectangle_9453" data-name="Rectangle 9453" width="83" height="12" rx="6" transform="translate(707.744 203)" fill="#fff"/>
+    <rect id="Rectangle_9454" data-name="Rectangle 9454" width="83" height="12" rx="6" transform="translate(695.744 220)" fill="#fff"/>
+    <rect id="Rectangle_9455" data-name="Rectangle 9455" width="83" height="12" rx="6" transform="translate(684.744 236)" fill="#fff"/>
+    <rect id="Rectangle_9456" data-name="Rectangle 9456" width="84" height="12" rx="6" transform="translate(671.744 252)" fill="#fff"/>
+    <rect id="Rectangle_9457" data-name="Rectangle 9457" width="84" height="13" rx="6.5" transform="translate(659.744 268)" fill="#fff"/>
+    <rect id="Rectangle_9458" data-name="Rectangle 9458" width="82" height="12" rx="6" transform="translate(649.744 285)" fill="#fff"/>
+    <rect id="Rectangle_9459" data-name="Rectangle 9459" width="90" height="12" rx="6" transform="translate(549.744 285)" fill="#fff"/>
+    <rect id="Rectangle_9462" data-name="Rectangle 9462" width="158" height="11" rx="5.5" transform="translate(562.744 301)" fill="#fff"/>
+    <rect id="Rectangle_9463" data-name="Rectangle 9463" width="132" height="13" rx="6.5" transform="translate(576.744 317)" fill="#fff"/>
+    <rect id="Rectangle_9464" data-name="Rectangle 9464" width="107" height="12" rx="6" transform="translate(590.744 333)" fill="#fff"/>
+    <rect id="Rectangle_9465" data-name="Rectangle 9465" width="80" height="12" rx="6" transform="translate(604.744 350)" fill="#fff"/>
+    <rect id="Rectangle_9466" data-name="Rectangle 9466" width="54" height="13" rx="6.5" transform="translate(618.744 365)" fill="#fff"/>
+    <rect id="Rectangle_9460" data-name="Rectangle 9460" width="69" height="13" rx="6.5" transform="translate(549.744 268)" fill="#fff"/>
+    <rect id="Rectangle_9461" data-name="Rectangle 9461" width="35" height="12" rx="6" transform="translate(562.744 252)" fill="#fff"/>
+  </g>
+</svg>

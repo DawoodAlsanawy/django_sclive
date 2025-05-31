@@ -57210,7 +57210,7 @@ footer .row {
 
 .header .menu .navbar-toggler .navbar-toggler-icon,
 .navbar .menu .navbar-toggler .navbar-toggler-icon {
-  background-image: url(../.www.seha.sa/static/media/menu.d709b087e307b7c12f7a.svg);
+  background-image: url(../media/menu.d709b087e307b7c12f7a.svg);
   width: 56%
 }
 
@@ -57732,7 +57732,7 @@ div.footer-container .about.section p.about {
 
 @media(min-width:992px) {
   div.footer-container .about.section p.about {
-    background-image: url(../.www.seha.sa/static/media/background-check-light.b76e2425c8123ed0f99c.svg);
+    background-image: url(../media/background-check-light.b76e2425c8123ed0f99c.svg);
     background-position-x: 95%;
     background-position-y: center;
     background-repeat: no-repeat;
@@ -58375,7 +58375,7 @@ div.inquiries-container .btn {
 }
 
 div.inquiries-container h1.heading {
-  background-image: url(../.www.seha.sa/static/media/rectangle.62441ab88b5bcc89755a.svg);
+  background-image: url(../media/rectangle.62441ab88b5bcc89755a.svg);
   background-position: 50%;
   background-repeat: no-repeat;
   color: #306db5;
@@ -59510,7 +59510,7 @@ button.swiper-pagination-bullet {
 .main-slider .main-slider-container div.swiper-button-prev,
 .main-slider .main-slider-container div.swiper-container-rtl .swiper-button-next,
 .main-slider .main-slider-container div.swiper-container-rtl .swiper-button-prev {
-  background-image: url(../.www.seha.sa/static/media/arrow-right.80131d0ed01a5bc1bd0e.svg);
+  background-image: url(../media/arrow-right.80131d0ed01a5bc1bd0e.svg);
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: contain;
@@ -59713,7 +59713,7 @@ div.faq-section-container {
   div.faq-section-container {
     background-color: #000;
     background-color: #0000;
-    background-image: url(../.www.seha.sa/static/media/background-section.04be0f24a59eab4635b7.svg);
+    background-image: url(../media/background-section.04be0f24a59eab4635b7.svg);
     background-position: 1200px;
     background-repeat: no-repeat;
     background-size: contain;
@@ -59881,7 +59881,7 @@ div.faq-section-container .accordion .accordion-item .accordion-button {
 }
 
 div.faq-section-container .accordion .accordion-item .accordion-button:after {
-  background-image: url(../.www.seha.sa/static/media/arrow_down_sign_to_navigate.5f2271646eb7967361d5.svg);
+  background-image: url(../media/arrow_down_sign_to_navigate.5f2271646eb7967361d5.svg);
   background-size: 15px 20px;
   margin-left: 0
 }
@@ -59955,7 +59955,7 @@ div.partner-container {
   div.partner-container {
     align-items: center;
     background-color: #0000;
-    background-image: url(../.www.seha.sa/static/media/background.d54132059bc1b41ec737.svg);
+    background-image: url(../media/background.d54132059bc1b41ec737.svg);
     background-position-x: -400px;
     background-position-x: -85%;
     background-position-y: -30px;
@@ -60133,7 +60133,7 @@ div.partner-container div.swiper-button-next,
 div.partner-container div.swiper-button-prev,
 div.partner-container div.swiper-container-rtl .swiper-button-next,
 div.partner-container div.swiper-container-rtl .swiper-button-prev {
-  background-image: url(../.www.seha.sa/static/media/arrow-right.80131d0ed01a5bc1bd0e.svg);
+  background-image: url(../media/arrow-right.80131d0ed01a5bc1bd0e.svg);
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: contain;
@@ -60195,7 +60195,7 @@ div.partner-container div.swiper-container-rtl .swiper-button-prev:after {
   .seha-eco-container {
     align-items: center;
     background-color: #fff;
-    background-image: url(../.www.seha.sa/static/media/background.d54132059bc1b41ec737.svg);
+    background-image: url(../media/background.d54132059bc1b41ec737.svg);
     background-position-x: -400px;
     background-position-x: -85%;
     background-position-y: -30px;
@@ -60510,7 +60510,7 @@ div.partner-container div.swiper-container-rtl .swiper-button-prev:after {
 .seha-eco-container .swiper-button-prev,
 .seha-eco-container div.swiper-button-next,
 .seha-eco-container div.swiper-button-prev {
-  background-image: url(../.www.seha.sa/static/media/arrow-right.80131d0ed01a5bc1bd0e.svg);
+  background-image: url(../media/arrow-right.80131d0ed01a5bc1bd0e.svg);
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: contain;
@@ -60592,7 +60592,7 @@ div.services-container {
 @media(min-width:992px) {
   div.services-container {
     background-color: #0000;
-    background-image: url(../.www.seha.sa/static/media/background-section.04be0f24a59eab4635b7.svg);
+    background-image: url(../media/background-section.04be0f24a59eab4635b7.svg);
     background-position: 50%;
     background-position: 1000px 30px;
     background-repeat: no-repeat;
@@ -61075,7 +61075,7 @@ div.services-container .swiper-button-next,
 div.services-container .swiper-button-prev,
 div.services-container div.swiper-button-next,
 div.services-container div.swiper-button-prev {
-  background-image: url(../.www.seha.sa/static/media/arrow-right.80131d0ed01a5bc1bd0e.svg);
+  background-image: url(../media/arrow-right.80131d0ed01a5bc1bd0e.svg);
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: contain;
@@ -61405,7 +61405,7 @@ div.swiper-pagination-bullets .swiper-pagination-bullet-active {
 }
 
 div.qna-content-wrapper {
-  background-image: url(../.www.seha.sa/static/media/background-check.b59b86a4a7a5ee0b1b02.svg);
+  background-image: url(../media/background-check.b59b86a4a7a5ee0b1b02.svg);
   background-repeat: no-repeat;
   display: flex;
   flex: 1 1;
@@ -61751,7 +61751,7 @@ div.qna-content-wrapper .page-item:last-child span {
 
 .contact-us-container {
   align-items: center;
-  background-image: url(../.www.seha.sa/static/media/background-check.b59b86a4a7a5ee0b1b02.svg);
+  background-image: url(../media/background-check.b59b86a4a7a5ee0b1b02.svg);
   background-repeat: no-repeat;
   direction: rtl;
   display: flex;
@@ -62069,7 +62069,7 @@ div.qna-content-wrapper .page-item:last-child span {
 }
 
 .inverstors-dashboard h2.heading {
-  background-image: url(../.www.seha.sa/static/media/rectangle.62441ab88b5bcc89755a.svg);
+  background-image: url(../media/rectangle.62441ab88b5bcc89755a.svg);
   background-position: 50%;
   background-repeat: no-repeat;
   color: #306db5;
@@ -62355,7 +62355,7 @@ div.qna-content-wrapper .page-item:last-child span {
 
 div.service-content-wrapper {
   align-items: center;
-  background-image: url(../.www.seha.sa/static/media/background-check.b59b86a4a7a5ee0b1b02.svg);
+  background-image: url(../media/background-check.b59b86a4a7a5ee0b1b02.svg);
   background-repeat: no-repeat;
   direction: rtl;
   display: flex;
@@ -62692,7 +62692,7 @@ div.service-content-wrapper .content .lower-wrapper .services-list-wrapper {
 }
 
 .page-services-details .title-area:before {
-  background-image: url(../.www.seha.sa/static/media/bg-dashed-1.e1a15120c6d24941f0b8.svg);
+  background-image: url(../media/bg-dashed-1.e1a15120c6d24941f0b8.svg);
   background-position: -276px 634px;
   background-repeat: no-repeat;
   background-size: cover;
@@ -63790,7 +63790,7 @@ div.service-content-wrapper .content .lower-wrapper .services-list-wrapper {
 .notfound {
   align-content: center;
   align-items: center;
-  background-image: url(../.www.seha.sa/static/media/background-check-3.9582f221f0204d520f4b.svg);
+  background-image: url(../media/background-check-3.9582f221f0204d520f4b.svg);
   display: flex;
   height: 100vh;
   justify-content: center;
@@ -63820,7 +63820,7 @@ div.login-section-container {
   align-items: center;
   background-attachment: fixed;
   background-color: #f8f9fb;
-  background-image: url(../.www.seha.sa/static/media/background-check-3.9582f221f0204d520f4b.svg);
+  background-image: url(../media/background-check-3.9582f221f0204d520f4b.svg);
   background-position: 50%;
   background-size: cover;
   display: flex;
@@ -64780,7 +64780,7 @@ div.login-section-container .loading {
 div.physician-otp {
   align-items: center;
   background-color: #f8f9fb;
-  background-image: url(../.www.seha.sa/static/media/background-check-3.9582f221f0204d520f4b.svg);
+  background-image: url(../media/background-check-3.9582f221f0204d520f4b.svg);
   background-position: 50%;
   background-size: cover;
   display: flex;
@@ -80029,7 +80029,7 @@ fieldset:disabled .bootstrap_btn__FneNw {
 .verify-page {
   align-items: center;
   background-color: #f8f9fb;
-  background-image: url(../.www.seha.sa/static/media/background-check-3.9582f221f0204d520f4b.svg);
+  background-image: url(../media/background-check-3.9582f221f0204d520f4b.svg);
   background-position: 50%;
   background-size: cover;
   justify-content: center;
@@ -80444,7 +80444,7 @@ div.activation-page {
   align-items: center;
   background-attachment: fixed;
   background-color: #f8f9fb;
-  background-image: url(../.www.seha.sa/static/media/background-check-3.9582f221f0204d520f4b.svg);
+  background-image: url(../media/background-check-3.9582f221f0204d520f4b.svg);
   background-position: 50%;
   background-size: cover;
   display: flex;
