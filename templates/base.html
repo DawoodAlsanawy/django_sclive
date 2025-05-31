@@ -17,18 +17,21 @@
     {% dynamic_css %}
 
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
     <style>
+        /* أنماط إضافية مخصصة للقالب الأساسي */
         body {
             font-family: 'Tajawal', sans-serif;
             background-color: #f8f9fa;
+            overflow-x: hidden;
         }
 
         .sidebar {
             min-height: 100vh;
             background-color: #343a40;
             color: #fff;
-
-
+            transition: all 0.3s ease;
         }
 
         .sidebar .nav-link {
@@ -36,11 +39,13 @@
             padding: 0.5rem 1rem;
             margin: 0.2rem 0;
             border-radius: 0.25rem;
+            transition: all 0.3s ease;
         }
 
         .sidebar .nav-link:hover {
             color: #fff;
             background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(-3px);
         }
 
         .sidebar .nav-link.active {
@@ -50,16 +55,25 @@
 
         .sidebar .nav-link i {
             margin-left: 0.5rem;
+            width: 20px;
+            text-align: center;
         }
 
         .main-content {
             padding: 2rem;
+            transition: all 0.3s ease;
         }
 
         .card {
             margin-bottom: 1.5rem;
             border: none;
             box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
         }
 
         .card-header {
@@ -71,31 +85,65 @@
         .btn-primary {
             background-color: #007bff;
             border-color: #007bff;
+            transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
             background-color: #0069d9;
             border-color: #0062cc;
+            transform: translateY(-1px);
         }
 
         .table th {
             font-weight: bold;
             background-color: #f8f9fa;
         }
+
+        /* تحسينات أساسية للـ Sidebar */
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        /* إخفاء زر القائمة على الشاشات الكبيرة */
+        @media (min-width: 768px) {
+            .mobile-menu-btn {
+                display: none !important;
+            }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="container-fluid" >
+    <!-- زر القائمة للأجهزة المحمولة -->
+    {% if user.is_authenticated %}
+    <button class="mobile-menu-btn d-md-none" id="mobileMenuBtn" type="button">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- طبقة الخلفية للأجهزة المحمولة -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    {% endif %}
+
+    <div class="container-fluid">
         <div class="row">
             <!-- Sidebar -->
             {% if user.is_authenticated %}
-            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="position-sticky pt-3" style="position: fixed; top:0;right:0; overflow-y:auto;">
+            <div class="col-md-3 col-lg-2 d-md-block sidebar" id="sidebar">
+                <div class="position-sticky pt-3" style="position: fixed; top:0;right:0; overflow-y:auto; height: 100vh;">
+                    <!-- زر إغلاق القائمة للأجهزة المحمولة -->
+                    <div class="d-md-none text-end p-3">
+                        <button class="btn btn-sm btn-outline-light" id="closeSidebarBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
                     <div class="text-center mb-4">
-                        <h5>{% get_site_name %}</h5>
-                        <p class="text-muted">مرحباً، {{ user.username }}</p>
+                        <h5 class="responsive-heading">{% get_site_name %}</h5>
+                        <p class="text-muted small">مرحباً، {{ user.username }}</p>
                     </div>
 
                     <ul class="nav flex-column">
@@ -245,6 +293,9 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <!-- Responsive Enhancements -->
+    <script src="{% static 'js/responsive-enhancements.js' %}"></script>
+
     <!-- Settings-based JavaScript -->
     <script>
         // تطبيق إعدادات الرسائل
@@ -299,6 +350,82 @@
                         $(this).next('.invalid-feedback').remove();
                     }
                 });
+            });
+
+            // وظائف القائمة المحمولة
+            const mobileMenuBtn = $('#mobileMenuBtn');
+            const sidebar = $('#sidebar');
+            const sidebarOverlay = $('#sidebarOverlay');
+            const closeSidebarBtn = $('#closeSidebarBtn');
+
+            // فتح القائمة
+            mobileMenuBtn.on('click', function() {
+                sidebar.addClass('show');
+                sidebarOverlay.addClass('show');
+                $('body').css('overflow', 'hidden');
+            });
+
+            // إغلاق القائمة
+            function closeSidebar() {
+                sidebar.removeClass('show');
+                sidebarOverlay.removeClass('show');
+                $('body').css('overflow', 'auto');
+            }
+
+            closeSidebarBtn.on('click', closeSidebar);
+            sidebarOverlay.on('click', closeSidebar);
+
+            // إغلاق القائمة عند النقر على رابط (للأجهزة المحمولة)
+            sidebar.find('.nav-link').on('click', function() {
+                if ($(window).width() <= 768) {
+                    setTimeout(closeSidebar, 300);
+                }
+            });
+
+            // إغلاق القائمة عند تغيير حجم الشاشة
+            $(window).on('resize', function() {
+                if ($(window).width() >= 768) {
+                    closeSidebar();
+                    // إعادة تعيين الـ sidebar للشاشات الكبيرة
+                    sidebar.removeClass('show');
+                    sidebar.css('right', '');
+                    sidebar.css('position', '');
+                    $('body').css('overflow', 'auto');
+                }
+            });
+
+            // تحسين الجداول للأجهزة المحمولة
+            $('.table-responsive').each(function() {
+                const table = $(this).find('table');
+                if (table.length) {
+                    // إضافة فئة للنصوص الطويلة
+                    table.find('td').each(function() {
+                        const text = $(this).text().trim();
+                        if (text.length > 20) {
+                            $(this).addClass('text-truncate-mobile');
+                            $(this).attr('title', text);
+                        }
+                    });
+                }
+            });
+
+            // تحسين النماذج للأجهزة المحمولة
+            if ($(window).width() <= 768) {
+                $('.btn-group').addClass('d-grid gap-2');
+                $('.btn-group .btn').removeClass('btn-sm').addClass('btn');
+            }
+
+            // تحسين الترقيم للأجهزة المحمولة
+            $('.pagination').each(function() {
+                if ($(window).width() <= 768) {
+                    $(this).find('.page-item').each(function(index) {
+                        if (index > 2 && index < $(this).parent().children().length - 3) {
+                            if (!$(this).hasClass('active')) {
+                                $(this).hide();
+                            }
+                        }
+                    });
+                }
             });
         });
     </script>

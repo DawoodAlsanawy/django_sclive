@@ -10,60 +10,154 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-procedures fa-4x mb-3 text-primary"></i>
-                <h4 class="card-title">تقرير الإجازات المرضية</h4>
-                <p class="card-text">عرض وتحليل بيانات الإجازات المرضية حسب الفترة والحالة</p>
-                <a href="{% url 'core:report_sick_leaves' %}" class="btn btn-primary">عرض التقرير</a>
+<div class="row g-4">
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm hover-card">
+            <div class="card-body text-center p-4">
+                <div class="icon-wrapper mb-3">
+                    <i class="fas fa-procedures fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title fw-bold">تقرير الإجازات المرضية</h5>
+                <p class="card-text text-muted small">عرض وتحليل بيانات الإجازات المرضية حسب الفترة والحالة</p>
+                <div class="mt-auto">
+                    <a href="{% url 'core:report_sick_leaves' %}" class="btn btn-primary btn-sm px-4">
+                        <i class="fas fa-chart-line me-2"></i>
+                        عرض التقرير
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-user-nurse fa-4x mb-3 text-success"></i>
-                <h4 class="card-title">تقرير إجازات المرافقين</h4>
-                <p class="card-text">عرض وتحليل بيانات إجازات المرافقين حسب الفترة والحالة</p>
-                <a href="{% url 'core:report_companion_leaves' %}" class="btn btn-success">عرض التقرير</a>
+
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm hover-card">
+            <div class="card-body text-center p-4">
+                <div class="icon-wrapper mb-3">
+                    <i class="fas fa-user-nurse fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title fw-bold">تقرير إجازات المرافقين</h5>
+                <p class="card-text text-muted small">عرض وتحليل بيانات إجازات المرافقين حسب الفترة والحالة</p>
+                <div class="mt-auto">
+                    <a href="{% url 'core:report_companion_leaves' %}" class="btn btn-success btn-sm px-4">
+                        <i class="fas fa-chart-line me-2"></i>
+                        عرض التقرير
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-file-invoice-dollar fa-4x mb-3 text-info"></i>
-                <h4 class="card-title">تقرير الفواتير</h4>
-                <p class="card-text">عرض وتحليل بيانات الفواتير حسب الفترة والحالة ونوع الإجازة</p>
-                <a href="{% url 'core:report_invoices' %}" class="btn btn-info">عرض التقرير</a>
+
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm hover-card">
+            <div class="card-body text-center p-4">
+                <div class="icon-wrapper mb-3">
+                    <i class="fas fa-file-invoice-dollar fa-3x text-info"></i>
+                </div>
+                <h5 class="card-title fw-bold">تقرير الفواتير</h5>
+                <p class="card-text text-muted small">عرض وتحليل بيانات الفواتير حسب الفترة والحالة ونوع الإجازة</p>
+                <div class="mt-auto">
+                    <a href="{% url 'core:report_invoices' %}" class="btn btn-info btn-sm px-4">
+                        <i class="fas fa-chart-line me-2"></i>
+                        عرض التقرير
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-money-bill-wave fa-4x mb-3 text-warning"></i>
-                <h4 class="card-title">تقرير المدفوعات</h4>
-                <p class="card-text">عرض وتحليل بيانات المدفوعات حسب الفترة وطريقة الدفع</p>
-                <a href="{% url 'core:report_payments' %}" class="btn btn-warning">عرض التقرير</a>
+
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm hover-card">
+            <div class="card-body text-center p-4">
+                <div class="icon-wrapper mb-3">
+                    <i class="fas fa-money-bill-wave fa-3x text-warning"></i>
+                </div>
+                <h5 class="card-title fw-bold">تقرير المدفوعات</h5>
+                <p class="card-text text-muted small">عرض وتحليل بيانات المدفوعات حسب الفترة وطريقة الدفع</p>
+                <div class="mt-auto">
+                    <a href="{% url 'core:report_payments' %}" class="btn btn-warning btn-sm px-4">
+                        <i class="fas fa-chart-line me-2"></i>
+                        عرض التقرير
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-users fa-4x mb-3 text-danger"></i>
-                <h4 class="card-title">تقرير العملاء</h4>
-                <p class="card-text">عرض وتحليل بيانات العملاء والأرصدة المستحقة</p>
-                <a href="{% url 'core:report_clients' %}" class="btn btn-danger">عرض التقرير</a>
+
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm hover-card">
+            <div class="card-body text-center p-4">
+                <div class="icon-wrapper mb-3">
+                    <i class="fas fa-users fa-3x text-danger"></i>
+                </div>
+                <h5 class="card-title fw-bold">تقرير العملاء</h5>
+                <p class="card-text text-muted small">عرض وتحليل بيانات العملاء والأرصدة المستحقة</p>
+                <div class="mt-auto">
+                    <a href="{% url 'core:report_clients' %}" class="btn btn-danger btn-sm px-4">
+                        <i class="fas fa-chart-line me-2"></i>
+                        عرض التقرير
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- بطاقة إضافية للتقارير المخصصة -->
+    <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm hover-card border-dashed">
+            <div class="card-body text-center p-4 d-flex flex-column justify-content-center">
+                <div class="icon-wrapper mb-3">
+                    <i class="fas fa-plus-circle fa-3x text-secondary"></i>
+                </div>
+                <h5 class="card-title fw-bold text-secondary">تقارير مخصصة</h5>
+                <p class="card-text text-muted small">قريباً - إمكانية إنشاء تقارير مخصصة حسب احتياجاتك</p>
+                <div class="mt-auto">
+                    <button class="btn btn-outline-secondary btn-sm px-4" disabled>
+                        <i class="fas fa-cog me-2"></i>
+                        قريباً
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.hover-card {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.icon-wrapper {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.border-dashed {
+    border: 2px dashed #dee2e6 !important;
+}
+
+@media (max-width: 768px) {
+    .icon-wrapper {
+        height: 60px;
+    }
+
+    .icon-wrapper i {
+        font-size: 2rem !important;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-text {
+        font-size: 0.85rem;
+    }
+}
+</style>
 {% endblock %}

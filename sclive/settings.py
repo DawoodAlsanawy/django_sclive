@@ -276,3 +276,10 @@ LOGGING = {
         },
     },
 }
+# أضف هذه الإعدادات:
+# SECURE_SSL_REDIRECT = True  # يحول كل الروابط إلى HTTPS
+# SESSION_COOKIE_SECURE = True  # يرسل الكوكيز عبر HTTPS فقط
+# CSRF_COOKIE_SECURE = True  # يحمي من هجمات CSRF
+# SECURE_BROWSER_XSS_FILTER = True  # حماية من هجمات XSS
+# SECURE_CONTENT_TYPE_NOSNIFF = True  # منع تخمين نوع المحتوى
+# X_FRAME_OPTIONS = 'DENY'  # منع تضمين موقعك في iframe

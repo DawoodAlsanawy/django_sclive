@@ -1,0 +1,326 @@
+/* إصلاحات التصميم المتجاوب - حل مشاكل العرض */
+
+/* إعادة تعيين أساسية للـ Sidebar */
+.sidebar {
+    position: relative !important;
+    right: auto !important;
+    width: auto !important;
+    height: auto !important;
+    background-color: #343a40;
+    color: #fff;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+}
+
+/* إخفاء عناصر الهاتف المحمول على الشاشات الكبيرة */
+@media (min-width: 768px) {
+    .mobile-menu-btn {
+        display: none !important;
+    }
+    
+    .sidebar-overlay {
+        display: none !important;
+    }
+    
+    /* إعادة تعيين الـ sidebar للشاشات الكبيرة */
+    .sidebar {
+        position: relative !important;
+        right: auto !important;
+        width: auto !important;
+        height: auto !important;
+        transform: none !important;
+    }
+    
+    .sidebar .position-sticky {
+        position: sticky !important;
+        top: 20px !important;
+        right: auto !important;
+        height: calc(100vh - 40px) !important;
+        overflow-y: auto;
+    }
+    
+    /* إعادة تعيين المحتوى الرئيسي */
+    main {
+        margin-right: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    .main-content {
+        padding: 2rem;
+    }
+}
+
+/* تحسينات للأجهزة المحمولة فقط */
+@media (max-width: 767.98px) {
+    /* إظهار زر القائمة */
+    .mobile-menu-btn {
+        display: block !important;
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 1060;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 18px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* تحويل الـ sidebar إلى قائمة منزلقة */
+    .sidebar {
+        position: fixed !important;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        z-index: 1050;
+        transition: right 0.3s ease;
+        overflow-y: auto;
+    }
+    
+    .sidebar.show {
+        right: 0;
+    }
+    
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        display: none;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+    
+    /* تحسين المحتوى الرئيسي للهواتف */
+    main {
+        margin-right: 0 !important;
+        padding-top: 70px !important;
+    }
+    
+    .main-content {
+        padding: 1rem;
+    }
+    
+    .container-fluid {
+        padding: 8px;
+    }
+}
+
+/* تحسينات للأجهزة اللوحية */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    .sidebar {
+        width: 220px !important;
+    }
+    
+    .sidebar .nav-link {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .main-content {
+        padding: 1.5rem;
+    }
+    
+    .container-fluid {
+        padding: 15px;
+    }
+}
+
+/* تحسينات للشاشات الكبيرة */
+@media (min-width: 1200px) {
+    .sidebar {
+        width: 250px !important;
+    }
+    
+    .sidebar .nav-link {
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+    
+    .main-content {
+        padding: 2rem;
+    }
+    
+    .container-fluid {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+}
+
+/* تحسينات للشاشات العريضة جداً */
+@media (min-width: 1400px) {
+    .sidebar {
+        width: 280px !important;
+    }
+    
+    .container-fluid {
+        max-width: 1600px;
+    }
+    
+    .main-content {
+        padding: 2.5rem;
+    }
+}
+
+/* تحسينات عامة للجداول */
+.table-responsive {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 767.98px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table {
+        font-size: 13px;
+    }
+    
+    .table th, .table td {
+        padding: 8px 6px;
+        white-space: nowrap;
+        min-width: 100px;
+    }
+    
+    .table th:first-child,
+    .table td:first-child {
+        position: sticky;
+        right: 0;
+        background-color: #fff;
+        z-index: 10;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+}
+
+/* تحسينات النماذج */
+@media (max-width: 767.98px) {
+    .form-control, .form-select {
+        font-size: 16px; /* منع التكبير في iOS */
+        padding: 12px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 14px;
+        margin: 2px;
+    }
+    
+    .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 5px;
+    }
+}
+
+/* تحسينات البطاقات */
+@media (max-width: 767.98px) {
+    .card {
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+    
+    .card-header {
+        padding: 12px 15px;
+        font-size: 16px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+}
+
+/* تحسينات العناوين */
+@media (max-width: 767.98px) {
+    h1 {
+        font-size: 24px !important;
+        margin-bottom: 15px;
+    }
+
+    h2 {
+        font-size: 20px !important;
+        margin-bottom: 12px;
+    }
+
+    h3 {
+        font-size: 18px !important;
+        margin-bottom: 10px;
+    }
+    
+    h4 {
+        font-size: 16px !important;
+        margin-bottom: 8px;
+    }
+    
+    h5 {
+        font-size: 14px !important;
+        margin-bottom: 6px;
+    }
+}
+
+/* تحسينات الترقيم */
+@media (max-width: 767.98px) {
+    .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .pagination .page-link {
+        padding: 8px 12px;
+        font-size: 14px;
+        margin: 2px;
+    }
+}
+
+/* تحسينات الشارات */
+@media (max-width: 767.98px) {
+    .badge {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+
+/* إخفاء النصوص الطويلة */
+.text-truncate-mobile {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+/* تحسينات إضافية */
+.responsive-text {
+    font-size: clamp(14px, 2.5vw, 18px);
+}
+
+.responsive-heading {
+    font-size: clamp(20px, 4vw, 32px);
+}
+
+/* تحسينات للتفاعل باللمس */
+@media (hover: none) and (pointer: coarse) {
+    .btn, .nav-link, .page-link {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .table th, .table td {
+        min-height: 44px;
+    }
+    
+    .form-control, .form-select {
+        min-height: 44px;
+    }
+}
