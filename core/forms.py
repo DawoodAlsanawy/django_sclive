@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django import forms
 from django.contrib.auth.forms import (AuthenticationForm, PasswordChangeForm,
                                        UserCreationForm)
@@ -525,6 +526,7 @@ class SickLeaveForm(forms.ModelForm):
         self.fields['admission_date'].required = False
         self.fields['discharge_date'].required = False
         self.fields['status'].required = False
+        self.fields['duration_days'].required = False
 
         # جعل حقول التواريخ الهجرية غير مطلوبة
         self.fields['start_date_hijri'].required = False
@@ -532,6 +534,7 @@ class SickLeaveForm(forms.ModelForm):
         self.fields['admission_date_hijri'].required = False
         self.fields['discharge_date_hijri'].required = False
         self.fields['issue_date_hijri'].required = False
+        self.fields['duration_days'].required = False
 
         # جعل حقول المريض والطبيب غير مطلوبة لتمكين إضافة بيانات جديدة
         self.fields['patient'].required = False
@@ -1019,7 +1022,7 @@ class CompanionLeaveForm(forms.ModelForm):
         self.fields['admission_date'].required = False
         self.fields['discharge_date'].required = False
         self.fields['status'].required = False
-
+        self.fields['duration_days'].required = False
         # جعل حقول التواريخ الهجرية غير مطلوبة
         self.fields['start_date_hijri'].required = False
         self.fields['end_date_hijri'].required = False

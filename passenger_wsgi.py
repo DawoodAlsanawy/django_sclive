@@ -10,4 +10,6 @@
 
 # from django.core.wsgi import get_wsgi_application
 # application = get_wsgi_application()
+import sys
+sys.stdout.reconfigure(encoding='utf-8')  # Python 3.7+
 from sclive.wsgi import application
