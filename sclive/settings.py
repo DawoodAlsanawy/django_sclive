@@ -277,12 +277,12 @@ LOGGING = {
     },
 }
 
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
-SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
-CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
-SECURE_BROWSER_XSS_FILTER = os.environ.get('SECURE_BROWSER_XSS_FILTER', 'False') == 'True'
-SECURE_CONTENT_TYPE_NOSNIFF = os.environ.get('SECURE_CONTENT_TYPE_NOSNIFF', 'False') == 'True'
-X_FRAME_OPTIONS = 'DENY'
-SECURE_HSTS_SECONDS = 30 * 24 * 60 * 60  # 30 يوم (ابدأ بهذه القيمة)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # يشمل كل النطاقات الفرعية
-SECURE_HSTS_PRELOAD = True  # لإدراج الموقع في قائمة HSTS المسبقة للمتصفحات
+# SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+# SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
+# CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
+# SECURE_BROWSER_XSS_FILTER = os.environ.get('SECURE_BROWSER_XSS_FILTER', 'False') == 'True'
+# SECURE_CONTENT_TYPE_NOSNIFF = os.environ.get('SECURE_CONTENT_TYPE_NOSNIFF', 'False') == 'True'
+# X_FRAME_OPTIONS = 'DENY'
+# SECURE_HSTS_SECONDS = 30 * 24 * 60 * 60  # 30 يوم (ابدأ بهذه القيمة)
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # يشمل كل النطاقات الفرعية
+# SECURE_HSTS_PRELOAD = True  # لإدراج الموقع في قائمة HSTS المسبقة للمتصفحات

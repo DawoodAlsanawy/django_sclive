@@ -747,8 +747,46 @@
                 }
             });
         });
+// توليد رقم إجازة تلقائي عند اختيار البادئة
+        $('#id_prefix').change(function() {
+            var prefix = $(this).val();
+            // إرسال طلب AJAX للحصول على رقم إجازة جديد
+            $.ajax({
+                url: '/api/generate-sick-leave-id/',
+                type: 'GET',
+                data: {
+                    prefix: prefix
+                },
+                success: function(response) {
+                    $('#id_leave_id').val(response.leave_id);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error generating leave ID:', error);
+                    // في حالة الخطأ، نقوم بتوليد رقم محلي مؤقت
+                    var today = new Date();
+                    var dateString = today.getFullYear().toString() +
+                                    (today.getMonth() + 1).toString().padStart(2, '0') +
+                                    today.getDate().toString().padStart(2, '0');
+                    var randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                    $('#id_leave_id').val(prefix + dateString + randomNum);
+                }
+            });
+        });
 
-
+    });
+</script>
+<script>
+    document.getElementById('id_prefix').addEventListener('change', function() {
+        const selectedValue = this.value;
+        const targetElement = document.getElementById('id_leave_id');
+        
+        if (selectedValue && targetElement.value.length >= 3) {
+            // استبدال أول 3 أحرف من العنصر الهدف بالقيمة المختارة
+            targetElement.value = selectedValue + targetElement.value.substring(3);
+        } else if (!selectedValue) {
+            // إذا لم يتم اختيار أي شيء، ارجع إلى القيمة الأصلية
+            targetElement.value = 'usr_' + targetElement.value.substring(3);
+        }
     });
 </script>
 {% endblock %}
