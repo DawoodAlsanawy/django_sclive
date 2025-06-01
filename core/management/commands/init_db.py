@@ -130,38 +130,38 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS('تم إنشاء عميل خالد سعيد الغامدي'))
 
             # إضافة أسعار الإجازات
-            leave_prices = [
-                {'leave_type': 'sick_leave', 'duration_days': 1, 'price': 100},
-                {'leave_type': 'sick_leave', 'duration_days': 2, 'price': 180},
-                {'leave_type': 'sick_leave', 'duration_days': 3, 'price': 250},
-                {'leave_type': 'sick_leave', 'duration_days': 5, 'price': 400},
-                {'leave_type': 'sick_leave', 'duration_days': 7, 'price': 550},
-                {'leave_type': 'sick_leave', 'duration_days': 10, 'price': 750},
-                {'leave_type': 'sick_leave', 'duration_days': 14, 'price': 1000},
-                {'leave_type': 'sick_leave', 'duration_days': 30, 'price': 2000},
-                # أسعار إجازات المرافقة
-                {'leave_type': 'companion_leave', 'duration_days': 1, 'price': 150},
-                {'leave_type': 'companion_leave', 'duration_days': 2, 'price': 280},
-                {'leave_type': 'companion_leave', 'duration_days': 3, 'price': 400},
-                {'leave_type': 'companion_leave', 'duration_days': 5, 'price': 650},
-                {'leave_type': 'companion_leave', 'duration_days': 7, 'price': 850},
-                {'leave_type': 'companion_leave', 'duration_days': 10, 'price': 1200},
-                {'leave_type': 'companion_leave', 'duration_days': 14, 'price': 1600},
-                {'leave_type': 'companion_leave', 'duration_days': 30, 'price': 3000},
-            ]
+            # leave_prices = [
+            #     {'leave_type': 'sick_leave', 'duration_days': 1, 'price': 100},
+            #     {'leave_type': 'sick_leave', 'duration_days': 2, 'price': 180},
+            #     {'leave_type': 'sick_leave', 'duration_days': 3, 'price': 250},
+            #     {'leave_type': 'sick_leave', 'duration_days': 5, 'price': 400},
+            #     {'leave_type': 'sick_leave', 'duration_days': 7, 'price': 550},
+            #     {'leave_type': 'sick_leave', 'duration_days': 10, 'price': 750},
+            #     {'leave_type': 'sick_leave', 'duration_days': 14, 'price': 1000},
+            #     {'leave_type': 'sick_leave', 'duration_days': 30, 'price': 2000},
+            #     # أسعار إجازات المرافقة
+            #     {'leave_type': 'companion_leave', 'duration_days': 1, 'price': 150},
+            #     {'leave_type': 'companion_leave', 'duration_days': 2, 'price': 280},
+            #     {'leave_type': 'companion_leave', 'duration_days': 3, 'price': 400},
+            #     {'leave_type': 'companion_leave', 'duration_days': 5, 'price': 650},
+            #     {'leave_type': 'companion_leave', 'duration_days': 7, 'price': 850},
+            #     {'leave_type': 'companion_leave', 'duration_days': 10, 'price': 1200},
+            #     {'leave_type': 'companion_leave', 'duration_days': 14, 'price': 1600},
+            #     {'leave_type': 'companion_leave', 'duration_days': 30, 'price': 3000},
+            # ]
 
-            for price_data in leave_prices:
-                if not LeavePrice.objects.filter(
-                    leave_type=price_data['leave_type'],
-                    duration_days=price_data['duration_days']
-                ).exists():
-                    LeavePrice.objects.create(
-                        leave_type=price_data['leave_type'],
-                        duration_days=price_data['duration_days'],
-                        price=price_data['price']
-                    )
-                    self.stdout.write(self.style.SUCCESS(
-                        f"تم إنشاء سعر إجازة {price_data['leave_type']} لمدة {price_data['duration_days']} يوم"
-                    ))
+            # for price_data in leave_prices:
+            #     if not LeavePrice.objects.filter(
+            #         leave_type=price_data['leave_type'],
+            #         duration_days=price_data['duration_days']
+            #     ).exists():
+            #         LeavePrice.objects.create(
+            #             leave_type=price_data['leave_type'],
+            #             duration_days=price_data['duration_days'],
+            #             price=price_data['price']
+            #         )
+            #         self.stdout.write(self.style.SUCCESS(
+            #             f"تم إنشاء سعر إجازة {price_data['leave_type']} لمدة {price_data['duration_days']} يوم"
+            #         ))
 
         self.stdout.write(self.style.SUCCESS('تم تهيئة قاعدة البيانات وإضافة البيانات الأولية بنجاح'))
