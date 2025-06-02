@@ -505,16 +505,16 @@ class SickLeaveForm(forms.ModelForm):
             'patient': forms.Select(attrs={'class': 'form-control select2-patient'}),
             'hospital': forms.Select(attrs={'class': 'form-control select2-hospital'}),
             'doctor': forms.Select(attrs={'class': 'form-control select2-doctor'}),
-            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'start_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'end_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'admission_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'admission_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
+            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'hidden'}),
+            'start_date_hijri': forms.TextInput(attrs={'class': 'form-control','type': 'hidden', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
+            'end_date': forms.DateInput(attrs={'class': 'form-control','type': 'hidden'}),
+            'end_date_hijri': forms.TextInput(attrs={'class': 'form-control','type': 'hidden', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
+            'admission_date': forms.DateInput(attrs={'class': 'form-control','type': 'date',}),
+            'admission_date_hijri': forms.TextInput(attrs={'class': 'form-control' ,'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'discharge_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
-            'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
+            'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
+            'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control','placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
             'created_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local','format':'%Y-%m-%dT%H:%M'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'type':'hidden'}),
@@ -528,10 +528,12 @@ class SickLeaveForm(forms.ModelForm):
         self.fields['discharge_date'].required = False
         self.fields['status'].required = False
         self.fields['duration_days'].required = False
-
+        
         # جعل حقول التواريخ الهجرية غير مطلوبة
         self.fields['start_date_hijri'].required = False
+        self.fields['start_date'].required = False
         self.fields['end_date_hijri'].required = False
+        self.fields['end_date'].required = False
         self.fields['admission_date_hijri'].required = False
         self.fields['discharge_date_hijri'].required = False
         self.fields['issue_date_hijri'].required = False
@@ -559,6 +561,9 @@ class SickLeaveForm(forms.ModelForm):
 
             from core.utils import generate_sick_leave_id
 
+            # إضافة بيانات عادية الى الحقول start_date , end_date
+            self.initial['start_date'] = timezone.now().date()
+            self.initial['end_date'] = timezone.now().date()
             # توليد رقم إجازة تلقائي باستخدام البادئة المختارة
             prefix = self.initial.get('prefix', 'PSL')
             if prefix not in ['PSL', 'GSL']:
@@ -711,11 +716,13 @@ class SickLeaveWithInvoiceForm(forms.Form):
     # حقول الإجازة
     start_date = forms.DateField(
         label='تاريخ البداية',
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'hidden'}),
+        initial=timezone.now().date(),
     )
     end_date = forms.DateField(
         label='تاريخ النهاية',
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'hidden'}),
+        initial=timezone.now().date(),
     )
     issue_date = forms.DateField(
         label='تاريخ الإصدار',
@@ -987,7 +994,7 @@ class CompanionLeaveForm(forms.ModelForm):
         label='صلة القرابة (بالإنجليزية)',
         max_length=100,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'})
     )
 
     class Meta:
@@ -996,26 +1003,77 @@ class CompanionLeaveForm(forms.ModelForm):
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
                   'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days','duration_days2')
         widgets = {
-            'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
-            'prefix': forms.Select(attrs={'class': 'form-control'}),
-            'patient': forms.Select(attrs={'class': 'form-control select2-patient'}),
-            'companion': forms.Select(attrs={'class': 'form-control select2-companion'}),
-            'hospital': forms.Select(attrs={'class': 'form-control select2-hospital'}),
-            'doctor': forms.Select(attrs={'class': 'form-control select2-doctor'}),
-            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'start_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'end_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'admission_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'admission_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'discharge_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'discharge_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'issue_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date', 'readonly': 'readonly'}),
-            'issue_date_hijri': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly', 'placeholder': 'سيتم ملؤه تلقائيًا عند الحفظ'}),
-            'created_date': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-            'duration_days': forms.NumberInput(attrs={'class': 'form-control', 'type':'hidden'}),
-            'duration_days2': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'})
+            "leave_id": forms.TextInput(
+                attrs={"class": "form-control", "readonly": "readonly"}
+            ),
+            "prefix": forms.Select(attrs={"class": "form-control"}),
+            "patient": forms.Select(attrs={"class": "form-control select2-patient"}),
+            "companion": forms.Select(
+                attrs={"class": "form-control select2-companion"}
+            ),
+            "hospital": forms.Select(attrs={"class": "form-control select2-hospital"}),
+            "doctor": forms.Select(attrs={"class": "form-control select2-doctor"}),
+            "start_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "hidden"}
+            ),
+            "start_date_hijri": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    'type': 'hidden',
+                    "placeholder": "سيتم ملؤه تلقائيًا عند الحفظ",
+                }
+            ),
+            "end_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "hidden"}
+                
+            ),
+            "end_date_hijri": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "type": "hidden",
+                    "placeholder": "سيتم ملؤه تلقائيًا عند الحفظ",
+                }
+            ),
+            "admission_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
+            "admission_date_hijri": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    
+                    "placeholder": "سيتم ملؤه تلقائيًا عند الحفظ",
+                }
+            ),
+            "discharge_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
+            "discharge_date_hijri": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    
+                    "placeholder": "سيتم ملؤه تلقائيًا عند الحفظ",
+                }
+            ),
+            "issue_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
+            "issue_date_hijri": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    
+                    "placeholder": "سيتم ملؤه تلقائيًا عند الحفظ",
+                }
+            ),
+            "created_date": forms.DateTimeInput(
+                attrs={"class": "form-control", "type": "datetime-local"}
+            ),
+            "status": forms.Select(attrs={"class": "form-control"}),
+            "duration_days": forms.NumberInput(
+                attrs={"class": "form-control", "type": "hidden"}
+            ),
+            "duration_days2": forms.NumberInput(
+                attrs={"class": "form-control", "min": "1"}
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -1027,7 +1085,9 @@ class CompanionLeaveForm(forms.ModelForm):
         self.fields['duration_days'].required = False
         # جعل حقول التواريخ الهجرية غير مطلوبة
         self.fields['start_date_hijri'].required = False
+        self.fields['start_date'].required = False
         self.fields['end_date_hijri'].required = False
+        self.fields['end_date'].required = False
         self.fields['admission_date_hijri'].required = False
         self.fields['discharge_date_hijri'].required = False
         self.fields['issue_date_hijri'].required = False
@@ -1256,11 +1316,14 @@ class CompanionLeaveWithInvoiceForm(forms.Form):
     # حقول الإجازة
     start_date = forms.DateField(
         label='تاريخ البداية',
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'hidden'}),
+        initial=timezone.now().date(),
+        
     )
     end_date = forms.DateField(
         label='تاريخ النهاية',
-        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'hidden'}),
+        initial=timezone.now().date(),
     )
     issue_date = forms.DateField(
         label='تاريخ الإصدار',

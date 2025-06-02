@@ -343,8 +343,8 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="start_date_hijri">تاريخ البداية (هجري)</label>
-                        <input type="text" id="start_date_hijri" class="form-control" readonly>
+                        {% comment %} <label for="start_date_hijri">تاريخ البداية (هجري)</label> {% endcomment %}
+                        <input type="hidden" id="start_date_hijri" class="form-control" readonly>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -352,8 +352,8 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="end_date_hijri">تاريخ النهاية (هجري)</label>
-                        <input type="text" id="end_date_hijri" class="form-control" readonly>
+                        {% comment %} <label for="end_date_hijri">تاريخ النهاية (هجري)</label> {% endcomment %}
+                        <input type="hidden" id="end_date_hijri" class="form-control" readonly>
                     </div>
                 </div>
             </div>
@@ -365,7 +365,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="admission_date_hijri">تاريخ الدخول (هجري)</label>
-                        <input type="text" id="admission_date_hijri" class="form-control" readonly>
+                        <input type="text" id="admission_date_hijri" class="form-control" value="{{form.admission_date_hijri.value}}" />
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -374,7 +374,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="discharge_date_hijri">تاريخ الخروج (هجري)</label>
-                        <input type="text" id="discharge_date_hijri" class="form-control" readonly>
+                        <input type="text" id="discharge_date_hijri" class="form-control" value="{{form.discharge_date_hijri.value}}" >
                     </div>
                 </div>
             </div>

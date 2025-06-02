@@ -578,10 +578,10 @@
             </tr>
                             <tr style="height:35px;">
                     <td class="highlight english-text" style="max-height: 35px; height:35px;color:#ffffff;vertical-align: middle;">
-                        {{ sick_leave.duration_days2 }} يوم ({{ sick_leave.start_date_hijri }} الى {{ sick_leave.end_date_hijri }})
+                        {{ sick_leave.duration_days2 }} يوم ({{ sick_leave.admission_date_hijri }} الى {{ sick_leave.discharge_date_hijri }})
                     </td>
                     <td class="highlight english-text" dir="ltr" style="vertical-align: middle;">
-                        {{ sick_leave.duration_days2 }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.start_date|date:"d-m-Y" }} to {{ sick_leave.end_date|date:"d-m-Y" }})
+                        {{ sick_leave.duration_days2 }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.admission_date|date:"d-m-Y" }} to {{ sick_leave.discharge_date|date:"d-m-Y" }})
                     </td>
                 </tr>
                         <tr style="height:35px;">
@@ -639,7 +639,7 @@
                     <span class="arabic-text" style="display: block;">{{ sick_leave.doctor.position }}</span>
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height:35px;height:35px;  width: 209px; overflow: hidden;font-size: 14px;  text-overflow: ellipsis; vertical-align: middle;">
-                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position_en|capitalize|first_word }}</span>
+                    <span class="english-text" style="display: block;">{{ sick_leave.doctor.position_en|capitalize }}</span>
                 </td>
             </tr>
           </tbody></table>
@@ -657,15 +657,15 @@
             <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:180px;">
                 
                 <img src="{{ sick_leave.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo"></img>
-                
+                <br>
 
                 <p class="arabic-text" style="margin-top: 2px ;
                 margin-left:30px; font-weight:bold; font-size:12px;">{{ sick_leave.hospital.name }}</p>
                <p class="english-text" style="margin-top: -2px ; font-size:12px;
                 margin-left:30px; font-weight:bold; font-size:11px;">{{ sick_leave.hospital.name_en|capitalize }}</p>
+                 <p class="arabic-text" style="margin-top: 2px ; font-size:12px;
+                margin-left:30px; font-weight:bold; font-size:12px;">   رقـم  الـــترخيص :     14101535512860  </p>
                 
-               
-
 
             </div>
 
