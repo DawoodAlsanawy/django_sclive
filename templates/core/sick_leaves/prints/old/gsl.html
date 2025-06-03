@@ -655,16 +655,22 @@
     <div class="footer-section">
         <div class="row">
             <div class="text-center col-6 medical-logo-name" style="border-left: 1.8px solid #d3d3d37d;height:180px;">
-                
-                <img src="{{ sick_leave.hospital.logo.url }}" alt="Medical Center Logo" class="footer-logo"></img>
-                
+                {% load core_extras %}
+                {% if sick_leave.hospital|has_logo %}
+                    <img src="{{ sick_leave.hospital|safe_logo_url }}" alt="Medical Center Logo" class="footer-logo"></img>
+                {% else %}
+                    <div class="footer-logo" style="width: 135px; height: 90px; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; background-color: #f8f9fa;">
+                        <span style="color: #6c757d; font-size: 12px;">لا يوجد شعار</span>
+                    </div>
+                {% endif %}
+
 
                 <p class="arabic-text" style="margin-top: 2px ;
                 margin-left:30px; font-weight:bold; font-size:12px;">{{ sick_leave.hospital.name }}</p>
                <p class="english-text" style="margin-top: -2px ; font-size:12px;
                 margin-left:30px; font-weight:bold; font-size:11px;">{{ sick_leave.hospital.name_en|capitalize }}</p>
-                
-               
+
+
 
 
             </div>

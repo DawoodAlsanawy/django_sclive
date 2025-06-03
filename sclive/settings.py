@@ -147,7 +147,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # تكوين Whitenoise لخدمة الملفات الثابتة في الإنتاج
 if not DEBUG:
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # استخدام StaticFilesStorage العادي بدلاً من CompressedManifestStaticFilesStorage لتجنب مشاكل manifest
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
     # إعدادات إضافية لتحسين الأداء
     # تكوين ذاكرة التخزين المؤقت للقوالب
@@ -261,7 +262,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'django.request': {
@@ -276,13 +277,33 @@ LOGGING = {
         },
     },
 }
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
-SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
-CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
-SECURE_BROWSER_XSS_FILTER = os.environ.get('SECURE_BROWSER_XSS_FILTER', 'False') == 'True'
-SECURE_CONTENT_TYPE_NOSNIFF = os.environ.get('SECURE_CONTENT_TYPE_NOSNIFF', 'False') == 'True'
-X_FRAME_OPTIONS = 'DENY'
-SECURE_HSTS_SECONDS = 30 * 24 * 60 * 60  # 30 يوم (ابدأ بهذه القيمة)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # يشمل كل النطاقات الفرعية
-SECURE_HSTS_PRELOAD = True  # لإدراج الموقع في قائمة HSTS المسبقة للمتصفحات
+# إعدادات الأمان - محسنة للبيئة المحلية والإنتاج
+if not DEBUG:
+    # إعدادات HTTPS - تفعيل فقط في الإنتاج الحقيقي
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
+
+    # إعدادات الكوكيز الآمنة - تعطيل في البيئة المحلية
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True'
+    CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True'
+
+    # إعدادات الأمان الأساسية
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'SAMEORIGIN'  # تغيير من DENY للسماح بالإطارات المحلية
+
+    # إعدادات HSTS - تعطيل في البيئة المحلية
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.environ.get('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False') == 'True'
+    SECURE_HSTS_PRELOAD = os.environ.get('SECURE_HSTS_PRELOAD', 'False') == 'True'
+else:
+    # إعدادات البيئة المحلية
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_BROWSER_XSS_FILTER = False
+    SECURE_CONTENT_TYPE_NOSNIFF = False
+    X_FRAME_OPTIONS = 'SAMEORIGIN'
+    SECURE_HSTS_SECONDS = 0
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False

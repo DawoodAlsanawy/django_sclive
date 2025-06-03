@@ -316,5 +316,30 @@ def format_hijri(value):
     if not value:
         return ''
     subvalue=value.split('-')
-    
+
     return f'{subvalue[-1]}-{subvalue[1]}-{subvalue[0]}' if subvalue else ''
+
+@register.filter
+def has_logo(obj):
+    """
+    تحقق من وجود شعار للكائن
+    """
+    if hasattr(obj, 'logo') and obj.logo:
+        try:
+            # محاولة الوصول للـ URL للتأكد من وجود الملف
+            return bool(obj.logo.url)
+        except (ValueError, AttributeError):
+            return False
+    return False
+
+@register.filter
+def safe_logo_url(obj):
+    """
+    إرجاع URL آمن للشعار أو None إذا لم يكن موجوداً
+    """
+    if hasattr(obj, 'logo') and obj.logo:
+        try:
+            return obj.logo.url
+        except (ValueError, AttributeError):
+            return None
+    return None
