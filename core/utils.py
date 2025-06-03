@@ -208,13 +208,13 @@ def convert_to_hijri(date_obj):
     - date_obj: كائن تاريخ ميلادي (datetime.date)
 
     يعيد:
-    - سلسلة نصية تمثل التاريخ الهجري بتنسيق "YYYY-MM-DD"
+    - سلسلة نصية تمثل التاريخ الهجري بتنسيق "DD-MM-YYYY"
     """
     if not date_obj:
         return ""
 
     try:
-        g_date = Gregorian(date_obj.year, date_obj.month, date_obj.day)
+        g_date = Gregorian(date_obj.day, date_obj.month, date_obj.year)
         hijri_date = g_date.to_hijri()
         return f"{hijri_date.day}-{hijri_date.month}-{hijri_date.year}"
     except Exception as e:

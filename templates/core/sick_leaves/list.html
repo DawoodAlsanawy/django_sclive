@@ -81,6 +81,7 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th data-sort="leave_id" style="cursor: pointer;">تاريخ الإنشاء {% if sort == 'created_at' %}<i class="fas fa-sort-up"></i>{% elif sort == '-created_at' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th data-sort="leave_id" style="cursor: pointer;">رقم الإجازة {% if sort == 'leave_id' %}<i class="fas fa-sort-up"></i>{% elif sort == '-leave_id' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th data-sort="patient__name" style="cursor: pointer;">المريض {% if sort == 'patient__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-patient__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th data-sort="doctor__name" style="cursor: pointer;">الطبيب {% if sort == 'doctor__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-doctor__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
@@ -94,6 +95,7 @@
                 <tbody>
                     {% for leave in sick_leaves %}
                     <tr>
+                        <td>{{ leave.created_at }}</td>
                         <td>{{ leave.leave_id }}</td>
                         <td>{{ leave.patient.name }}</td>
                         <td>{{ leave.doctor.name }}</td>

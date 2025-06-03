@@ -141,7 +141,7 @@ class Employer(models.Model):
 
 class Doctor(models.Model):
     """نموذج الطبيب"""
-    national_id = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name='رقم الهوية')
+    national_id = models.CharField(max_length=20, blank=True, null=True, verbose_name='رقم الهوية')
     name = models.CharField(max_length=100, verbose_name='اسم الطبيب')
     name_en = models.CharField(max_length=100, blank=True, null=True, verbose_name='اسم الطبيب (بالإنجليزية)')
     position = models.CharField(max_length=100, blank=True, null=True, verbose_name='المنصب')

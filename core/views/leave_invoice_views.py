@@ -262,7 +262,7 @@ def leave_invoice_detail(request, leave_invoice_id):
     payment_details = invoice.get_payments()
 
     # طباعة عدد المدفوعات للتأكد من استدعائها بشكل صحيح
-    print(f"عدد المدفوعات المرتبطة بالفاتورة: {payment_details.count()}")
+    
 
     # حساب المبلغ المدفوع والمتبقي باستخدام الدوال المعرفة في النموذج
     paid_amount = invoice.get_total_paid()

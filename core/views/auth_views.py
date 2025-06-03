@@ -22,23 +22,21 @@ def register(request):
     # else:
     #     form = RegisterForm()
 
-    # return render(request, 'core/auth/login.html', {'form': form})
-    return render(request, 'core/auth/login.html')
+    # return render(request, 'core/auth/register.html', {'form': form})
 
 
 @login_required
 def password_change(request):
     """تغيير كلمة المرور"""
-    # if request.method == 'POST':
-    #     form = PasswordChangeForm(request.user, request.POST)
-    #     if form.is_valid():
-    #         user = form.save()
-    #         # تحديث جلسة المستخدم لمنع تسجيل الخروج
-    #         update_session_auth_hash(request, user)
-    #         messages.success(request, 'تم تغيير كلمة المرور بنجاح')
-    #         return redirect('password_change_done')
-    # else:
-    #     form = PasswordChangeForm(request.user)
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # تحديث جلسة المستخدم لمنع تسجيل الخروج
+            update_session_auth_hash(request, user)
+            messages.success(request, 'تم تغيير كلمة المرور بنجاح')
+            return redirect('password_change_done')
+    else:
+        form = PasswordChangeForm(request.user)
 
-    # return render(request, 'core/auth/login.html', {'form': form})
-    return render(request, 'core/auth/login.html')
+    return render(request, 'core/auth/password_change.html', {'form': form})

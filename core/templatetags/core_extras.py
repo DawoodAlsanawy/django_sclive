@@ -307,3 +307,14 @@ def generate_qrcode(url, size=200, border=4, fill_color="black", back_color="whi
     img_str = base64.b64encode(buffer.getvalue()).decode()
 
     return f"data:image/png;base64,{img_str}"
+
+@register.filter(name='format_hijri')
+def format_hijri(value):
+    """
+    يستخرج أول كلمة من الجملة
+    """
+    if not value:
+        return ''
+    subvalue=value.split('-')
+    
+    return f'{subvalue[-1]}-{subvalue[1]}-{subvalue[0]}' if subvalue else ''

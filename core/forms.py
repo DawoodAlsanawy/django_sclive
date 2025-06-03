@@ -500,7 +500,7 @@ class SickLeaveForm(forms.ModelForm):
                   'admission_date', 'admission_date_hijri', 'discharge_date', 'discharge_date_hijri',
                   'issue_date', 'issue_date_hijri', 'created_date', 'status', 'duration_days','duration_days2')
         widgets = {
-            'leave_id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'leave_id': forms.TextInput(attrs={'class': 'form-control'}),
             'prefix': forms.Select(attrs={'class': 'form-control'}),
             'patient': forms.Select(attrs={'class': 'form-control select2-patient'}),
             'hospital': forms.Select(attrs={'class': 'form-control select2-hospital'}),
