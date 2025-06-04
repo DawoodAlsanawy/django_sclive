@@ -63,6 +63,19 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-4">
+                        <strong>العميل:</strong>
+                    </div>
+                    <div class="col-md-8">
+                        {% if sick_leave.get_client %}
+                            {{ sick_leave.get_client.name }}
+                            <small class="text-muted">({{ sick_leave.get_client.contact_person }})</small>
+                        {% else %}
+                            <span class="text-muted">غير محدد</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
                         <strong>الطبيب:</strong>
                     </div>
                     <div class="col-md-8">

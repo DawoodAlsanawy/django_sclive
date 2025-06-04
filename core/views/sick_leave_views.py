@@ -8,8 +8,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from core.forms import SickLeaveForm, SickLeaveWithInvoiceForm
-from core.models import (Doctor, Hospital, LeaveInvoice, LeavePrice, Patient,
-                         SickLeave)
+from core.models import (Client, Doctor, Hospital, LeaveInvoice, LeavePrice,
+                         Patient, SickLeave)
 from core.utils import (convert_to_hijri, generate_sick_leave_id,
                         generate_unique_number, translate_text)
 
@@ -34,6 +34,16 @@ def sick_leave_list(request):
     doctor = request.GET.get('doctor')
     if doctor:
         sick_leaves = sick_leaves.filter(doctor__name__icontains=doctor)
+
+    # فلتر العميل (من خلال الفواتير)
+    client = request.GET.get('client')
+    if client:
+        # البحث عن الإجازات التي لها فواتير مرتبطة بالعميل المحدد
+        invoice_leave_ids = LeaveInvoice.objects.filter(
+            leave_type='sick_leave',
+            client__name__icontains=client
+        ).values_list('leave_id', flat=True)
+        sick_leaves = sick_leaves.filter(leave_id__in=invoice_leave_ids)
 
     # فلتر الحالة
     status = request.GET.get('status')
@@ -79,6 +89,7 @@ def sick_leave_list(request):
         'leave_id': leave_id,
         'patient': patient,
         'doctor': doctor,
+        'client': client,
         'status': status,
         'start_date_from': start_date_from,
         'start_date_to': start_date_to,
@@ -681,7 +692,7 @@ def sick_leave_delete(request, sick_leave_id):
 
     if request.method == 'POST':
         leave_id = sick_leave.leave_id  # حفظ رقم الإجازة قبل الحذف
-        
+
         sick_leave.delete()
         messages.success(request, f'تم حذف الإجازة المرضية رقم {leave_id} بنجاح')
         return redirect('core:sick_leave_list')

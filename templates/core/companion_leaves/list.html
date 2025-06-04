@@ -43,8 +43,8 @@
                 <input type="text" class="form-control" id="companion" name="companion" value="{{ request.GET.companion }}">
             </div>
             <div class="col-md-3">
-                <label for="doctor" class="form-label">الطبيب</label>
-                <input type="text" class="form-control" id="doctor" name="doctor" value="{{ request.GET.doctor }}">
+                <label for="client" class="form-label">العميل</label>
+                <input type="text" class="form-control" id="client" name="client" value="{{ request.GET.client }}">
             </div>
             <div class="col-md-3">
                 <label for="status" class="form-label">الحالة</label>
@@ -88,7 +88,7 @@
                         <th data-sort="leave_id" style="cursor: pointer;">رقم الإجازة {% if sort == 'leave_id' %}<i class="fas fa-sort-up"></i>{% elif sort == '-leave_id' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th data-sort="patient__name" style="cursor: pointer;">المريض {% if sort == 'patient__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-patient__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th data-sort="companion__name" style="cursor: pointer;">المرافق {% if sort == 'companion__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-companion__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
-                        <th data-sort="doctor__name" style="cursor: pointer;">الطبيب {% if sort == 'doctor__name' %}<i class="fas fa-sort-up"></i>{% elif sort == '-doctor__name' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
+                        <th>العميل</th>
                         <th data-sort="start_date" style="cursor: pointer;">تاريخ البداية {% if sort == 'start_date' %}<i class="fas fa-sort-up"></i>{% elif sort == '-start_date' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th data-sort="end_date" style="cursor: pointer;">تاريخ النهاية {% if sort == 'end_date' %}<i class="fas fa-sort-up"></i>{% elif sort == '-end_date' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
                         <th data-sort="duration_days" style="cursor: pointer;">المدة (أيام) {% if sort == 'duration_days' %}<i class="fas fa-sort-up"></i>{% elif sort == '-duration_days' %}<i class="fas fa-sort-down"></i>{% endif %}</th>
@@ -102,7 +102,7 @@
                         <td>{{ leave.leave_id }}</td>
                         <td>{{ leave.patient.name }}</td>
                         <td>{{ leave.companion.name }}</td>
-                        <td>{{ leave.doctor.name }}</td>
+                        <td>{{ leave.get_client_name }}</td>
                         <td>{{ leave.start_date }}</td>
                         <td>{{ leave.end_date }}</td>
                         <td>{{ leave.duration_days }}</td>
@@ -144,7 +144,7 @@
             <ul class="pagination">
                 {% if companion_leaves.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ companion_leaves.previous_page_number }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if companion %}&companion={{ companion }}{% endif %}{% if doctor %}&doctor={{ doctor }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="السابق">
+                    <a class="page-link" href="?page={{ companion_leaves.previous_page_number }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if companion %}&companion={{ companion }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="السابق">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
@@ -161,14 +161,14 @@
                     <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
                     {% elif i > companion_leaves.number|add:'-3' and i < companion_leaves.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ i }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if companion %}&companion={{ companion }}{% endif %}{% if doctor %}&doctor={{ doctor }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ i }}</a>
+                        <a class="page-link" href="?page={{ i }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if companion %}&companion={{ companion }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}">{{ i }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
 
                 {% if companion_leaves.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ companion_leaves.next_page_number }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if companion %}&companion={{ companion }}{% endif %}{% if doctor %}&doctor={{ doctor }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="التالي">
+                    <a class="page-link" href="?page={{ companion_leaves.next_page_number }}{% if leave_id %}&leave_id={{ leave_id }}{% endif %}{% if patient %}&patient={{ patient }}{% endif %}{% if companion %}&companion={{ companion }}{% endif %}{% if client %}&client={{ client }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if start_date_from %}&start_date_from={{ start_date_from }}{% endif %}{% if start_date_to %}&start_date_to={{ start_date_to }}{% endif %}{% if end_date_from %}&end_date_from={{ end_date_from }}{% endif %}{% if end_date_to %}&end_date_to={{ end_date_to }}{% endif %}{% if sort %}&sort={{ sort }}{% endif %}" aria-label="التالي">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
@@ -247,6 +247,8 @@
                 // إنشاء URL جديد مع معلمة الترتيب الجديدة
                 const url = new URL(window.location.href);
                 url.searchParams.set('sort', newSort);
+                // العودة للصفحة الأولى عند الترتيب
+                url.searchParams.set('page', '1');
                 window.location.href = url.toString();
             });
         });

@@ -339,27 +339,6 @@
 
             <div class="row">
                 <div class="col-md-3">
-                    {{ form.start_date|as_crispy_field }}
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        {% comment %} <label for="start_date_hijri">تاريخ البداية (هجري)</label> {% endcomment %}
-                        <input type="hidden" id="start_date_hijri" class="form-control" readonly>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    {{ form.end_date|as_crispy_field }}
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        {% comment %} <label for="end_date_hijri">تاريخ النهاية (هجري)</label> {% endcomment %}
-                        <input type="hidden" id="end_date_hijri" class="form-control" readonly>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-3">
                     {{ form.admission_date|as_crispy_field }}
                 </div>
                 <div class="col-md-3">
@@ -375,6 +354,27 @@
                     <div class="form-group">
                         <label for="discharge_date_hijri">تاريخ الخروج (هجري)</label>
                         <input type="text" id="discharge_date_hijri" class="form-control" value="{{form.discharge_date_hijri.value}}" >
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    {{ form.start_date|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {% comment %} <label for="start_date_hijri">تاريخ البداية (هجري)</label> {% endcomment %}
+                        <input type="hidden" id="start_date_hijri" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    {{ form.end_date|as_crispy_field }}
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {% comment %} <label for="end_date_hijri">تاريخ النهاية (هجري)</label> {% endcomment %}
+                        <input type="hidden" id="end_date_hijri" class="form-control" readonly>
                     </div>
                 </div>
             </div>
@@ -420,6 +420,50 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+
+
+         // تعيين معالجات الأحداث لنسخ التواريخ
+         $('#id_admission_date').on('change', function() {
+            $('#id_start_date').val($(this).val());
+            calculateDaysDifference();
+        });
+        
+        $('#id_discharge_date').on('change', function() {
+            $('#id_end_date').val($(this).val());
+            calculateDaysDifference();
+        });
+    
+        // دالة مشتركة لحساب الفرق بين التاريخين
+        function calculateDaysDifference() {
+            // الحصول على قيم التواريخ
+            var startDateStr = $('#id_start_date').val();
+            var endDateStr = $('#id_end_date').val();
+            
+            // التحقق من وجود القيم
+            if (!startDateStr || !endDateStr) {
+                $('#id_duration_days2').val('');
+                return;
+            }
+            
+            var startDate = new Date(startDateStr);
+            var endDate = new Date(endDateStr);
+            
+            // التحقق من أن تاريخ النهاية بعد تاريخ البداية
+            
+            
+            // حساب الفرق بين التاريخين بالأيام (بما في ذلك اليوم الأخير)
+            var timeDiff = endDate.getTime() - startDate.getTime();
+            var dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24)) + 1;
+            
+            // عرض النتيجة
+            $('#id_duration_days2').val(dayDiff);
+        }
+        
+        // تعيين معالجات الأحداث لحساب الفرق عند تغيير أي من التاريخين
+        $('#id_start_date, #id_end_date').on('change', calculateDaysDifference);
+        
+        // حساب الفرق عند تحميل الصفحة إذا كانت الحقول تحتوي على قيم
+        calculateDaysDifference();
         // إعداد URLs للـ AJAX
         var ajaxUrls = {
             getPatientData: "/patients/",
@@ -442,6 +486,7 @@
             placeholder: 'اختر الطبيب',
             allowClear: true
         });
+        
 
         // تحويل التواريخ إلى هجري
         function convertToHijri() {

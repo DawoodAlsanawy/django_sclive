@@ -515,6 +515,23 @@ class SickLeave(models.Model):
         verbose_name = 'إجازة مرضية'
         verbose_name_plural = 'الإجازات المرضية'
 
+    def get_client(self):
+        """الحصول على العميل المرتبط بالإجازة من خلال الفواتير"""
+        try:
+            # البحث عن فاتورة مرتبطة بهذه الإجازة
+            invoice = LeaveInvoice.objects.filter(
+                leave_type='sick_leave',
+                leave_id=self.leave_id
+            ).first()
+            return invoice.client if invoice else None
+        except:
+            return None
+
+    def get_client_name(self):
+        """الحصول على اسم العميل المرتبط بالإجازة"""
+        client = self.get_client()
+        return client.name if client else "غير محدد"
+
     def __str__(self):
         return f"{self.leave_id} - {self.patient.name}"
 
@@ -668,6 +685,23 @@ class CompanionLeave(models.Model):
     class Meta:
         verbose_name = 'إجازة مرافق'
         verbose_name_plural = 'إجازات المرافقين'
+
+    def get_client(self):
+        """الحصول على العميل المرتبط بالإجازة من خلال الفواتير"""
+        try:
+            # البحث عن فاتورة مرتبطة بهذه الإجازة
+            invoice = LeaveInvoice.objects.filter(
+                leave_type='companion_leave',
+                leave_id=self.leave_id
+            ).first()
+            return invoice.client if invoice else None
+        except:
+            return None
+
+    def get_client_name(self):
+        """الحصول على اسم العميل المرتبط بالإجازة"""
+        client = self.get_client()
+        return client.name if client else "غير محدد"
 
     def __str__(self):
         return f"{self.leave_id} - {self.patient.name} - {self.companion.name}"

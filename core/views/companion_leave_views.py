@@ -8,8 +8,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from core.forms import CompanionLeaveForm, CompanionLeaveWithInvoiceForm
-from core.models import (CompanionLeave, Doctor, Hospital, LeaveInvoice,
-                         LeavePrice, Patient)
+from core.models import (Client, CompanionLeave, Doctor, Hospital,
+                         LeaveInvoice, LeavePrice, Patient)
 from core.utils import (convert_to_hijri, generate_companion_leave_id,
                         generate_unique_number, translate_text)
 
@@ -39,6 +39,16 @@ def companion_leave_list(request):
     doctor = request.GET.get('doctor')
     if doctor:
         companion_leaves = companion_leaves.filter(doctor__name__icontains=doctor)
+
+    # فلتر العميل (من خلال الفواتير)
+    client = request.GET.get('client')
+    if client:
+        # البحث عن الإجازات التي لها فواتير مرتبطة بالعميل المحدد
+        invoice_leave_ids = LeaveInvoice.objects.filter(
+            leave_type='companion_leave',
+            client__name__icontains=client
+        ).values_list('leave_id', flat=True)
+        companion_leaves = companion_leaves.filter(leave_id__in=invoice_leave_ids)
 
     # فلتر الحالة
     status = request.GET.get('status')
@@ -85,6 +95,7 @@ def companion_leave_list(request):
         'patient': patient,
         'companion': companion,
         'doctor': doctor,
+        'client': client,
         'status': status,
         'start_date_from': start_date_from,
         'start_date_to': start_date_to,
