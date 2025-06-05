@@ -620,7 +620,8 @@ class SickLeaveWithInvoiceForm(forms.Form):
     patient_national_id = forms.CharField(
         label='رقم هوية المريض',
         max_length=20,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        strip=True,
 
     )
     patient_name = forms.CharField(
@@ -822,7 +823,8 @@ class CompanionLeaveForm(forms.ModelForm):
         label='رقم هوية المرافق الجديد',
         max_length=20,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هوية المرافق الجديد'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هوية المرافق الجديد'}),
+        strip=True,
     )
     new_companion_name = forms.CharField(
         label='اسم المرافق الجديد',
@@ -896,7 +898,8 @@ class CompanionLeaveForm(forms.ModelForm):
         label='رقم هوية الطبيب الجديد',
         max_length=20,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هوية الطبيب الجديد'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هوية الطبيب الجديد'}),
+        strip=True,
     )
     new_doctor_name = forms.CharField(
         label='اسم الطبيب الجديد',
@@ -1180,7 +1183,8 @@ class CompanionLeaveWithInvoiceForm(forms.Form):
     patient_national_id = forms.CharField(
         label='رقم هوية المريض',
         max_length=20,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        strip=True,
     )
     patient_name = forms.CharField(
         label='اسم المريض',
@@ -1204,7 +1208,8 @@ class CompanionLeaveWithInvoiceForm(forms.Form):
     companion_national_id = forms.CharField(
         label='رقم هوية المرافق',
         max_length=20,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        strip=True,
     )
     companion_name = forms.CharField(
         label='اسم المرافق',
@@ -1248,7 +1253,8 @@ class CompanionLeaveWithInvoiceForm(forms.Form):
         label='رقم هوية الطبيب الجديد',
         max_length=20,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هوية الطبيب الجديد'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'أدخل رقم هوية الطبيب الجديد'}),
+        strip=True
     )
     new_doctor_name = forms.CharField(
         label='اسم الطبيب الجديد',
@@ -1756,7 +1762,8 @@ class ValidationSettingsForm(forms.Form):
     national_id_regex = forms.CharField(
         label="نمط رقم الهوية",
         max_length=100,
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        strip=True,
     )
     email_required = forms.BooleanField(
         label="البريد الإلكتروني مطلوب",

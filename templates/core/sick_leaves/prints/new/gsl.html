@@ -585,11 +585,11 @@
                     </td>
                 </tr>
                         <tr style="height:35px;">
-                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date_hijri }}</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date_hijri|format_hijri }}</td>
                 <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.admission_date|date:"d-m-Y" }}</td>
             </tr>
             <tr style="height:35px;">
-                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date_hijri }}</td>
+                <td class="english-text" style="color:#2c3e77; font-weight: 300; max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date_hijri|format_hijri }}</td>
                 <td class="english-text" style="color:#2c3e77; font-weight: 300;max-height: 35px; height:35px;vertical-align: middle;">{{ sick_leave.discharge_date|date:"d-m-Y" }}</td>
             </tr>
             <tr style="height:35px;">
@@ -620,7 +620,12 @@
             </tr>
             <tr style="height: 35px;">
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px;width: 209px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
+                    {% if sick_leave.patient.employer_name %}
                     <span class="arabic-text">{{ sick_leave.patient.employer_name }}</span>
+                    {% else %}
+                    <span class="arabic-text"></span>
+                    {%endif%}
+
                 </td>
                 <td style="color:#2c3e77; font-weight: 200;max-height: 35px;height: 35px; width: 209px;overflow: hidden; text-overflow: ellipsis; vertical-align: middle;">
                     <span class="english-text"></span>
