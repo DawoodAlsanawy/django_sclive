@@ -578,7 +578,7 @@
             </tr>
                             <tr style="height:35px;">
                     <td class="highlight english-text" style="max-height: 35px; height:35px;color:#ffffff;vertical-align: middle;">
-                        {{ sick_leave.duration_days2 }} يوم ({{ sick_leave.start_date_hijri|format_hijri }} الى {{ sick_leave.end_date_hijri|format_hijri }})
+                        {{ sick_leave.duration_days2 }} يوم ({{ sick_leave.start_date_hijri }} الى {{ sick_leave.end_date_hijri }})
                     </td>
                     <td class="highlight english-text" dir="ltr" style="vertical-align: middle;">
                         {{ sick_leave.duration_days2 }} day{% if sick_leave.duration_days > 1 %}s{% endif %} ({{ sick_leave.start_date|date:"d-m-Y" }} to {{ sick_leave.end_date|date:"d-m-Y" }})
